@@ -53,6 +53,22 @@ void prefix_element_at ()
     static_assert( prefix.element_at( 1 ) == 1 );
     static_assert( prefix.element_at( 2 ) == 1 );
 }
+void sumsum ()
+{
+    int sum = 0;
+    constexpr auto prefix = make_prefix< int, 3 >( { 1, 1, 1 } );
+    
+    for( int x : prefix )
+    {
+        sum += x;
+    }
+    return sum;
+}
+void prefix_iterator ()
+{
+    constexpr auto sum = sumsum();
+    static_assert( sum == 6 );
+}
 
 
 } // namespace test_meta_range_queries
