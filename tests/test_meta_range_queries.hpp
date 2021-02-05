@@ -18,5 +18,6 @@ void prefix_make_prefix ();
 void prefix_range ();
 void prefix_at ();
 void prefix_element_at ();
+void prefix_iterator ();
 
 } // namespace test_meta_range_queries
