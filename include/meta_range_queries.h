@@ -87,7 +87,7 @@ public:
     constexpr T const & operator[] ( std::size_t const _index_ ) const noexcept
     { return data_[ _index_ ]; }
     
-    constexpr prefix_array ( std::initializer_list< T > const _list_ )
+    constexpr prefix_array ( std::initializer_list< T > const & _list_ )
     {
         for( auto & t : _list_ )
         {
