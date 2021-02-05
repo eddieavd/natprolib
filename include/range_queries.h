@@ -32,7 +32,7 @@ namespace range_queries
  *  prefix array
  *  vector-like container limited to arithmetic types
  *  holds sum of all previous elements at each index
- *  allows for constant-time sum queries at any interval
+ *  allows for constant-time sum queries on any interval
  */
 template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
 class prefix_array;
