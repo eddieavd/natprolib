@@ -18,14 +18,14 @@
 #   include <unistd.h>
 #endif
 
-#define MIN_CAPACITY 8
-
 
 namespace natprolib
 {
 
 namespace range_queries
 {
+          
+#define MIN_CAPACITY 8
 
 
 /**
@@ -159,7 +159,7 @@ public:
         }
         *_head_ = nullptr;
     }
-    prefix_array ( std::initializer_list< T > _list_ ) : capacity_ { _list_.size() }
+    prefix_array ( std::initializer_list< T > const & _list_ ) : capacity_ { _list_.size() }
     {
         alloc();
         
@@ -169,7 +169,7 @@ public:
         }
     }
     template< class Iterator >
-    prefix_array ( Iterator const begin, Iterator const end ) : capacity_ { MIN_CAPACITY }
+    prefix_array ( Iterator const & begin, Iterator const & end ) : capacity_ { MIN_CAPACITY }
     {
         alloc();
         
