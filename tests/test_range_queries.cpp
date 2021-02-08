@@ -182,8 +182,9 @@ void segment_parent_builder ()
         int max;
         int diff;
         
-        bool operator< ( const node & rhs ) const { return max < rhs.max; }
-        bool operator> ( const node & rhs ) const { return max > rhs.max; }
+        bool operator<  ( const node & rhs ) const { return max < rhs.max; }
+        bool operator>  ( const node & rhs ) const { return max > rhs.max; }
+        bool operator== ( const node & rhs ) const { return max == rhs.max && diff == rhs.diff; }
     };
     
     std::vector< node > array
@@ -226,6 +227,9 @@ void segment_parent_builder ()
             }
         }
     );
+    
+    node max { 4, 1 };
+    assert( segtree.range( 0, 7 ) == max );
 }
 void test_segment ()
 {
