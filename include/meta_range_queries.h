@@ -73,7 +73,7 @@ private:
     std::size_t size_            { 0 };
     std::size_t capacity_     { Size };
     
-    inline constexpr bool is_index_in_range ( std::size_t const _index_ ) const { return _index_ < size_; }
+    inline constexpr bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
     
 public:
               auto begin ()       { return       iterator{ data_         }; }
