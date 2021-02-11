@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <memory>
 #include <type_traits>
 #include <stdexcept>
@@ -268,14 +269,166 @@ public:
     
     ~prefix_array () { free( head_ ); }
 };
+          
+
+template< typename T >
+class segment_tree;
+
+template< typename T, bool C >
+class segment_tree_iterator
+{
+    //  TODO: implement
+};
+
+template< typename T >
+class segment_tree
+{
+    using     value_type = T;
+    using       iterator = segment_tree_iterator< T, false >;
+    using const_iterator = segment_tree_iterator< T,  true >;
+    
+private:
+    T           * head_;
+    T             default_;
+    std::size_t   size_;
+    std::size_t   og_size_;
+    std::size_t   capacity_;
+    
+    std::function< T ( T, T ) > parent_builder_;
+    
+    void alloc ( std::size_t const _capacity_ )
+    {
+        og_size_  = _capacity_;
+        size_     = round_up_to_pow_2( _capacity_ );
+        capacity_ = 2 * size_;
+        head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
+        
+        for( auto i = 0; i < capacity_; i++ )
+        {
+            head_[ i ] = default_;
+        }
+    }
+    
+    std::size_t round_up_to_pow_2 ( std::size_t const _size_ ) const noexcept
+    {
+        auto log2 = std::log2( _size_ );
+        
+        if( log2 != std::floor( log2 ) )
+        {
+            auto pow = std::ceil( log2 );
+            return std::pow( 2, pow );
+        }
+        return _size_;
+    }
+    
+    void construct_tree ()
+    {
+        for( auto i = size_ - 1; i > 0; i-- )
+        {
+            head_[ i ] = parent_builder_( head_[ 2 * i ], head_[ 2 * i + 1 ] );
+        }
+    }
+    
+    bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < og_size_; }
+    
+public:
+    auto begin ()       { return       iterator{ head_ + size_            }; }
+    auto   end ()       { return       iterator{ head_ + size_ + og_size_ }; }
+    auto begin () const { return const_iterator{ head_ + size_            }; }
+    auto   end () const { return const_iterator{ head_ + size_ + og_size_ }; }
+    
+    inline T const & operator[] ( std::size_t const _index_ ) const noexcept { return head_[ size_ + _index_ ]; }
+    
+    inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
+    inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
+    
+    segment_tree (              std::size_t _capacity_, T _default_, std::function< T ( T, T ) > _pb_ ) : default_ { _default_ }, parent_builder_ { _pb_ } { alloc( _capacity_ ); }
+    segment_tree ( T ** _head_, std::size_t _capacity_, T _default_, std::function< T ( T, T ) > _pb_ ) : default_ { _default_ }, parent_builder_ { _pb_ }
+    {
+        alloc( _capacity_ );
+        
+        for( auto i = 0; i < _capacity_; i++ )
+        {
+            head_[ size_ + i ] = ( *_head_ )[ i ];
+        }
+        *_head_ = nullptr;
+        construct_tree();
+    };
+    template< class Iterator >
+    segment_tree ( Iterator begin, Iterator const & end, T _default_, std::function< T ( T, T ) > _pb_ ) : default_ { _default_ }, parent_builder_ { _pb_ }
+    {
+        alloc( std::distance( begin, end ) );
+        
+        for( auto i = 0; begin != end; i++ )
+        {
+            head_[ size_ + i ] = *begin;
+            begin++;
+        }
+        construct_tree();
+    };
+    
+    inline std::size_t size () const noexcept { return og_size_; }
+    
+    inline T const & at ( std::size_t const _index_ ) const
+    {
+        if( !is_index_in_range( _index_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        else
+        {
+            return operator[]( _index_ );
+        }
+    }
+    inline T range ( std::size_t _x_, std::size_t _y_ ) const
+    {
+        if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        
+        _x_ += size_;
+        _y_ += size_;
+        
+        T res = default_;
+        
+        while( _x_ <= _y_ )
+        {
+            if( _x_ % 2 == 1 ) res = parent_builder_( res, head_[ _x_++ ] );
+            if( _y_ % 2 == 0 ) res = parent_builder_( res, head_[ _y_-- ] );
+            _x_ /= 2;
+            _y_ /= 2;
+        }
+        return res;
+    }
+    
+    void update ( std::size_t _index_, T const _value_ )
+    {
+        if( !is_index_in_range( _index_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        
+        _index_ += size_;
+        
+        head_[ _index_ ] = _value_;
+        
+        for( _index_ /= 2; _index_ >= 1; _index_ /= 2 )
+        {
+            head_[ _index_ ] = parent_builder_( head_[ 2 * _index_ ], head_[ 2 * _index_ + 1 ] );
+        }
+    }
+    
+    void set_parent_builder ( std::function< T ( T, T ) > _pb_ ) { parent_builder_ = _pb_; construct_tree(); }
+    
+    ~segment_tree () { free( head_ ); }
+};
+
 
 //  TODO
 
 template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
 class fenwick_tree;
-
-template< typename T >
-class segment_tree;
 
 template< typename T >
 class lazy_segtree;

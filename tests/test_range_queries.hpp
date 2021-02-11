@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <set>
 #include <vector>
 
 #include "../include/range_queries.h"
@@ -27,5 +28,14 @@ void prefix_push_back ();
 void prefix_push_array ();
 void prefix_reserve ();
 void test_prefix ();
+  
+void segment_default_constructor ();
+void segment_pointer_constructor ();
+void segment_iterator_constructor ();
+void segment_range ();
+void segment_at ();
+void segment_update ();
+void segment_parent_builder ();
+void test_segment ();
 
 } // namespace test_range_queries
