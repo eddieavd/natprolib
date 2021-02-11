@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		065AF79925D584ED0036DA26 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 065AF79825D584ED0036DA26 /* main.cpp */; };
+		065AF7A625D585670036DA26 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 065AF7A225D585670036DA26 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +24,12 @@
 
 /* Begin PBXFileReference section */
 		065AF79525D584ED0036DA26 /* natprolib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = natprolib; sourceTree = BUILT_PRODUCTS_DIR; };
-		065AF79825D584ED0036DA26 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		065AF7A125D585670036DA26 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
+		065AF7A225D585670036DA26 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		065AF7A325D585670036DA26 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		065AF7A425D585670036DA26 /* tests */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tests; sourceTree = "<group>"; };
+		065AF7A525D585670036DA26 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		065AF7A825D586980036DA26 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +46,12 @@
 		065AF78C25D584ED0036DA26 = {
 			isa = PBXGroup;
 			children = (
-				065AF79725D584ED0036DA26 /* natprolib */,
+				065AF7A825D586980036DA26 /* .gitignore */,
+				065AF7A125D585670036DA26 /* include */,
+				065AF7A525D585670036DA26 /* LICENSE */,
+				065AF7A225D585670036DA26 /* main.cpp */,
+				065AF7A325D585670036DA26 /* README.md */,
+				065AF7A425D585670036DA26 /* tests */,
 				065AF79625D584ED0036DA26 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +62,6 @@
 				065AF79525D584ED0036DA26 /* natprolib */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		065AF79725D584ED0036DA26 /* natprolib */ = {
-			isa = PBXGroup;
-			children = (
-				065AF79825D584ED0036DA26 /* main.cpp */,
-			);
-			path = natprolib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,7 +120,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				065AF79925D584ED0036DA26 /* main.cpp in Sources */,
+				065AF7A625D585670036DA26 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
