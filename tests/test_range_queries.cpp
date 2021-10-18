@@ -63,6 +63,31 @@ void prefix_init_list_constructor ()
     assert( prefix.at( 2 ) == 3 );
     assert( prefix.element_at( 2 ) == 1 );
 }
+void prefix_range ()
+{
+    prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
+    
+    assert( prefix.range( 0, 4 ) == 5 );
+    assert( prefix.range( 0, 1 ) == 2 );
+    assert( prefix.range( 3, 3 ) == 1 );
+    assert( prefix.range( 2, 4 ) == 3 );
+}
+void prefix_at ()
+{
+    prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
+    
+    assert( prefix.at( 0 ) == 1 );
+    assert( prefix.at( 2 ) == 3 );
+    assert( prefix.at( 4 ) == 5 );
+}
+void prefix_element_at ()
+{
+    prefix_array< int > prefix( { 1, 2, 3, 4, 5 } );
+    
+    assert( prefix.at( 0 ) == 1 );
+    assert( prefix.at( 2 ) == 3 );
+    assert( prefix.at( 4 ) == 5 );
+}
 void prefix_push_back ()
 {
     prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
@@ -127,6 +152,15 @@ void test_prefix ()
     prefix_iterator_constructor();
     std::cout << "PASSED prefix_iterator_constructor\n";
     
+    prefix_range();
+    std::cout << "PASSED prefix_range\n";
+    
+    prefix_at();
+    std::cout << "PASSED prefix_at\n";
+    
+    prefix_element_at();
+    std::cout << "PASSED prefix_element_at\n";
+    
     prefix_init_list_constructor();
     std::cout << "PASSED prefix_init_list_constructor\n";
     
@@ -141,6 +175,189 @@ void test_prefix ()
     
     prefix_reserve();
     std::cout << "PASSED prefix_reserve\n";
+}
+
+void fenwick_default_constructor ()
+{
+    fenwick_tree< int > ftree;
+    
+    assert( ftree.size() == 0 );
+    assert( ftree.capacity() == DEFAULT_CAPACITY );
+}
+
+void fenwick_reserve_constructor ()
+{
+    fenwick_tree< int > ftree( 5 );
+    
+    assert( ftree.size() == 0 );
+    assert( ftree.capacity() == 5 );
+}
+
+void fenwick_pointer_constructor ()
+{
+    int array[] = { 1, 1, 1, 1, 1 };
+    int * ptr = array;
+    
+    fenwick_tree< int > ftree( &ptr, 5 );
+    
+    assert( ftree.size() == 5 );
+    assert( ftree.range( 0, 4 ) == 5 );
+    assert( ftree.at( 2 ) == 1 );
+}
+
+void fenwick_iterator_constructor ()
+{
+    std::vector< int > vec( { 1, 1, 1, 1, 1 } );
+    
+    fenwick_tree< int > ftree( vec.begin(), vec.end() );
+    
+    assert( ftree.size() == 5 );
+    assert( ftree.range( 0, 4 ) == 5 );
+    assert( ftree.at( 2 ) == 1 );
+}
+
+void fenwick_init_list_constructor ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.size() == 5 );
+    assert( ftree.range( 0, 4 ) == 5 );
+    assert( ftree.at( 2 ) == 1 );
+}
+
+void fenwick_range ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.range( 0, 4 ) == 5 );
+    assert( ftree.range( 0, 1 ) == 2 );
+    assert( ftree.range( 2, 2 ) == 1 );
+    assert( ftree.range( 2, 4 ) == 3 );
+}
+
+void fenwick_at ()
+{
+    fenwick_tree< int > ftree( { 1, 2, 3, 4, 5 } );
+    
+    assert( ftree.at( 0 ) == 1 );
+    assert( ftree.at( 2 ) == 3 );
+    assert( ftree.at( 4 ) == 5 );
+}
+
+void fenwick_update ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.range( 0, 4 ) == 5 );
+    
+    ftree.update( 3, 2 );
+    
+    assert( ftree.at( 2 ) == 3 );
+    assert( ftree.range( 0, 4 ) == 7 );
+}
+
+void fenwick_add ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.range( 0, 4 ) == 5 );
+    
+    ftree.add( 2, 2 );
+    
+    assert( ftree.at( 2 ) == 3 );
+    assert( ftree.range( 0, 4 ) == 7 );
+}
+
+void fenwick_push_back ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.size() == 5 );
+    assert( ftree.range( 0, 4 ) == 5 );
+    
+    ftree.push_back( 1 );
+    
+    assert( ftree.size() == 6 );
+    assert( ftree.range( 0, 5 ) == 6 );
+}
+
+void fenwick_emplace_back ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.size() == 5 );
+    
+    ftree.emplace_back( 1 );
+    
+    assert( ftree.size() == 6 );
+    assert( ftree.range( 0, 6 ) == 6 );
+}
+
+void fenwick_push_array ()
+{
+    fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
+    
+    assert( ftree.size() == 5 );
+    
+    ftree.push_array( 1, 1, 1 );
+    
+    assert( ftree.size() == 8 );
+    assert( ftree.range( 0, 7 ) == 8 );
+}
+
+void fenwick_reserve ()
+{
+    fenwick_tree< int > ftree;
+    
+    assert( ftree.size() == 0 );
+    assert( ftree.capacity() == DEFAULT_CAPACITY );
+    
+    ftree.reserve( DEFAULT_CAPACITY * 2 );
+    
+    assert( ftree.size() == 0 );
+    assert( ftree.capacity() == ( DEFAULT_CAPACITY * 2 ) );
+}
+
+void test_fenwick ()
+{
+    fenwick_default_constructor();
+    std::cout << "PASSED fenwick_default_constructor\n";
+    
+    fenwick_reserve_constructor();
+    std::cout << "PASSED fenwick_reserve_constructor\n";
+    
+    fenwick_pointer_constructor();
+    std::cout << "PASSED fenwick_pointer_constructor\n";
+    
+    fenwick_iterator_constructor();
+    std::cout << "PASSED fenwick_iterator_constructor\n";
+    
+    fenwick_init_list_constructor();
+    std::cout << "PASSED fenwick_init_list_constructor\n";
+    
+    fenwick_range();
+    std::cout << "PASSED fenwick_range\n";
+    
+    fenwick_at();
+    std::cout << "PASSED fenwick_at\n";
+    
+    fenwick_update();
+    std::cout << "PASSED fenwick_update\n";
+    
+    fenwick_add();
+    std::cout << "PASSED fenwick_add\n";
+    
+    fenwick_push_back();
+    std::cout << "PASSED fenwick_push_back\n";
+    
+    fenwick_emplace_back();
+    std::cout << "PASSED fenwick_emplace_back\n";
+    
+    fenwick_push_array();
+    std::cout << "PASSED fenwick_push_array\n";
+    
+    fenwick_reserve();
+    std::cout << "PASSED fenwick_reserve\n";
 }
     
     
@@ -216,8 +433,28 @@ void segment_push_back ()
         some_data () : x{ 0 }, y{ 0 } { hash = "0"; };
         some_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } { hash = std::to_string( x * y ); }
         
+        some_data ( some_data const &  other ) : x{ other.x }, y{ other.y }, hash{ other.hash } {}
+        some_data ( some_data       && other ) noexcept : x{ other.x }, y{ other.y }, hash{ std::move( other.hash ) } {}
+        
+        some_data& operator= ( some_data const & other )
+        {
+            return *this = some_data( other );
+        }
+        
+        some_data& operator= ( some_data && other ) noexcept
+        {
+            x = other.x;
+            y = other.y;
+            std::swap( hash, other.hash );
+            
+            return *this;
+        }
+        
+        
         bool operator< ( some_data const & rhs ) const { return ( x + y ) <  ( rhs.x + rhs.y ); }
         bool operator==( some_data const & rhs ) const { return ( x + y ) == ( rhs.x + rhs.y ); }
+        
+        ~some_data() {};
     };
     
     segment_tree< some_data > segtree( 4, []( some_data const & lhs, some_data const & rhs ){ return lhs < rhs ? rhs : lhs; } );

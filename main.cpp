@@ -13,8 +13,7 @@
 
 int main ()
 {
-    test_range_queries::test_prefix();
-    test_range_queries::test_segment();
+    test_range_queries::test_fenwick();
     
     
     
