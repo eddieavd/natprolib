@@ -10,6 +10,7 @@
 
 #include <set>
 #include <vector>
+#include <iostream>
 
 #include "../include/range_queries.h"
 

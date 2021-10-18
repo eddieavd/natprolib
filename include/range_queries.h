@@ -267,12 +267,10 @@ public:
         
         if( size_ == 0 )
         {
-            //head_[ size_ ] = _value_;
             head_[ size_ ] = T ( args... );
         }
         else
         {
-            //head_[ size_ ] = head_[ size_ - 1 ] + _value_;
             head_[ size_ ] = T ( args... );
             head_[ size_ ] += head_[ size_ - 1 ];
         }
@@ -435,7 +433,7 @@ private:
         
         for( auto i = 0; i < capacity_; i++ )
         {
-            head_[ i ] = default_;
+            head_[ i ] = T();
         }
     }
     
@@ -488,9 +486,7 @@ public:
     inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
     inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
     
-    // za default dodat is_default_constructible
-    //segment_tree ( std::size_t _capacity_ = 4, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) { alloc2(); }
-    segment_tree ( std::size_t _capacity_ = DEFAULT_CAPACITY, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) : parent_builder_ { _pb_ } { alloc( _capacity_ ); }
+    segment_tree ( std::size_t _capacity_ = MIN_CAPACITY, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) : parent_builder_ { _pb_ } { alloc( _capacity_ ); }
     segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
     {
         alloc( _capacity_ );
@@ -550,7 +546,7 @@ public:
         _x_ += size_;
         _y_ += size_;
         
-        T res = default_;
+        T res = T();
         
         while( _x_ <= _y_ )
         {
@@ -579,13 +575,13 @@ public:
         }
     }
     
-    void print ()
-    {
-        for( auto i = 0; i < capacity_; i++ )
-        {
-            std::cout << head_[ i ].val << std::endl;
-        }
-    }
+//    void print ()
+//    {
+//        for( auto i = 0; i < capacity_; i++ )
+//        {
+//            std::cout << head_[ i ].val << std::endl;
+//        }
+//    }
     
     void set_parent_builder ( std::function< T ( T, T ) > _pb_ ) { parent_builder_ = _pb_; construct_tree(); }
     

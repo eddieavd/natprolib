@@ -8,7 +8,7 @@
 
 #include "test_range_queries.hpp"
 
-#define DEFAULT_CAPACITY 8
+#define DEFAULT_CAPACITY 16
 
 using namespace natprolib::range_queries;
 
@@ -105,19 +105,34 @@ void prefix_reserve ()
 void test_prefix ()
 {
     prefix_default_constructor();
+    std::cout << "PASSED prefix_default_constructor\n";
+    
     prefix_reserve_constructor();
+    std::cout << "PASSED prefix_reserve_constructor\n";
+    
     prefix_pointer_constructor();
+    std::cout << "PASSED prefix_pointer_constructor\n";
+    
     prefix_iterator_constructor();
+    std::cout << "PASSED prefix_iterator_constructor\n";
+    
     prefix_init_list_constructor();
+    std::cout << "PASSED prefix_init_list_constructor\n";
+    
     prefix_push_back();
+    std::cout << "PASSED prefix_push_back\n";
+    
     prefix_push_array();
+    std::cout << "PASSED prefix_push_array\n";
+    
     prefix_reserve();
+    std::cout << "PASSED prefix_reserve\n";
 }
     
     
 void segment_default_constructor ()
 {
-    segment_tree< int > segtree( 5, 0, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
+    segment_tree< int > segtree( 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.size() == 5 );
 }
@@ -126,7 +141,7 @@ void segment_pointer_constructor ()
     int array[] = { 1, 3, 2, 7, 4 };
     int * ptr = array;
     
-    segment_tree< int > segtree( &ptr, 5, 0, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
+    segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.size() == 5 );
 }
@@ -134,7 +149,7 @@ void segment_iterator_constructor ()
 {
     std::vector< int > vec { 1, 3, 2, 7, 4 };
     
-    segment_tree< int > segtree( vec.begin(), vec.end(), 0, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
+    segment_tree< int > segtree( vec.begin(), vec.end(), []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.size() == 5 );
 }
@@ -143,7 +158,7 @@ void segment_range ()
     int array[] = { 1, 3, 2, 7, 4 };
     int * ptr = array;
     
-    segment_tree< int > segtree( &ptr, 5, 0, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
+    segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.range( 0, 4 ) == 7 );
     assert( segtree.range( 1, 2 ) == 3 );
@@ -154,7 +169,7 @@ void segment_at ()
     int array[] = { 1, 3, 2, 7, 4 };
     int * ptr = array;
     
-    segment_tree< int > segtree( &ptr, 5, 0, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
+    segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.at( 1 ) == 3 );
     assert( segtree.at( 2 ) == 2 );
@@ -165,7 +180,7 @@ void segment_update ()
     int array[] = { 1, 3, 2, 7, 4 };
     int * ptr = array;
     
-    segment_tree< int > segtree( &ptr, 5, 0, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
+    segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.range( 0, 4 ) == 7 );
     
@@ -199,7 +214,7 @@ void segment_parent_builder ()
         { 2, 0 }
     };
     
-    segment_tree< node > segtree( array.begin(), array.end(), { 0, 0 },
+    segment_tree< node > segtree( array.begin(), array.end(),
         [] ( node const & l_child, node const & r_child ) -> node
         {
             if( l_child.max == r_child.max )
@@ -231,12 +246,25 @@ void segment_parent_builder ()
 void test_segment ()
 {
     segment_default_constructor();
+    std::cout << "PASSED segment_default_constructor\n";
+    
     segment_pointer_constructor();
+    std::cout << "PASSED segment_pointer_constructor\n";
+    
     segment_iterator_constructor();
+    std::cout << "PASSED segment_iterator_constrcutor\n";
+    
     segment_range();
+    std::cout << "PASSED segment_range\n";
+    
     segment_at();
+    std::cout << "PASSED segment_at\n";
+    
     segment_update();
+    std::cout << "PASSED segment_update\n";
+    
     segment_parent_builder();
+    std::cout << "PASSED segment_parent_builder\n";
 }
 
 
