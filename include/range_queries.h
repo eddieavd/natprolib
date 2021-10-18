@@ -340,10 +340,21 @@ private:
     std::size_t   capacity_       { 0 };
     
     void alloc  (                        ) { head_ = ( T* ) std::calloc( MIN_CAPACITY, sizeof( T ) ); if( !head_ ) throw std::bad_alloc(); }
-    void alloc  ( std::size_t _capacity_ ) { head_ = ( T* ) std::calloc(   _capacity_, sizeof( T ) ); if( !head_ ) throw std::bad_alloc(); }
-    void resize (                        )
+    void alloc  ( std::size_t _capacity_ )
     {
-        auto new_cap = ( capacity_ + 1 ) * 1.618;  // golden ratio magic
+        if( _capacity_ > max_size() )
+        {
+            throw std::out_of_range( "capacity > max_size" );
+        }
+        head_ = ( T* ) std::calloc(   _capacity_, sizeof( T ) );
+        if( !head_ )
+        {
+            throw std::bad_alloc();
+        }
+    }
+    void resize ()
+    {
+        auto new_cap = ( capacity_ + 1 ) * 1.618;
         auto tmp = ( T* ) std::realloc( head_, sizeof( T ) * new_cap );
         
         if( tmp )
@@ -431,8 +442,7 @@ public:
         
         for( auto t : _list_ )
         {
-            size_++;
-            update( t, size_ - 1 );
+            update( t, size_++ );
         }
     }
     template< class Iterator >
@@ -442,8 +452,7 @@ public:
         
         while( begin != end )
         {
-            size_++;
-            update( *begin, size_ - 1 );
+            update( *begin, size_++ );
             begin++;
         }
     }
