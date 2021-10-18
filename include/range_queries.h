@@ -427,8 +427,16 @@ private:
     void alloc ( std::size_t const _capacity_ )
     {
         og_size_  = _capacity_;
-        size_     = round_up_to_pow_2( _capacity_ );
-        capacity_ = 2 * size_;
+        size_     = 0;
+        capacity_ = 2 * round_up_to_pow_2( _capacity_ );
+        head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
+    }
+    
+    void alloc_default ( std::size_t const _capacity_ )
+    {
+        og_size_  = _capacity_;
+        size_     = 0;
+        capacity_ = 2 * round_up_to_pow_2( _capacity_ );
         head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
         
         for( auto i = 0; i < capacity_; i++ )
@@ -486,14 +494,14 @@ public:
     inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
     inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
     
-    segment_tree ( std::size_t _capacity_ = MIN_CAPACITY, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) : parent_builder_ { _pb_ } { alloc( _capacity_ ); }
+    segment_tree ( std::size_t _capacity_ = MIN_CAPACITY, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) : parent_builder_ { _pb_ } { alloc_default( _capacity_ ); }
     segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
     {
         alloc( _capacity_ );
         
         for( auto i = 0; i < _capacity_; i++ )
         {
-            head_[ size_ + i ] = ( *_head_ )[ i ];
+            head_[ ( capacity_ / 2 ) + i ] = ( *_head_ )[ i ];
         }
         *_head_ = nullptr;
         construct_tree();
@@ -505,7 +513,7 @@ public:
         
         for( auto i = 0; begin != end; i++ )
         {
-            head_[ size_ + i ] = *begin;
+            head_[ ( capacity_ / 2 ) + i ] = *begin;
             begin++;
         }
         construct_tree();
@@ -519,8 +527,21 @@ public:
         }
         
         head_[ capacity_ / 2 + size_ ] = _value_;
+        size_++;
+        construct_tree();
+    }
+    
+    template< class... Args >
+    void emplace_back ( Args&&... args )
+    {
+        if( size_ >= capacity_ / 2 )
+        {
+            return;
+        }
         
-//        construct_tree();
+        head_[ capacity_ / 2 + size_ ] = T ( args... );
+        size_++;
+        construct_tree();
     }
     
     inline std::size_t size () const noexcept { return og_size_; }
