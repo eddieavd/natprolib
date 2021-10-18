@@ -35,6 +35,7 @@ void segment_default_constructor ();
 void segment_pointer_constructor ();
 void segment_iterator_constructor ();
 void segment_range ();
+void segment_range2 ();
 void segment_at ();
 void segment_push_back ();
 void segment_emplace_back ();

@@ -74,6 +74,17 @@ void prefix_push_back ()
     assert( prefix.size() == 6 );
     assert( prefix.range( 0, 5 ) == 6 );
 }
+void prefix_emplace_back ()
+{
+    prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
+    
+    assert( prefix.size() == 5 );
+    
+    prefix.emplace_back( 1 );
+    
+    assert( prefix.size() == 6 );
+    assert( prefix.range( 0, 5 ) == 6 );
+}
 void prefix_push_array ()
 {
     prefix_array< int > prefix;
@@ -122,6 +133,9 @@ void test_prefix ()
     prefix_push_back();
     std::cout << "PASSED prefix_push_back\n";
     
+    prefix_emplace_back();
+    std::cout << "PASSED prefix_emplace_back\n";
+    
     prefix_push_array();
     std::cout << "PASSED prefix_push_array\n";
     
@@ -134,7 +148,8 @@ void segment_default_constructor ()
 {
     segment_tree< int > segtree( 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
-    assert( segtree.size() == 5 );
+    assert( segtree.size() == 0 );
+    assert( segtree.capacity() == 5 );
 }
 void segment_pointer_constructor ()
 {
@@ -144,6 +159,7 @@ void segment_pointer_constructor ()
     segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.size() == 5 );
+    assert( segtree.capacity() == 5 );
 }
 void segment_iterator_constructor ()
 {
@@ -152,8 +168,9 @@ void segment_iterator_constructor ()
     segment_tree< int > segtree( vec.begin(), vec.end(), []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.size() == 5 );
+    assert( segtree.capacity() == 5 );
 }
-void segment_range ()
+void segment_range2 ()
 {
     int array[] = { 1, 3, 2, 7, 4 };
     int * ptr = array;
@@ -161,7 +178,20 @@ void segment_range ()
     segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? rhs : lhs; } );
     
     assert( segtree.range( 0, 4 ) == 7 );
-    assert( segtree.range( 1, 2 ) == 3 );
+    assert( segtree.range( 0, 1 ) == 3 );
+    assert( segtree.range( 1, 3 ) == 7 );
+    assert( segtree.range( 4, 4 ) == 4 );
+}
+void segment_range ()
+{
+    int array[] = { 1, 3, 2, 7, 4 };
+    int * ptr = array;
+    
+    segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+    
+    assert( segtree.range( 0, 4 ) == 1 );
+    assert( segtree.range( 0, 1 ) == 1 );
+    assert( segtree.range( 1, 3 ) == 2 );
     assert( segtree.range( 4, 4 ) == 4 );
 }
 void segment_at ()
@@ -174,6 +204,68 @@ void segment_at ()
     assert( segtree.at( 1 ) == 3 );
     assert( segtree.at( 2 ) == 2 );
     assert( segtree.at( 4 ) == 4 );
+}
+void segment_push_back ()
+{
+    struct some_data
+    {
+        int x;
+        int y;
+        std::string hash;
+        
+        some_data () : x{ 0 }, y{ 0 } { hash = "0"; };
+        some_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } { hash = std::to_string( x * y ); }
+        
+        bool operator< ( some_data const & rhs ) const { return ( x + y ) <  ( rhs.x + rhs.y ); }
+        bool operator==( some_data const & rhs ) const { return ( x + y ) == ( rhs.x + rhs.y ); }
+    };
+    
+    segment_tree< some_data > segtree( 4, []( some_data const & lhs, some_data const & rhs ){ return lhs < rhs ? rhs : lhs; } );
+    
+    assert( segtree.size() == 0 );
+    assert( segtree.capacity() == 4 );
+    
+    segtree.push_back( { 1, 1 } );
+    segtree.push_back( { 2, 2 } );
+    segtree.push_back( { 3, 3 } );
+    segtree.push_back( { 4, 4 } );
+    
+    assert( segtree.size() == 4 );
+    assert( segtree.capacity() == 4 );
+    
+    some_data tmp( 4, 4 );
+    assert( segtree.range( 0, 3 ) == tmp );
+}
+void segment_emplace_back ()
+{
+    struct some_data
+    {
+        int x;
+        int y;
+        std::string hash;
+        
+        some_data () : x{ 0 }, y{ 0 } { hash = "0"; };
+        some_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } { hash = std::to_string( x * y ); }
+        
+        bool operator< ( some_data const & rhs ) const { return ( x + y ) <  ( rhs.x + rhs.y ); }
+        bool operator==( some_data const & rhs ) const { return ( x + y ) == ( rhs.x + rhs.y ); }
+    };
+    
+    segment_tree< some_data > segtree( 4, []( some_data const & lhs, some_data const & rhs ){ return lhs < rhs ? lhs : rhs; } );
+    
+    assert( segtree.size() == 0 );
+    assert( segtree.capacity() == 4 );
+    
+    segtree.emplace_back( 1, 1 );
+    segtree.emplace_back( 2, 2 );
+    segtree.emplace_back( 3, 3 );
+    segtree.emplace_back( 4, 4 );
+    
+    assert( segtree.size() == 4 );
+    assert( segtree.capacity() == 4 );
+    
+    some_data tmp( 1, 1 );
+    assert( segtree.range( 0, 3 ) == tmp );
 }
 void segment_update ()
 {
@@ -255,10 +347,17 @@ void test_segment ()
     std::cout << "PASSED segment_iterator_constrcutor\n";
     
     segment_range();
+    segment_range2();
     std::cout << "PASSED segment_range\n";
     
     segment_at();
     std::cout << "PASSED segment_at\n";
+    
+    segment_push_back();
+    std::cout << "PASSED segment_push_back\n";
+    
+    segment_emplace_back();
+    std::cout << "PASSED segment_emplace_back\n";
     
     segment_update();
     std::cout << "PASSED segment_update\n";

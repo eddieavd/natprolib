@@ -475,13 +475,13 @@ private:
     
     void construct_tree ()
     {
-        for( auto i = size_ - 1; i > 0; i-- )
+        for( auto i = ( capacity_ / 2 ) - 1; i > 0; i-- )
         {
             head_[ i ] = parent_builder_( head_[ 2 * i ], head_[ 2 * i + 1 ] );
         }
     }
     
-    bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < og_size_; }
+    bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
     
 public:
     auto begin ()       { return       iterator{ head_ + size_            }; }
@@ -489,7 +489,7 @@ public:
     auto begin () const { return const_iterator{ head_ + size_            }; }
     auto   end () const { return const_iterator{ head_ + size_ + og_size_ }; }
     
-    inline T const & operator[] ( std::size_t const _index_ ) const noexcept { return head_[ size_ + _index_ ]; }
+    inline T const & operator[] ( std::size_t const _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
     
     inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
     inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
@@ -502,6 +502,7 @@ public:
         for( auto i = 0; i < _capacity_; i++ )
         {
             head_[ ( capacity_ / 2 ) + i ] = ( *_head_ )[ i ];
+            size_++;
         }
         *_head_ = nullptr;
         construct_tree();
@@ -515,6 +516,7 @@ public:
         {
             head_[ ( capacity_ / 2 ) + i ] = *begin;
             begin++;
+            size_++;
         }
         construct_tree();
     }
@@ -524,6 +526,10 @@ public:
         if( size_ >= capacity_ / 2 )
         {
             return;
+        }
+        if( size_ >= og_size_ )
+        {
+            og_size_ = size_ + 1;
         }
         
         head_[ capacity_ / 2 + size_ ] = _value_;
@@ -538,13 +544,18 @@ public:
         {
             return;
         }
+        if( size_ >= og_size_ )
+        {
+            og_size_ = size_ + 1;
+        }
         
         head_[ capacity_ / 2 + size_ ] = T ( args... );
         size_++;
         construct_tree();
     }
     
-    inline std::size_t size () const noexcept { return og_size_; }
+    inline std::size_t     size () const noexcept { return    size_; }
+    inline std::size_t capacity () const noexcept { return og_size_; }
     
     inline T const & at ( std::size_t const _index_ ) const
     {
@@ -564,15 +575,38 @@ public:
             throw std::out_of_range( "index out of bounds" );
         }
         
-        _x_ += size_;
-        _y_ += size_;
+        _x_ += capacity_ / 2;
+        _y_ += capacity_ / 2;
         
         T res = T();
+        bool is_res_default = true;
         
         while( _x_ <= _y_ )
         {
-            if( _x_ % 2 == 1 ) res = parent_builder_( res, head_[ _x_++ ] );
-            if( _y_ % 2 == 0 ) res = parent_builder_( res, head_[ _y_-- ] );
+            if( _x_ % 2 == 1 )
+            {
+                if( is_res_default )
+                {
+                    res = head_[ _x_++ ];
+                    is_res_default = false;
+                }
+                else
+                {
+                    res = parent_builder_( res, head_[ _x_++ ] );
+                }
+            }
+            if( _y_ % 2 == 0 )
+            {
+                if( is_res_default )
+                {
+                    res = head_[ _y_-- ];
+                    is_res_default = false;
+                }
+                else
+                {
+                    res = parent_builder_( res, head_[ _y_-- ] );
+                }
+            }
             _x_ /= 2;
             _y_ /= 2;
         }
@@ -586,7 +620,7 @@ public:
             throw std::out_of_range( "index out of bounds" );
         }
         
-        _index_ += size_;
+        _index_ += capacity_ / 2;
         
         head_[ _index_ ] = _value_;
         
@@ -596,13 +630,13 @@ public:
         }
     }
     
-//    void print ()
-//    {
-//        for( auto i = 0; i < capacity_; i++ )
-//        {
-//            std::cout << head_[ i ].val << std::endl;
-//        }
-//    }
+    void print ()
+    {
+        for( auto i = 0; i < capacity_; i++ )
+        {
+            std::cout << head_[ i ].x << " " << head_[ i ].y << std::endl;
+        }
+    }
     
     void set_parent_builder ( std::function< T ( T, T ) > _pb_ ) { parent_builder_ = _pb_; construct_tree(); }
     
