@@ -26,7 +26,7 @@ namespace natprolib
 namespace range_queries
 {
           
-#define MIN_CAPACITY 8
+#define MIN_CAPACITY 16
 
 
 /**
@@ -148,6 +148,9 @@ public:
     inline bool operator!= ( prefix_array< T, U > const & rhs ) const noexcept
     { return head_ != rhs.head_; }
     
+    prefix_array ( prefix_array const &  ) = delete;
+    prefix_array ( prefix_array       && ) = delete;
+    
     prefix_array (                                           ) : capacity_ { MIN_CAPACITY } { alloc(); };
     prefix_array (              std::size_t const _capacity_ ) : capacity_ {   _capacity_ } { alloc(); };
     prefix_array ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {   _capacity_ }
@@ -256,6 +259,26 @@ public:
         }
         size_++;
     }
+    
+    template< class... Args >
+    void emplace_back ( Args&&... args )
+    {
+        if( capacity_ <= size_ ) { resize(); }
+        
+        if( size_ == 0 )
+        {
+            //head_[ size_ ] = _value_;
+            head_[ size_ ] = T ( args... );
+        }
+        else
+        {
+            //head_[ size_ ] = head_[ size_ - 1 ] + _value_;
+            head_[ size_ ] = T ( args... );
+            head_[ size_ ] += head_[ size_ - 1 ];
+        }
+        size_++;
+    }
+    
     void push_array ( T _value_ )
     {
         push_back( _value_ );
@@ -269,18 +292,126 @@ public:
     
     ~prefix_array () { free( head_ ); }
 };
+
+
+template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+class fenwick_tree;
+
+template< typename T, bool C,
+          typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+class fenwick_tree_iterator
+{
+    friend class fenwick_tree< T >;
+    friend class fenwick_tree_iterator< T, !C >;
+    
+    using pointer   = std::conditional_t< C, T const *, T * >;
+    using reference = std::conditional_t< C, T const &, T & >;
+    
+    pointer ptr_;
+    
+    explicit fenwick_tree_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
+    
+public:
+    reference   operator*  (     ) const { return *ptr_; }
+    auto      & operator++ (     )       { ptr_++; return *this; }
+    auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+    
+    template< bool R >
+    bool operator== ( fenwick_tree_iterator< T, R > const & rhs ) const noexcept
+    { return ptr_ == rhs.ptr_; }
+    
+    template< bool R >
+    bool operator!= ( fenwick_tree_iterator< T, R > const & rhs ) const noexcept
+    { return ptr_ != rhs.ptr_; }
+    
+    operator fenwick_tree_iterator< T, true > () const
+    { return fenwick_tree_iterator< T, true >{ ptr_ }; }
+};
+
+template< typename T, typename U >
+class fenwick_tree
+{
+    using     value_type = T;
+    using       iterator = fenwick_tree_iterator< T, false >;
+    using const_iterator = fenwick_tree_iterator< T,  true >;
+    
+private:
+    T           * head_     { nullptr };
+    std::size_t   size_           { 0 };
+    std::size_t   capacity_       { 0 };
+    
+    void alloc  (                        ) {}
+    void alloc  ( std::size_t _capacity_ ) {}
+    void resize (                        ) {}
+    void resize ( std::size_t _capacity_ ) {}
+    
+#ifdef _WIN32
+    std::size_t max_size () const
+    {
+        MEMORYSTATUSEX status;
+        status.dwLength = sizeof( status );
+        GlobalMemoryStatusEx( &status );
+        
+        return status.ullTotalPhys;
+    }
+#else
+    std::size_t max_size () const
+    {
+        long pages     = sysconf( _SC_PHYS_PAGES );
+        long page_size = sysconf( _SC_PAGE_SIZE );
+        
+        return pages * page_size;
+    }
+#endif
+    
+    inline std::size_t p ( std::size_t const k ) const noexcept { return k & -k; }
+    
+    inline bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
+    
+    T sum_to_index ( std::size_t const _index_ ) const {}
+    
+public:
+    auto begin ()       { return       iterator{ head_         }; }
+    auto   end ()       { return       iterator{ head_ + size_ }; }
+    auto begin () const { return const_iterator{ head_         }; }
+    auto   end () const { return const_iterator{ head_ + size_ }; }
+    
+    inline T const & operator[] ( std::size_t const _index_ ) const noexcept {}
+    
+    fenwick_tree (                                           ) : capacity_ {             0 } { alloc(           ); }
+    fenwick_tree (              std::size_t const _capacity_ ) : capacity_ {    _capacity_ } { alloc( capacity_ ); }
+    fenwick_tree ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {    _capacity_ } {}
+    fenwick_tree ( std::initializer_list< T > const & _list_ ) : capacity_ { _list_.size() } {}
+    template< class Iterator >
+    fenwick_tree ( Iterator const & begin, Iterator const & end ) : capacity_ { std::distance( begin, end ) } {}
+    
+    inline std::size_t     size () const noexcept { return size_ - 1; }
+    inline std::size_t capacity () const noexcept { return capacity_ - 1; }
+    
+    T range ( std::size_t const _x_, std::size_t const _y_ ) const {}
+    
+    void update ( T const _value_, std::size_t const _index_ ) {}
+    void    add ( T const _value_, std::size_t const _index_ ) {}
+    
+    void reserve ( std::size_t const _capacity_ ) { resize( _capacity_ ); }
+    
+    void push_back ( T _value_ ) {}
+    
+    ~fenwick_tree () { free( head_ ); }
+};
           
 
-template< typename T >
+template< typename T, typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree;
 
-template< typename T, bool C >
+template< typename T, bool C,
+          typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree_iterator
 {
     //  TODO: implement
 };
 
-template< typename T >
+template< typename T, typename U >
 class segment_tree
 {
     using     value_type = T;
@@ -289,7 +420,6 @@ class segment_tree
     
 private:
     T           * head_;
-    T             default_;
     std::size_t   size_;
     std::size_t   og_size_;
     std::size_t   capacity_;
@@ -306,6 +436,22 @@ private:
         for( auto i = 0; i < capacity_; i++ )
         {
             head_[ i ] = default_;
+        }
+    }
+    
+    //  the fuck is this
+    void alloc2 ( std::size_t const _capacity_ )
+    {
+        og_size_  = _capacity_;
+        size_     = 0;
+        capacity_ = 2 * round_up_to_pow_2( _capacity_ );
+//        head_ = new T[ capacity_ ];
+        head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
+//        head_ = ( T* ) std::calloc( 3, sizeof( T ) * capacity_ );
+        
+        for( auto i = capacity_ / 2; i < capacity_; i++ )
+        {
+            head_[ i ] = { 5 };
         }
     }
     
@@ -342,8 +488,10 @@ public:
     inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
     inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
     
-    segment_tree (              std::size_t _capacity_, T _default_, std::function< T ( T, T ) > _pb_ ) : default_ { _default_ }, parent_builder_ { _pb_ } { alloc( _capacity_ ); }
-    segment_tree ( T ** _head_, std::size_t _capacity_, T _default_, std::function< T ( T, T ) > _pb_ ) : default_ { _default_ }, parent_builder_ { _pb_ }
+    // za default dodat is_default_constructible
+    //segment_tree ( std::size_t _capacity_ = 4, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) { alloc2(); }
+    segment_tree ( std::size_t _capacity_ = DEFAULT_CAPACITY, std::function< T ( T, T ) > _pb_ = [](){ return T(); } ) : parent_builder_ { _pb_ } { alloc( _capacity_ ); }
+    segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
     {
         alloc( _capacity_ );
         
@@ -353,9 +501,9 @@ public:
         }
         *_head_ = nullptr;
         construct_tree();
-    };
+    }
     template< class Iterator >
-    segment_tree ( Iterator begin, Iterator const & end, T _default_, std::function< T ( T, T ) > _pb_ ) : default_ { _default_ }, parent_builder_ { _pb_ }
+    segment_tree ( Iterator begin, Iterator const & end, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
     {
         alloc( std::distance( begin, end ) );
         
@@ -365,7 +513,19 @@ public:
             begin++;
         }
         construct_tree();
-    };
+    }
+    
+    void push_back ( T _value_ )
+    {
+        if( size_ >= capacity_ / 2 )
+        {
+            return;
+        }
+        
+        head_[ capacity_ / 2 + size_ ] = _value_;
+        
+//        construct_tree();
+    }
     
     inline std::size_t size () const noexcept { return og_size_; }
     
@@ -419,6 +579,14 @@ public:
         }
     }
     
+    void print ()
+    {
+        for( auto i = 0; i < capacity_; i++ )
+        {
+            std::cout << head_[ i ].val << std::endl;
+        }
+    }
+    
     void set_parent_builder ( std::function< T ( T, T ) > _pb_ ) { parent_builder_ = _pb_; construct_tree(); }
     
     ~segment_tree () { free( head_ ); }
@@ -426,9 +594,6 @@ public:
 
 
 //  TODO
-
-template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
-class fenwick_tree;
 
 template< typename T >
 class lazy_segtree;
