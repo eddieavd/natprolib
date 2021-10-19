@@ -84,9 +84,9 @@ void prefix_element_at ()
 {
     prefix_array< int > prefix( { 1, 2, 3, 4, 5 } );
     
-    assert( prefix.at( 0 ) == 1 );
-    assert( prefix.at( 2 ) == 3 );
-    assert( prefix.at( 4 ) == 5 );
+    assert( prefix.element_at( 0 ) == 1 );
+    assert( prefix.element_at( 2 ) == 3 );
+    assert( prefix.element_at( 4 ) == 5 );
 }
 void prefix_push_back ()
 {

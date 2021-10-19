@@ -399,7 +399,7 @@ private:
     
     inline std::size_t p ( std::size_t const k ) const noexcept { return k & -k; }
     
-    inline bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
+    inline bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < capacity_; }
     
     T sum_to_index ( std::size_t _index_ ) const
     {
@@ -409,7 +409,7 @@ private:
         while( _index_ >= 1 )
         {
             s += head_[ _index_ - 1 ];
-            _index_ -= _index_ & -_index_;
+            _index_ -= p( _index_ );
         }
         
         return s;
@@ -431,8 +431,7 @@ public:
         
         for( int i = 0; i < _capacity_; i++ )
         {
-            size_++;
-            update( ( *_head_ )[ i ], i );
+            update( ( *_head_ )[ i ], size_++ );
         }
         *_head_ = nullptr;
     }
@@ -462,17 +461,32 @@ public:
     
     T at ( std::size_t const _index_ ) const
     {
+        if( !is_index_in_range( _index_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        
         return _index_ == 0 ?
                 sum_to_index( _index_ ) : sum_to_index( _index_ ) - sum_to_index( _index_ - 1 );
     }
     T range ( std::size_t const _x_, std::size_t const _y_ ) const
     {
+        if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        
         return _x_ == 0 ?
                 sum_to_index( _y_ ) : sum_to_index( _y_ ) - sum_to_index( _x_ - 1 );
     }
     
     void update ( T const _value_, std::size_t _index_ )
     {
+        if( !is_index_in_range( _index_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        
         T current = at( _index_ );
         
         _index_++;
@@ -480,17 +494,22 @@ public:
         while( _index_ <= size_ )
         {
             head_[ _index_ - 1 ] += _value_ - current;
-            _index_ += _index_ & -_index_;
+            _index_ += p( _index_ );
         }
     }
     void add ( T const _value_, std::size_t _index_ )
     {
+        if( !is_index_in_range( _index_ ) )
+        {
+            throw std::out_of_range( "index out of bounds" );
+        }
+        
         _index_++;
         
         while( _index_ <= size_ )
         {
             head_[ _index_ - 1 ] += _value_;
-            _index_ += _index_ & -_index_;
+            _index_ += p( _index_ );
         }
     }
     
