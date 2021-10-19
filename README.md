@@ -33,7 +33,7 @@ When updating values, several elements of the array need to be changed. However,
 #### segment tree<br/>
 
 The segment tree is a data structure which allows for both range queries and single value updates, both in O(log _n_) time. 
-Unlike the previous entries which only supports sum queries, the segment tree can be used for minimum/maximum queries, sum queries as well as with any other user-defined comparator (called _parent_builder_).<sup>1</sup>  
+Unlike the previous entries which only support sum queries, the segment tree can be used for minimum/maximum queries, sum queries as well as with any other user-defined comparator (called _parent_builder_).<sup>1</sup>  
 It is implemented as a binary tree such that the nodes on the bottom level of the tree correspond to the array elements, and the other nodes contain information needed for processing range queries.  
 ![segment tree](https://github.com/eddieavd/img/blob/main/segtree.png)  
 example segment tree used for sum queries  
