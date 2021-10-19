@@ -84,7 +84,7 @@ public:
     constexpr auto     size () const noexcept { return     size_; }
     constexpr auto capacity () const noexcept { return capacity_; }
     
-    constexpr T const & operator[] ( std::size_t const _index_ ) const noexcept
+    constexpr T const & operator[] ( std::size_t const _index_ ) const
     { return data_[ _index_ ]; }
     
     constexpr prefix_array ( std::initializer_list< T > const & _list_ )

@@ -449,10 +449,9 @@ public:
     {
         alloc( capacity_ );
         
-        while( begin != end )
+        for( ; begin != end; begin++ )
         {
             update( *begin, size_++ );
-            begin++;
         }
     }
     
@@ -467,7 +466,8 @@ public:
         }
         
         return _index_ == 0 ?
-                sum_to_index( _index_ ) : sum_to_index( _index_ ) - sum_to_index( _index_ - 1 );
+                sum_to_index( _index_ ) :
+                sum_to_index( _index_ ) - sum_to_index( _index_ - 1 );
     }
     T range ( std::size_t const _x_, std::size_t const _y_ ) const
     {
@@ -477,7 +477,8 @@ public:
         }
         
         return _x_ == 0 ?
-                sum_to_index( _y_ ) : sum_to_index( _y_ ) - sum_to_index( _x_ - 1 );
+                sum_to_index( _y_ ) :
+                sum_to_index( _y_ ) - sum_to_index( _x_ - 1 );
     }
     
     void update ( T const _value_, std::size_t _index_ )
