@@ -6,16 +6,14 @@
 //  Distributed under the terms of the GNU General Public License
 //
 
-#include <iostream>
-
-#include "tests/test_range_queries.hpp"
+#include "include/natprolib.h"
 
 
 int main ()
 {
-    test_range_queries::test_prefix();
-    test_range_queries::test_segment();
-    test_range_queries::test_fenwick();
+    natprolib::range_queries::prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
+
+    assert( prefix.range( 0, 4 ) == 5 );
 
     
     

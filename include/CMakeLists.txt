@@ -1,1 +1,1 @@
-add_library(natprolib INTERFACE)
+add_library( natprolib INTERFACE )

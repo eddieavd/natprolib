@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <memory>
+#include <functional>
 #include <type_traits>
 #include <stdexcept>
 
@@ -672,6 +673,17 @@ public:
         }
         construct_tree();
     }
+    segment_tree ( std::initializer_list< T > const & _list_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
+    {
+        alloc( _list_.size() );
+
+        for( auto el : _list_ )
+        {
+            head_[ ( capacity_ / 2 ) + size_ ] = el;
+            size_++;
+        }
+        construct_tree();
+    }
     
     void push_back ( T _value_ )
     {
@@ -779,14 +791,6 @@ public:
         for( _index_ /= 2; _index_ >= 1; _index_ /= 2 )
         {
             head_[ _index_ ] = parent_builder_( head_[ 2 * _index_ ], head_[ 2 * _index_ + 1 ] );
-        }
-    }
-    
-    void print ()
-    {
-        for( auto i = 0; i < capacity_; i++ )
-        {
-            std::cout << head_[ i ].x << " " << head_[ i ].y << std::endl;
         }
     }
     
