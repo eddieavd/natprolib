@@ -1,2 +1,5 @@
+/build
 *.xcodeproj
+*.sh
+*.in
 .DS_Store

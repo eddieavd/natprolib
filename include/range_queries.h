@@ -643,8 +643,10 @@ public:
     inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
     inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
     
-    segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default( MIN_CAPACITY ); }
-    segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default(   _capacity_ ); }
+//    segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default( MIN_CAPACITY ); }
+//    segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default(   _capacity_ ); }
+    segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc( MIN_CAPACITY ); }
+    segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc(   _capacity_ ); }
     segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
     {
         alloc( _capacity_ );

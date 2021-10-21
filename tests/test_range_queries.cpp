@@ -453,8 +453,6 @@ void segment_push_back ()
         
         bool operator< ( some_data const & rhs ) const { return ( x + y ) <  ( rhs.x + rhs.y ); }
         bool operator==( some_data const & rhs ) const { return ( x + y ) == ( rhs.x + rhs.y ); }
-        
-        ~some_data() {};
     };
     
     segment_tree< some_data > segtree( 4, []( some_data const & lhs, some_data const & rhs ){ return lhs < rhs ? rhs : lhs; } );
