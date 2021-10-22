@@ -1,5 +1,5 @@
 /build
-*.xcodeproj
+/.cache
 *.sh
 *.in
 .DS_Store

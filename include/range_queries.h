@@ -158,7 +158,7 @@ public:
     {
         alloc();
         
-        for( auto i = 0; i < _capacity_; i++ )
+        for( std::size_t i = 0; i < _capacity_; i++ )
         {
             push_back( ( *_head_ )[ i ] );
         }
@@ -430,7 +430,7 @@ public:
     {
         alloc( _capacity_ );
         
-        for( int i = 0; i < _capacity_; i++ )
+        for( std::size_t i = 0; i < _capacity_; i++ )
         {
             update( ( *_head_ )[ i ], size_++ );
         }
@@ -605,7 +605,7 @@ private:
         capacity_ = 2 * round_up_to_pow_2( _capacity_ );
         head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
         
-        for( auto i = 0; i < capacity_; i++ )
+        for( std::size_t i = 0; i < capacity_; i++ )
         {
             head_[ i ] = T();
         }
@@ -644,15 +644,15 @@ public:
     inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
     inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
     
-//    segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default( MIN_CAPACITY ); }
-//    segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default(   _capacity_ ); }
+    // segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default( MIN_CAPACITY ); }
+    // segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default(   _capacity_ ); }
     segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc( MIN_CAPACITY ); }
     segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc(   _capacity_ ); }
     segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
     {
         alloc( _capacity_ );
         
-        for( auto i = 0; i < _capacity_; i++ )
+        for( std::size_t i = 0; i < _capacity_; i++ )
         {
             head_[ ( capacity_ / 2 ) + i ] = ( *_head_ )[ i ];
             size_++;
@@ -665,10 +665,9 @@ public:
     {
         alloc( std::distance( begin, end ) );
         
-        for( auto i = 0; begin != end; i++ )
+        for( ; begin != end; begin++ )
         {
-            head_[ ( capacity_ / 2 ) + i ] = *begin;
-            begin++;
+            head_[ ( capacity_ / 2 ) + size_ ] = *begin;
             size_++;
         }
         construct_tree();
@@ -696,7 +695,7 @@ public:
             og_size_ = size_ + 1;
         }
         
-        head_[ capacity_ / 2 + size_ ] = _value_;
+        head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
         size_++;
         construct_tree();
     }

@@ -329,29 +329,29 @@ TEST( SegmentPushBack, BasicAssertions )
 }
 TEST( SegmentEmplaceBack, BasicAssertions )
 {
-	struct some_data
+	struct other_data
 	{
 		int x;
 		int y;
 		std::string hash;
 
-		some_data (				   ) : x{ 0 }, y{ 0 }, hash{ "0" } {}
-		some_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } { hash = std::to_string( x_ + y_ ); }
+		other_data (				   ) : x{ 0 }, y{ 0 }, hash{ "0" } {}
+		other_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } { hash = std::to_string( x_ + y_ ); }
 
-		some_data ( some_data const & other )
+		other_data ( other_data const & other )
 		{
 			x = other.x;
 			y = other.y;
 			hash = other.hash;
 		}
-		some_data ( some_data && other )
+		other_data ( other_data && other )
 		{
 			x = other.x;
 			y = other.y;
 			hash = std::move( other.hash );
 		}
 
-		some_data & operator= ( some_data const & other )
+		other_data & operator= ( other_data const & other )
 		{
 			x = other.x;
 			y = other.y;
@@ -359,11 +359,51 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 
 			return *this;
 		}
-		some_data & operator= ( some_data && other ) noexcept
+		other_data & operator= ( other_data && other ) noexcept
 		{
 			x = other.x;
 			y = other.y;
 			hash = std::move( other.hash );
+
+			return *this;
+		}
+
+		bool operator< ( other_data const & other ) const { return x <  other.x; }
+		bool operator> ( other_data const & other ) const { return x >  other.x; }
+		bool operator==( other_data const & other ) const { return x == other.x; }
+		bool operator==( int other ) const { return x == other; }
+	};
+
+	struct some_data
+	{
+		int x;
+		int y;
+
+		some_data (				   ) : x{ 0 }, y{ 0 } {}
+		some_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } {}
+
+		some_data ( some_data const & other )
+		{
+			x = other.x;
+			y = other.y;
+		}
+		some_data ( some_data && other )
+		{
+			x = other.x;
+			y = other.y;
+		}
+
+		some_data & operator= ( some_data const & other )
+		{
+			x = other.x;
+			y = other.y;
+
+			return *this;
+		}
+		some_data & operator= ( some_data && other ) noexcept
+		{
+			x = other.x;
+			y = other.y;
 
 			return *this;
 		}
@@ -383,6 +423,20 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 	EXPECT_EQ( segtree.size(), 3 );
 	EXPECT_EQ( segtree.range( 0, 2 ), 3 );
 }
+// TEST( SegmentEmplaceVector, BasicAssertions )
+// {
+// 	std::vector< int > vec1( { 1, 2, 3 } );
+// 	std::vector< int > vec2( { 3, 4, 5 } );
+// 	std::vector< int > vec3( { 6, 7, 8 } );
+
+// 	segment_tree< std::vector< int > > segtree( 3, []( std::vector< int > const & lhs, std::vector< int > const & rhs ) -> std::vector< int > const & { return lhs[ 0 ] > rhs[ 0 ] ? lhs : rhs; } );
+
+// 	segtree.emplace_back( vec1 );
+// 	segtree.emplace_back( vec2 );
+// 	segtree.emplace_back( vec3 );
+
+// 	EXPECT_EQ( segtree.range( 0, 2 ), vec3 );
+// }
 TEST( SegmentUpdate, BasicAssertions )
 {
 	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );

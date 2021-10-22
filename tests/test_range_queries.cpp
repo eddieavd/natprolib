@@ -290,7 +290,7 @@ void fenwick_emplace_back ()
     ftree.emplace_back( 1 );
     
     assert( ftree.size() == 6 );
-    assert( ftree.range( 0, 6 ) == 6 );
+    assert( ftree.range( 0, 5 ) == 6 );
 }
 
 void fenwick_push_array ()
@@ -471,6 +471,16 @@ void segment_push_back ()
     some_data tmp( 4, 4 );
     assert( segtree.range( 0, 3 ) == tmp );
 }
+void segment_push_back_vector ()
+{
+    std::vector< int > vec1( { 1, 2, 3 } );
+    std::vector< int > vec2( { 4, 5, 6 } );
+    std::vector< int > vec3( { 7, 8, 9 } );
+
+    segment_tree< std::vector< int > > segtree( 3, []( std::vector< int > const & lhs, std::vector< int > const & rhs ){ return lhs.at( 0 ) > rhs.at( 0 ) ? lhs : rhs; } );
+
+    assert( segtree.range( 0, 2 ) == vec3 );
+}
 void segment_emplace_back ()
 {
     struct some_data
@@ -599,6 +609,9 @@ void test_segment ()
     
     segment_parent_builder();
     std::cout << "PASSED segment_parent_builder\n";
+
+    // segment_push_back_vector();
+    // std::cout << "PASSED segment_push_back_vector\n";
 }
 
 
