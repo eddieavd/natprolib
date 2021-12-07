@@ -10,6 +10,8 @@
 
 #include "../include/meta_range_queries.h"
 
+#define DEFAULT_CAPACITY 16
+
 
 namespace test_meta_range_queries
 {
