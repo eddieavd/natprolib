@@ -19,7 +19,7 @@ int main ()
 
 	std::cout << prefix.range( 0, 4 ) << std::endl;
 
-	
+
 
 
     return 0;

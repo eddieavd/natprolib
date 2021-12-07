@@ -1,5 +1,5 @@
 if( CTEST )
-	add_library( test_range_queries 	 test_range_queries.cpp 	 )
+	add_library( test_range_queries      test_range_queries.cpp      )
 	add_library( test_meta_range_queries test_meta_range_queries.cpp )
 
 elseif( GTEST )
@@ -14,11 +14,11 @@ elseif( GTEST )
 	enable_testing()
 
 	add_executable(
-		gtest_rq 
-		gtest_range_queries.cpp 
+		gtest_rq
+		gtest_range_queries.cpp
 	)
 	target_link_libraries(
-		gtest_rq 
+		gtest_rq
 		gtest_main
 	)
 

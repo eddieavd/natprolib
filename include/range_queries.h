@@ -20,14 +20,14 @@
 #   include <unistd.h>
 #endif
 
+#define DEFAULT_CAPACITY 16
+
 
 namespace natprolib
 {
 
 namespace range_queries
 {
-
-#define MIN_CAPACITY 16
 
 
 /**
@@ -152,9 +152,9 @@ public:
 	prefix_array ( prefix_array const &  ) = delete;
 	prefix_array ( prefix_array       && ) = delete;
 
-	prefix_array (                                           ) : capacity_ { MIN_CAPACITY } { alloc(); };
-	prefix_array (              std::size_t const _capacity_ ) : capacity_ {   _capacity_ } { alloc(); };
-	prefix_array ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {   _capacity_ }
+	prefix_array (                                           ) : capacity_ { DEFAULT_CAPACITY } { alloc(); };
+	prefix_array (              std::size_t const _capacity_ ) : capacity_ {       _capacity_ } { alloc(); };
+	prefix_array ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {       _capacity_ }
 	{
 		alloc();
 
@@ -174,7 +174,7 @@ public:
 		}
 	}
 	template< class Iterator >
-	prefix_array ( Iterator const & begin, Iterator const & end ) : capacity_ { MIN_CAPACITY }
+	prefix_array ( Iterator const & begin, Iterator const & end ) : capacity_ { DEFAULT_CAPACITY }
 	{
 		alloc();
 
@@ -340,7 +340,7 @@ private:
 	std::size_t   size_           { 0 };
 	std::size_t   capacity_       { 0 };
 
-	void alloc  (                        ) { head_ = ( T* ) std::calloc( MIN_CAPACITY, sizeof( T ) ); if( !head_ ) throw std::bad_alloc(); }
+	void alloc  (                        ) { head_ = ( T* ) std::calloc( DEFAULT_CAPACITY, sizeof( T ) ); if( !head_ ) throw std::bad_alloc(); }
 	void alloc  ( std::size_t _capacity_ )
 	{
 		if( _capacity_ > max_size() )
@@ -424,9 +424,9 @@ public:
 
 	inline T const & operator[] ( std::size_t const _index_ ) const { return head_[ _index_ ]; }
 
-	fenwick_tree (                                           ) : capacity_ { MIN_CAPACITY } { alloc(            ); }
-	fenwick_tree (              std::size_t const _capacity_ ) : capacity_ {   _capacity_ } { alloc( _capacity_ ); }
-	fenwick_tree ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {   _capacity_ }
+	fenwick_tree (                                           ) : capacity_ { DEFAULT_CAPACITY } { alloc(            ); }
+	fenwick_tree (              std::size_t const _capacity_ ) : capacity_ {       _capacity_ } { alloc( _capacity_ ); }
+	fenwick_tree ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {       _capacity_ }
 	{
 		alloc( _capacity_ );
 
@@ -646,10 +646,8 @@ public:
 	inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
 	inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
 
-	// segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default( MIN_CAPACITY ); }
-	// segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc_default(   _capacity_ ); }
-	segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc( MIN_CAPACITY ); }
-	segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc(   _capacity_ ); }
+	segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
+	segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
 	segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( _capacity_ );
