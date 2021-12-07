@@ -168,19 +168,19 @@ public:
 	{
 		alloc();
 
-		for( auto it = _list_.begin(); it != _list_.end(); it++ )
+		for( T const & it : _list_ )
 		{
-			push_back( *it );
+			push_back( it );
 		}
 	}
 	template< class Iterator >
-	prefix_array ( Iterator const & begin, Iterator const & end ) : capacity_ { DEFAULT_CAPACITY }
+	prefix_array ( Iterator begin, Iterator const & end ) : capacity_ { DEFAULT_CAPACITY }
 	{
 		alloc();
 
-		for( auto it = begin; it != end; it++ )
+		for( ; begin != end; begin++ )
 		{
-			push_back( *it );
+			push_back( *begin );
 		}
 	}
 
@@ -191,7 +191,7 @@ public:
 	 *  @brief returns sum on range ( 0 ... _index_ )
 	 *  @param _index_ - index of last element in range
 	 */
-	inline T const & at ( std::size_t const _index_ ) const
+	T const & at ( std::size_t const _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
@@ -204,11 +204,11 @@ public:
 	}
 
 	/**
-	 *  @brief returns sum of passed range
+	 *  @brief returns sum on range ( _x_ ... _y_ )
 	 *  @param _x_ - index of first element in range
 	 *  @param _y_ - index of last element in range
 	 */
-	inline T range ( std::size_t const _x_, std::size_t const _y_ ) const
+	T range ( std::size_t const _x_, std::size_t const _y_ ) const
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
@@ -226,7 +226,7 @@ public:
 	 *  @brief returns original value of element
 	 *  @param _index_ - index of the element
 	 */
-	inline T element_at ( std::size_t const _index_ ) const
+	T element_at ( std::size_t const _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
@@ -440,7 +440,7 @@ public:
 	{
 		alloc( capacity_ );
 
-		for( auto t : _list_ )
+		for( T const & t : _list_ )
 		{
 			update( t, size_++ );
 		}
@@ -490,9 +490,7 @@ public:
 			throw std::out_of_range( "index out of bounds" );
 		}
 
-		T current = at( _index_ );
-
-		_index_++;
+		T current = at( _index_++ );
 
 		while( _index_ <= size_ )
 		{
@@ -712,7 +710,7 @@ public:
 			og_size_ = size_ + 1;
 		}
 
-		head_[ capacity_ / 2 + size_ ] = T ( args... );
+		head_[ capacity_ / 2 + size_ ] = std::move( T ( args... ) );
 		size_++;
 		construct_tree();
 	}

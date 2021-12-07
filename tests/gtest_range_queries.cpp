@@ -379,7 +379,7 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 		int x;
 		int y;
 
-		some_data (				   ) : x{ 0 }, y{ 0 } {}
+		some_data (                ) : x{ 0  }, y{ 0  } {}
 		some_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } {}
 
 		some_data ( some_data const & other )
@@ -414,7 +414,12 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 		bool operator==( int other ) const { return x == other; }
 	};
 
-	segment_tree< some_data > segtree( 5, []( some_data const & lhs, some_data const & rhs ){ return lhs > rhs ? lhs : rhs; } );
+	segment_tree< some_data > segtree( 5,
+			[]( some_data const & lhs, some_data const & rhs )
+			{
+				return lhs > rhs ? lhs : rhs;
+			}
+	);
 
 	segtree.emplace_back( 1, 1 );
 	segtree.emplace_back( 2, 2 );
@@ -423,20 +428,25 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 	EXPECT_EQ( segtree.size(), 3 );
 	EXPECT_EQ( segtree.range( 0, 2 ), 3 );
 }
-// TEST( SegmentEmplaceVector, BasicAssertions )
-// {
-// 	std::vector< int > vec1( { 1, 2, 3 } );
-// 	std::vector< int > vec2( { 3, 4, 5 } );
-// 	std::vector< int > vec3( { 6, 7, 8 } );
+TEST( SegmentEmplaceVector, BasicAssertions )  //  not really emplacing vectors yet, just pointers; i'm working on it i promise
+{
+	std::vector< int > vec1( {  1,  2,  3 } );
+ 	std::vector< int > vec2( {  4,  5,  6 } );
+ 	std::vector< int > vec3( {  7,  8,  9 } );
+	std::vector< int > vec4( { 10, 11, 12 } );
 
-// 	segment_tree< std::vector< int > > segtree( 3, []( std::vector< int > const & lhs, std::vector< int > const & rhs ) -> std::vector< int > const & { return lhs[ 0 ] > rhs[ 0 ] ? lhs : rhs; } );
+	std::vector< std::vector< int > * > vecptr( { &vec1, &vec2, &vec3, &vec4 } );
 
-// 	segtree.emplace_back( vec1 );
-// 	segtree.emplace_back( vec2 );
-// 	segtree.emplace_back( vec3 );
+ 	segment_tree< std::vector< int > * > segtree( vecptr.begin(), vecptr.end(),
+			[]( std::vector< int > * lhs, std::vector< int > * rhs )
+		  	->  std::vector< int > *
+			{
+				return ( *lhs )[ 0 ] > ( *rhs )[ 0 ] ? lhs : rhs;
+			}
+	);
 
-// 	EXPECT_EQ( segtree.range( 0, 2 ), vec3 );
-// }
+ 	EXPECT_EQ( segtree.range( 0, 3 ), &vec4 );
+}
 TEST( SegmentUpdate, BasicAssertions )
 {
 	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
@@ -460,80 +470,49 @@ TEST( SegmentParentBuilder, BasicAssertions )
 	};
 
 	std::vector< node > array
-    {
-        { 1, 0 },
-        { 3, 0 },
-        { 2, 0 },
-        { 4, 0 },
-        { 2, 0 },
-        { 3, 0 },
-        { 3, 0 },
-        { 2, 0 }
-    };
+	{
+		{ 1, 0 },
+		{ 3, 0 },
+		{ 2, 0 },
+		{ 4, 0 },
+		{ 2, 0 },
+		{ 3, 0 },
+		{ 3, 0 },
+		{ 2, 0 }
+	};
 
-    segment_tree< node > segtree( array.begin(), array.end(),
-        [] ( node const & l_child, node const & r_child ) -> node
-        {
-            if( l_child.max == r_child.max )
-            {
-                return { l_child.max, 0 };
-            }
-            else
-            {
-                int a, b, c, d;
-                a = l_child.max;
-                b = a - l_child.diff;
-                c = r_child.max;
-                d = c - r_child.diff;
-                
-                std::set< int > set { a, b, c, d };
-                
-                auto it = set.rbegin();
-                int max = *it++;
-                int sec = *it;
-                
-                return { max, max - sec };
-            }
-        }
-    );
+	segment_tree< node > segtree( array.begin(), array.end(),
+			[] ( node const & l_child, node const & r_child ) -> node
+			{
+				if( l_child.max == r_child.max )
+				{
+					return { l_child.max, 0 };
+				}
+				else
+				{
+					int a, b, c, d;
+					a = l_child.max;
+					b = a - l_child.diff;
+					c = r_child.max;
+					d = c - r_child.diff;
 
-    node max { 4, 1 };
+					std::set< int > set { a, b, c, d };
 
-    EXPECT_EQ( segtree.range( 0, 7 ), max );
+					auto it = set.rbegin();
+					int max = *it++;
+					int sec = *it;
+
+					return { max, max - sec };
+				}
+			}
+	);
+
+	node max { 4, 1 };  //  max.max - max.diff == second largest element
+
+	EXPECT_EQ( segtree.range( 0, 7 ), max );
+
+	int second = 3;
+	node stree_max = segtree.range( 0, 7 );
+
+	EXPECT_EQ( second, stree_max.max - stree_max.diff );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
