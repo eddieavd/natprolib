@@ -7,20 +7,21 @@
 //
 
 #include <iostream>
-#include <vector>
-#include <set>
 
 #include "include/natprolib.h"
 
 
 int main ()
 {
-	natprolib::range_queries::prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
+	constexpr auto prefix = natprolib::meta_range_queries::make_prefix( { 1, 1, 1 } );
 
-	std::cout << prefix.range( 0, 4 ) << std::endl;
+	static_assert( prefix.range( 0, 2 ) == 3 );
+
+	constexpr auto ftree = natprolib::meta_range_queries::make_ftree( { 1, 1, 1 } );
+
+	static_assert( ftree.range( 0, 2 ) == 3 );
 
 
 
-
-    return 0;
+	return 0;
 }

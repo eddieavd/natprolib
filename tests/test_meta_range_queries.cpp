@@ -68,5 +68,34 @@ void prefix_iterator ()
 	static_assert( sum == 6 );
 }
 
+void ftree_make_ftree ()
+{
+	constexpr auto ftree_1 = make_ftree( { 1, 1, 1, 1, 1 } );
+
+	static_assert( ftree_1.size() == 5 );
+	static_assert( ftree_1.capacity() == DEFAULT_CAPACITY );
+
+	constexpr auto ftree_2 = make_ftree< int, 5 >( { 1, 1, 1, 1, 1 } );
+
+	static_assert( ftree_2.size() == 5 );
+	static_assert( ftree_2.capacity() == 5 );
+}
+void ftree_range ()
+{
+	constexpr auto ftree = make_ftree( { 1, 1, 1, 1, 1 } );
+
+	static_assert( ftree.range( 0, 4 ) == 5 );
+	static_assert( ftree.range( 1, 3 ) == 3 );
+	static_assert( ftree.range( 0, 0 ) == 1 );
+}
+void ftree_at ()
+{
+	constexpr auto ftree = make_ftree( { 1, 1, 1 } );
+
+	static_assert( ftree.at( 0 ) == 1 );
+	static_assert( ftree.at( 1 ) == 1 );
+	static_assert( ftree.at( 2 ) == 1 );
+}
+
 
 } // namespace test_meta_range_queries

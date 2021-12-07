@@ -18,7 +18,7 @@ add_subdirectory( tests   )
 add_subdirectory( include )
 
 if( CTEST )
-	list( APPEND EXTRA_LIBS test_range_queries )
+	list( APPEND EXTRA_LIBS test_meta_range_queries )
 	list( APPEND EXTRA_INCLUDES "$(PROJECT_SOURCE_DIR)/tests" )
 elseif( MAIN )
 	list( APPEND EXTRA_LIBS natprolib )

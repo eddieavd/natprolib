@@ -22,4 +22,8 @@ void prefix_at ();
 void prefix_element_at ();
 void prefix_iterator ();
 
+void ftree_make_ftree ();
+void ftree_range ();
+void ftree_at ();
+
 } // namespace test_meta_range_queries
