@@ -10,6 +10,7 @@
     * [segment tree](#segment_tree)
 * [meta range queries](#meta_range_queries)
     * [meta prefix array](#meta_prefix_array)
+    * [meta fenwick tree](#meta_ftree)
 
 ## <a name = "range_queries"></a> range queries<br/>
 
@@ -120,4 +121,8 @@ main:
         mov     eax, 0
         pop     rbp
         ret
-```
+```    
+
+#### <a name = "meta_ftree"></a> meta fenwick tree <br/>
+
+Still a major work in progress (as is everything else here lol), currently only allows queries, no updates to the underlying data. In other words, you get all the drawbacks but none of the benefits compared to using a prefix array (refer to [fenwick tree](#fenwick_tree) for more details).
