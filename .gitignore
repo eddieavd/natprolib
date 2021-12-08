@@ -1,5 +1,9 @@
 /build
+/cmake-build-debug
+/gtest-build
 /.cache
 *.sh
 *.in
 .DS_Store
+.vimspector.json
+compile_commands.json

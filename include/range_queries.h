@@ -118,7 +118,7 @@ private:
 		status.dwLength = sizeof( status );
 		GlobalMemoryStatusEx( &status );
 
-		return status.ullTotalPhys;
+		return status.ullAvailPhys;
 	}
 #else
 	inline std::size_t max_size () const noexcept
@@ -386,7 +386,7 @@ private:
 		status.dwLength = sizeof( status );
 		GlobalMemoryStatusEx( &status );
 
-		return status.ullTotalPhys;
+		return status.ullAvailPhys;
 	}
 #else
 	std::size_t max_size () const
