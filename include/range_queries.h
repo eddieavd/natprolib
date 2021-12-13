@@ -588,7 +588,7 @@ private:
 	std::size_t   og_size_;
 	std::size_t   capacity_;
 
-	std::function< T ( T, T ) > parent_builder_;
+	T ( *parent_builder_ )( T const &, T const & );
 
 	void alloc ( std::size_t const _capacity_ )
 	{
@@ -644,9 +644,9 @@ public:
 	inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
 	inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
 
-	segment_tree (                                      std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
-	segment_tree (              std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
-	segment_tree ( T ** _head_, std::size_t _capacity_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
+	segment_tree (                                      T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
+	segment_tree (              std::size_t _capacity_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
+	segment_tree ( T ** _head_, std::size_t _capacity_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
 	{
 		alloc( _capacity_ );
 
@@ -659,7 +659,7 @@ public:
 		construct_tree();
 	}
 	template< class Iterator >
-	segment_tree ( Iterator begin, Iterator const & end, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
+	segment_tree ( Iterator begin, Iterator const & end, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
 	{
 		alloc( std::distance( begin, end ) );
 
@@ -670,7 +670,7 @@ public:
 		}
 		construct_tree();
 	}
-	segment_tree ( std::initializer_list< T > const & _list_, std::function< T ( T, T ) > _pb_ ) : parent_builder_ { _pb_ }
+	segment_tree ( std::initializer_list< T > const & _list_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
 	{
 		alloc( _list_.size() );
 
@@ -792,7 +792,7 @@ public:
 		}
 	}
 
-	void set_parent_builder ( std::function< T ( T, T ) > _pb_ ) { parent_builder_ = _pb_; construct_tree(); }
+	void set_parent_builder ( T ( *_pb_ )( T const &, T const & ) ) { parent_builder_ = _pb_; construct_tree(); }
 
 	~segment_tree () { free( head_ ); }
 };

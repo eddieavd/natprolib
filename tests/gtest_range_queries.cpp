@@ -260,23 +260,22 @@ TEST( FenwickReserve, BasicAssertions )
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-// TEST( SegmentDefaultConstruct, BasicAssertions )
-// {
-// 	segment_tree< int > segtree;
 
-// 	EXPECT_EQ( segtree.size(), 0 );
-// 	EXPECT_EQ( segtree.capacity(), DEFAULT_CAPACITY );
-// }
+int ( *comp1 )( int const &, int const & ) = &compare1;
+int ( *comp2 )( int const &, int const & ) = &compare2;
+
+std::vector< int > * ( *comp_vec_ptr )( std::vector< int > * const & lhs, std::vector< int > * const & rhs ) = &compare_vec_ptr;
+
 TEST( SegmentParentBuilderConstruct, BasicAssertions )
 {
-	segment_tree< int > segtree( []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( comp1 );
 
 	EXPECT_EQ( segtree.size(), 0 );
 	EXPECT_EQ( segtree.capacity(), DEFAULT_CAPACITY );
 }
 TEST( SegmentReserveConstruct, BasicAssertions )
 {
-	segment_tree< int > segtree( CUSTOM_CAPACITY, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( CUSTOM_CAPACITY, comp1 );
 
 	EXPECT_EQ( segtree.size(), 0 );
 	EXPECT_EQ( segtree.capacity(), CUSTOM_CAPACITY );
@@ -286,7 +285,7 @@ TEST( SegmentPointerConstruct, BasicAssertions )
 	int array[] = { 1, 1, 1, 1, 1 };
 	int * ptr = array;
 
-	segment_tree< int > segtree( &ptr, 5, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( &ptr, 5, comp1 );
 
 	EXPECT_EQ( segtree.size(), 5 );
 	EXPECT_EQ( segtree.capacity(), 5 );
@@ -295,29 +294,29 @@ TEST( SegmentIteratorConstruct, BasicAssertions )
 {
 	std::vector< int > vec( { 1, 1, 1, 1, 1 } );
 
-	segment_tree< int > segtree( vec.begin(), vec.end(), []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( vec.begin(), vec.end(), comp1 );
 
 	EXPECT_EQ( segtree.size(), 5 );
 }
 TEST( SegmentInitListConstruct, BasicAssertions )
 {
-	segment_tree< int > segtree( { 1, 1, 1, 1, 1 }, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( { 1, 1, 1, 1, 1 }, comp1 );
 
 	EXPECT_EQ( segtree.size(), 5 );
 }
 TEST( SegmentRange, BasicAssertions )
 {
-	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, comp1 );
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 1 );
 
-	segtree.set_parent_builder( []( int lhs, int rhs ){ return lhs > rhs ? lhs : rhs; } );
+	segtree.set_parent_builder( comp2 );
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 5 );
 }
 TEST( SegmentPushBack, BasicAssertions )
 {
-	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, []( int lhs, int rhs ){ return lhs > rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, comp2 );
 
 	EXPECT_EQ( segtree.size(), 5 );
 	EXPECT_EQ( segtree.range( 0, 4 ), 5 );
@@ -329,51 +328,6 @@ TEST( SegmentPushBack, BasicAssertions )
 }
 TEST( SegmentEmplaceBack, BasicAssertions )
 {
-	struct other_data
-	{
-		int x;
-		int y;
-		std::string hash;
-
-		other_data (				   ) : x{ 0 }, y{ 0 }, hash{ "0" } {}
-		other_data ( int x_, int y_ ) : x{ x_ }, y{ y_ } { hash = std::to_string( x_ + y_ ); }
-
-		other_data ( other_data const & other )
-		{
-			x = other.x;
-			y = other.y;
-			hash = other.hash;
-		}
-		other_data ( other_data && other )
-		{
-			x = other.x;
-			y = other.y;
-			hash = std::move( other.hash );
-		}
-
-		other_data & operator= ( other_data const & other )
-		{
-			x = other.x;
-			y = other.y;
-			hash = other.hash;
-
-			return *this;
-		}
-		other_data & operator= ( other_data && other ) noexcept
-		{
-			x = other.x;
-			y = other.y;
-			hash = std::move( other.hash );
-
-			return *this;
-		}
-
-		bool operator< ( other_data const & other ) const { return x <  other.x; }
-		bool operator> ( other_data const & other ) const { return x >  other.x; }
-		bool operator==( other_data const & other ) const { return x == other.x; }
-		bool operator==( int other ) const { return x == other; }
-	};
-
 	struct some_data
 	{
 		int x;
@@ -412,14 +366,14 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 		bool operator> ( some_data const & other ) const { return x >  other.x; }
 		bool operator==( some_data const & other ) const { return x == other.x; }
 		bool operator==( int other ) const { return x == other; }
+
+		static some_data compare ( some_data const & lhs, some_data const & rhs )
+		{
+			return lhs > rhs ? lhs : rhs;
+		}
 	};
 
-	segment_tree< some_data > segtree( 5,
-			[]( some_data const & lhs, some_data const & rhs )
-			{
-				return lhs > rhs ? lhs : rhs;
-			}
-	);
+	segment_tree< some_data > segtree( 5, &some_data::compare );
 
 	segtree.emplace_back( 1, 1 );
 	segtree.emplace_back( 2, 2 );
@@ -437,19 +391,13 @@ TEST( SegmentEmplaceVector, BasicAssertions )  //  not really emplacing vectors 
 
 	std::vector< std::vector< int > * > vecptr( { &vec1, &vec2, &vec3, &vec4 } );
 
- 	segment_tree< std::vector< int > * > segtree( vecptr.begin(), vecptr.end(),
-			[]( std::vector< int > * lhs, std::vector< int > * rhs )
-		  	->  std::vector< int > *
-			{
-				return ( *lhs )[ 0 ] > ( *rhs )[ 0 ] ? lhs : rhs;
-			}
-	);
+ 	segment_tree< std::vector< int > * > segtree( vecptr.begin(), vecptr.end(), comp_vec_ptr );
 
  	EXPECT_EQ( segtree.range( 0, 3 ), &vec4 );
 }
 TEST( SegmentUpdate, BasicAssertions )
 {
-	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, []( int lhs, int rhs ){ return lhs < rhs ? lhs : rhs; } );
+	segment_tree< int > segtree( { 1, 2, 3, 4, 5 }, comp1 );
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 1 );
 
@@ -467,6 +415,30 @@ TEST( SegmentParentBuilder, BasicAssertions )
 		bool operator< ( node const & rhs ) const { return max < rhs.max; }
 		bool operator> ( node const & rhs ) const { return max > rhs.max; }
 		bool operator==( node const & rhs ) const { return max == rhs.max && diff == rhs.diff; }
+
+		static node compare_node ( node const & l_child, node const & r_child )
+		{
+			if( l_child.max == r_child.max )
+			{
+				return { l_child.max, 0 };
+			}
+			else
+			{
+				int a, b, c, d;
+				a = l_child.max;
+				b = a - l_child.diff;
+				c = r_child.max;
+				d = c - r_child.diff;
+
+				std::set< int > set { a, b, c, d };
+
+				auto it = set.rbegin();
+				int max = *it++;
+				int sec = *it;
+
+				return { max, max - sec };
+			}
+		}
 	};
 
 	std::vector< node > array
@@ -481,31 +453,7 @@ TEST( SegmentParentBuilder, BasicAssertions )
 		{ 2, 0 }
 	};
 
-	segment_tree< node > segtree( array.begin(), array.end(),
-			[] ( node const & l_child, node const & r_child ) -> node
-			{
-				if( l_child.max == r_child.max )
-				{
-					return { l_child.max, 0 };
-				}
-				else
-				{
-					int a, b, c, d;
-					a = l_child.max;
-					b = a - l_child.diff;
-					c = r_child.max;
-					d = c - r_child.diff;
-
-					std::set< int > set { a, b, c, d };
-
-					auto it = set.rbegin();
-					int max = *it++;
-					int sec = *it;
-
-					return { max, max - sec };
-				}
-			}
-	);
+	segment_tree< node > segtree( array.begin(), array.end(), &node::compare_node );
 
 	node max { 4, 1 };  //  max.max - max.diff == second largest element
 
@@ -515,4 +463,19 @@ TEST( SegmentParentBuilder, BasicAssertions )
 	node stree_max = segtree.range( 0, 7 );
 
 	EXPECT_EQ( second, stree_max.max - stree_max.diff );
+}
+
+int compare1 ( int const & lhs, int const & rhs )
+{
+	return lhs < rhs ? lhs : rhs;
+}
+
+int compare2 ( int const & lhs, int const & rhs )
+{
+	return lhs > rhs ? lhs : rhs;
+}
+
+std::vector< int > * compare_vec_ptr ( std::vector< int > * const & lhs, std::vector< int > * const & rhs )
+{
+	return ( *lhs )[ 0 ] > ( *rhs )[ 0 ] ? lhs : rhs;
 }

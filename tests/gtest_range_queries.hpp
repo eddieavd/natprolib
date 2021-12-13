@@ -12,3 +12,8 @@
 #include <gtest/gtest.h>
 
 #include "../include/range_queries.h"
+
+int compare1 ( int const &, int const & );
+int compare2 ( int const &, int const & );
+
+std::vector< int >* compare_vec_ptr ( std::vector< int > * const & lhs, std::vector< int > * const & rhs );
