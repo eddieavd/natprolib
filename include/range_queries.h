@@ -197,10 +197,8 @@ public:
 		{
 			throw std::out_of_range( "index out of bounds" );
 		}
-		else
-		{
-			return operator[]( _index_ );
-		}
+
+		return operator[]( _index_ );
 	}
 
 	/**
@@ -214,12 +212,10 @@ public:
 		{
 			throw std::out_of_range( "index out of bounds" );
 		}
-		else
-		{
-			return _x_ == 0 ?
-				operator[]( _y_ ) :
-				operator[]( _y_ ) - operator[]( _x_ - 1 );
-		}
+
+		return _x_ == 0 ?
+			operator[]( _y_ ) :
+			operator[]( _y_ ) - operator[]( _x_ - 1 );
 	}
 
 	/**
@@ -232,11 +228,25 @@ public:
 		{
 			throw std::out_of_range( "index out of bounds" );
 		}
-		else
+
+		return _index_ == 0 ?
+			operator[]( _index_ ) :
+			operator[]( _index_ ) - operator[]( _index_ - 1 );
+	}
+
+	void update ( std::size_t const _index_, std::size_t const _value_ )
+	{
+		if( !is_index_in_range( _index_ ) )
 		{
-			return _index_ == 0 ?
-				operator[]( _index_ ) :
-				operator[]( _index_ ) - operator[]( _index_ - 1 );
+			throw std::out_of_range( "index out of bounds" );
+		}
+
+		T current = element_at( _index_ );
+		T diff    = _value_ - current;
+
+		for( std::size_t i = _index_; i < size_; i++ )
+		{
+			head_[ i ] += diff;
 		}
 	}
 
