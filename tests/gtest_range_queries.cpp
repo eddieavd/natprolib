@@ -9,7 +9,7 @@
 #include "gtest_range_queries.hpp"
 
 #define DEFAULT_CAPACITY 16
-#define CUSTOM_CAPACITY 5
+#define CUSTOM_CAPACITY 8
 
 using namespace natprolib::range_queries;
 
@@ -288,7 +288,7 @@ TEST( SegmentPointerConstruct, BasicAssertions )
 	segment_tree< int > segtree( &ptr, 5, comp1 );
 
 	EXPECT_EQ( segtree.size(), 5 );
-	EXPECT_EQ( segtree.capacity(), 5 );
+	EXPECT_EQ( segtree.capacity(), 8 );  //  original array gets extended to closest power of two
 }
 TEST( SegmentIteratorConstruct, BasicAssertions )
 {

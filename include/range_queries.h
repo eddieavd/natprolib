@@ -593,32 +593,16 @@ class segment_tree
 	using const_iterator = segment_tree_iterator< T,  true >;
 
 private:
-	T           * head_;
-	std::size_t   size_;
-	std::size_t   og_size_;
-	std::size_t   capacity_;
+	T           * head_    { nullptr };
+	std::size_t   size_    {       0 };
+	std::size_t   capacity_{       0 };
 
 	T ( *parent_builder_ )( T const &, T const & );
 
 	void alloc ( std::size_t const _capacity_ )
 	{
-		og_size_  = _capacity_;
-		size_     = 0;
 		capacity_ = 2 * round_up_to_pow_2( _capacity_ );
 		head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
-	}
-
-	void alloc_default ( std::size_t const _capacity_ )
-	{
-		og_size_  = _capacity_;
-		size_     = 0;
-		capacity_ = 2 * round_up_to_pow_2( _capacity_ );
-		head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
-
-		for( std::size_t i = 0; i < capacity_; i++ )
-		{
-			head_[ i ] = T();
-		}
 	}
 
 	std::size_t round_up_to_pow_2 ( std::size_t const _size_ ) const noexcept
@@ -644,10 +628,10 @@ private:
 	bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
 
 public:
-	auto begin ()       { return       iterator{ head_ + size_            }; }
-	auto   end ()       { return       iterator{ head_ + size_ + og_size_ }; }
-	auto begin () const { return const_iterator{ head_ + size_            }; }
-	auto   end () const { return const_iterator{ head_ + size_ + og_size_ }; }
+	auto begin ()       { return       iterator{ head_ +     size_ }; }
+	auto   end ()       { return       iterator{ head_ + capacity_ }; }
+	auto begin () const { return const_iterator{ head_ +     size_ }; }
+	auto   end () const { return const_iterator{ head_ + capacity_ }; }
 
 	inline T const & operator[] ( std::size_t const _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
 
@@ -698,10 +682,6 @@ public:
 		{
 			return;
 		}
-		if( size_ >= og_size_ )
-		{
-			og_size_ = size_ + 1;
-		}
 
 		head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
 		size_++;
@@ -715,18 +695,14 @@ public:
 		{
 			return;
 		}
-		if( size_ >= og_size_ )
-		{
-			og_size_ = size_ + 1;
-		}
 
 		head_[ capacity_ / 2 + size_ ] = std::move( T ( args... ) );
 		size_++;
 		construct_tree();
 	}
 
-	inline std::size_t     size () const noexcept { return    size_; }
-	inline std::size_t capacity () const noexcept { return og_size_; }
+	inline std::size_t     size () const noexcept { return         size_; }
+	inline std::size_t capacity () const noexcept { return capacity_ / 2; }
 
 	inline T const & at ( std::size_t const _index_ ) const
 	{
@@ -734,10 +710,8 @@ public:
 		{
 			throw std::out_of_range( "index out of bounds" );
 		}
-		else
-		{
-			return operator[]( _index_ );
-		}
+
+		return operator[]( _index_ );
 	}
 
 	inline T range ( std::size_t _x_, std::size_t _y_ ) const
