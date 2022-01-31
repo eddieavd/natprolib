@@ -605,6 +605,53 @@ private:
 		head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
 	}
 
+	void resize ()
+	{
+		auto new_cap = capacity_ * 2;
+		auto tmp = ( T* ) std::malloc( sizeof( T ) * new_cap );
+
+		if( tmp )
+		{
+			for( std::size_t i = 0; i < size_; i++ )
+			{
+				tmp[ new_cap / 2 + i ] = head_[ capacity_ / 2 + i ];
+			}
+
+			free( head_ );
+
+			head_     = tmp;
+			capacity_ = new_cap;
+
+			construct_tree();
+		}
+	}
+
+	void resize ( std::size_t _capacity_ )
+	{
+		if( _capacity_ > max_size() )
+		{
+			throw std::out_of_range( "capacity > max_size" );
+		}
+
+		_capacity_ = 2 * round_up_to_pow_2( _capacity_ );
+		auto tmp = ( T* ) std::malloc( sizeof( T ) * _capacity_ );
+
+		if( tmp )
+		{
+			for( std::size_t i = 0; i < size_; i++ )
+			{
+				tmp[ _capacity_ / 2 + i ] = head_[ capacity_ / 2 + i ];
+			}
+
+			free( head_ );
+
+			head_     = tmp;
+			capacity_ = _capacity_;
+
+			construct_tree();
+		}
+	}
+
 	std::size_t round_up_to_pow_2 ( std::size_t const _size_ ) const noexcept
 	{
 		auto log2 = std::log2( _size_ );
@@ -626,6 +673,25 @@ private:
 	}
 
 	bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
+
+#ifdef _WIN32
+	inline std::size_t max_size () const noexcept
+	{
+		MEMORYSTATUSEX status;
+		status.dwLength = sizeof( status );
+		GlobalMemoryStatusEx( &status );
+
+		return status.ullAvailPhys;
+	}
+#else
+	inline std::size_t max_size () const noexcept
+	{
+		auto pages     = sysconf( _SC_PHYS_PAGES );
+		auto page_size = sysconf( _SC_PAGE_SIZE  );
+
+		return pages * page_size;
+	}
+#endif
 
 public:
 	auto begin ()       { return       iterator{ head_ +     size_ }; }
@@ -680,7 +746,7 @@ public:
 	{
 		if( size_ >= capacity_ / 2 )
 		{
-			return;
+			resize();
 		}
 
 		head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
@@ -693,7 +759,7 @@ public:
 	{
 		if( size_ >= capacity_ / 2 )
 		{
-			return;
+			resize();
 		}
 
 		head_[ capacity_ / 2 + size_ ] = std::move( T ( args... ) );
