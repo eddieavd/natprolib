@@ -621,8 +621,6 @@ private:
 
 			head_     = tmp;
 			capacity_ = new_cap;
-
-			construct_tree();
 		}
 	}
 
@@ -647,8 +645,6 @@ private:
 
 			head_     = tmp;
 			capacity_ = _capacity_;
-
-			construct_tree();
 		}
 	}
 
@@ -742,31 +738,6 @@ public:
 		construct_tree();
 	}
 
-	void push_back ( T _value_ )
-	{
-		if( size_ >= capacity_ / 2 )
-		{
-			resize();
-		}
-
-		head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
-		size_++;
-		construct_tree();
-	}
-
-	template< class... Args >
-	void emplace_back ( Args&&... args )
-	{
-		if( size_ >= capacity_ / 2 )
-		{
-			resize();
-		}
-
-		head_[ capacity_ / 2 + size_ ] = std::move( T ( args... ) );
-		size_++;
-		construct_tree();
-	}
-
 	inline std::size_t     size () const noexcept { return         size_; }
 	inline std::size_t capacity () const noexcept { return capacity_ / 2; }
 
@@ -840,6 +811,33 @@ public:
 		{
 			head_[ _index_ ] = parent_builder_( head_[ 2 * _index_ ], head_[ 2 * _index_ + 1 ] );
 		}
+	}
+
+	void reserve ( std::size_t const _capacity_ ) { resize( _capacity_ ); construct_tree(); }
+
+	void push_back ( T _value_ )
+	{
+		if( size_ >= capacity_ / 2 )
+		{
+			resize();
+		}
+
+		head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
+		size_++;
+		construct_tree();
+	}
+
+	template< class... Args >
+	void emplace_back ( Args&&... args )
+	{
+		if( size_ >= capacity_ / 2 )
+		{
+			resize();
+		}
+
+		head_[ capacity_ / 2 + size_ ] = std::move( T ( args... ) );
+		size_++;
+		construct_tree();
 	}
 
 	void set_parent_builder ( T ( *_pb_ )( T const &, T const & ) ) { parent_builder_ = _pb_; construct_tree(); }
