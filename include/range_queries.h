@@ -13,6 +13,7 @@
 #include <functional>
 #include <type_traits>
 #include <stdexcept>
+#include <concepts>
 
 #ifdef _WIN32
 #   include <windows.h>
@@ -576,29 +577,36 @@ public:
 };
 
 
-template< typename T, typename = std::enable_if_t< std::is_default_constructible_v< T > > >
+template< typename F, typename T >
+concept ParentBuilder = requires( F test, T const & obj )
+{
+	{ test( obj, obj ) } -> std::same_as< T >;
+};
+
+template< typename T, ParentBuilder< T > PB,
+	  typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree;
 
-template< typename T, bool C,
+template< typename T, ParentBuilder< T > PB, bool C,
 	  typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree_iterator
 {
 	//  TODO: implement
 };
 
-template< typename T, typename U >
+template< typename T, ParentBuilder< T > PB, typename U >
 class segment_tree
 {
 	using     value_type = T;
-	using       iterator = segment_tree_iterator< T, false >;
-	using const_iterator = segment_tree_iterator< T,  true >;
+	using       iterator = segment_tree_iterator< T, PB, false >;
+	using const_iterator = segment_tree_iterator< T, PB,  true >;
 
 private:
 	T           * head_    { nullptr };
 	std::size_t   size_    {       0 };
 	std::size_t   capacity_{       0 };
 
-	T ( *parent_builder_ )( T const &, T const & );
+	PB parent_builder_;
 
 	void alloc ( std::size_t _capacity_ )
 	{
@@ -698,12 +706,12 @@ public:
 
 	inline T const & operator[] ( std::size_t _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
 
-	inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
-	inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
+	inline bool operator== ( segment_tree< T, PB > const & rhs ) const { return head_ == rhs.head_; }
+	inline bool operator!= ( segment_tree< T, PB > const & rhs ) const { return head_ != rhs.head_; }
 
-	segment_tree (                                      T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
-	segment_tree (              std::size_t _capacity_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
-	segment_tree ( T ** _head_, std::size_t _capacity_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
+	segment_tree (                                      ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
+	segment_tree (              std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
+	segment_tree ( T ** _head_, std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( _capacity_ );
 
@@ -716,7 +724,7 @@ public:
 		construct_tree();
 	}
 	template< class Iterator >
-	segment_tree ( Iterator begin, Iterator const & end, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
+	segment_tree ( Iterator begin, Iterator const & end, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( std::distance( begin, end ) );
 
@@ -727,7 +735,7 @@ public:
 		}
 		construct_tree();
 	}
-	segment_tree ( std::initializer_list< T > const & _list_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
+	segment_tree ( std::initializer_list< T > const & _list_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( _list_.size() );
 
@@ -847,8 +855,6 @@ public:
 		size_++;
 		construct_tree();
 	}
-
-	void set_parent_builder ( T ( *_pb_ )( T const &, T const & ) ) { parent_builder_ = _pb_; construct_tree(); }
 
 	~segment_tree () { free( head_ ); }
 };
