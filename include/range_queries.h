@@ -94,7 +94,7 @@ private:
 			capacity_ = new_cap;
 		}
 	}
-	void resize ( std::size_t const _capacity_ )
+	void resize ( std::size_t _capacity_ )
 	{
 		if( _capacity_ > max_size() )
 		{
@@ -109,7 +109,7 @@ private:
 		}
 	}
 
-	bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
+	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < size_; }
 
 #ifdef _WIN32
 	inline std::size_t max_size () const noexcept
@@ -140,7 +140,7 @@ public:
 	 *  @brief returns sum on range ( 0 ... _index_ )
 	 *  @param _index_ - index of last element in range
 	 */
-	inline T const & operator[] ( std::size_t const _index_ ) const noexcept
+	inline T const & operator[] ( std::size_t _index_ ) const noexcept
 	{ return head_[ _index_ ]; }
 
 	inline bool operator== ( prefix_array< T, U > const & rhs ) const noexcept
@@ -153,8 +153,8 @@ public:
 	prefix_array ( prefix_array       && ) = delete;
 
 	prefix_array (                                           ) : capacity_ { DEFAULT_CAPACITY } { alloc(); };
-	prefix_array (              std::size_t const _capacity_ ) : capacity_ {       _capacity_ } { alloc(); };
-	prefix_array ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {       _capacity_ }
+	prefix_array (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc(); };
+	prefix_array ( T ** _head_, std::size_t _capacity_ ) : capacity_ {       _capacity_ }
 	{
 		alloc();
 
@@ -191,11 +191,11 @@ public:
 	 *  @brief returns sum on range ( 0 ... _index_ )
 	 *  @param _index_ - index of last element in range
 	 */
-	T const & at ( std::size_t const _index_ ) const
+	T const & at ( std::size_t _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
 		}
 
 		return operator[]( _index_ );
@@ -206,11 +206,11 @@ public:
 	 *  @param _x_ - index of first element in range
 	 *  @param _y_ - index of last element in range
 	 */
-	T range ( std::size_t const _x_, std::size_t const _y_ ) const
+	T range ( std::size_t _x_, std::size_t _y_ ) const
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
 		}
 
 		return _x_ == 0 ?
@@ -222,11 +222,11 @@ public:
 	 *  @brief returns original value of element
 	 *  @param _index_ - index of the element
 	 */
-	T element_at ( std::size_t const _index_ ) const
+	T element_at ( std::size_t _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
 		}
 
 		return _index_ == 0 ?
@@ -234,11 +234,11 @@ public:
 			operator[]( _index_ ) - operator[]( _index_ - 1 );
 	}
 
-	void update ( std::size_t const _index_, std::size_t const _value_ )
+	void update ( T _value_, std::size_t _index_ )
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
 		}
 
 		T current = element_at( _index_ );
@@ -250,7 +250,7 @@ public:
 		}
 	}
 
-	void reserve ( std::size_t const _capacity_ ) { resize( _capacity_ ); }
+	void reserve ( std::size_t _capacity_ ) { resize( _capacity_ ); }
 
 	/**
 	 *  @brief inserts element at the end and adds previous sum
@@ -374,7 +374,7 @@ private:
 			capacity_ = new_cap;
 		}
 	}
-	void resize ( std::size_t const _capacity_ )
+	void resize ( std::size_t _capacity_ )
 	{
 		if( _capacity_ > max_size() )
 		{
@@ -408,9 +408,9 @@ private:
 	}
 #endif
 
-	inline std::size_t p ( std::size_t const k ) const noexcept { return k & -k; }
+	inline std::size_t p ( std::size_t k ) const noexcept { return k & -k; }
 
-	inline bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < capacity_; }
+	inline bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < capacity_; }
 
 	T sum_to_index ( std::size_t _index_ ) const
 	{
@@ -432,11 +432,11 @@ public:
 	auto begin () const { return const_iterator{ head_         }; }
 	auto   end () const { return const_iterator{ head_ + size_ }; }
 
-	inline T const & operator[] ( std::size_t const _index_ ) const { return head_[ _index_ ]; }
+	inline T const & operator[] ( std::size_t _index_ ) const { return head_[ _index_ ]; }
 
 	fenwick_tree (                                           ) : capacity_ { DEFAULT_CAPACITY } { alloc(            ); }
-	fenwick_tree (              std::size_t const _capacity_ ) : capacity_ {       _capacity_ } { alloc( _capacity_ ); }
-	fenwick_tree ( T ** _head_, std::size_t const _capacity_ ) : capacity_ {       _capacity_ }
+	fenwick_tree (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc( _capacity_ ); }
+	fenwick_tree ( T ** _head_, std::size_t _capacity_ ) : capacity_ {       _capacity_ }
 	{
 		alloc( _capacity_ );
 
@@ -469,11 +469,11 @@ public:
 	inline std::size_t     size () const noexcept { return     size_; }
 	inline std::size_t capacity () const noexcept { return capacity_; }
 
-	T at ( std::size_t const _index_ ) const
+	T at ( std::size_t _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
 		}
 
 		return _index_ == 0 ?
@@ -481,11 +481,11 @@ public:
 			sum_to_index( _index_ ) - sum_to_index( _index_ - 1 );
 	}
 
-	T range ( std::size_t const _x_, std::size_t const _y_ ) const
+	T range ( std::size_t _x_, std::size_t _y_ ) const
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
 		}
 
 		return _x_ == 0 ?
@@ -493,11 +493,11 @@ public:
 			sum_to_index( _y_ ) - sum_to_index( _x_ - 1 );
 	}
 
-	void update ( T const _value_, std::size_t _index_ )
+	void update ( T _value_, std::size_t _index_ )
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
 		}
 
 		T current = at( _index_++ );
@@ -509,11 +509,12 @@ public:
 		}
 	}
 
-	void add ( T const _value_, std::size_t _index_ )
+	void add ( T _value_, std::size_t _index_ )
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+
 		}
 
 		_index_++;
@@ -525,7 +526,7 @@ public:
 		}
 	}
 
-	void reserve ( std::size_t const _capacity_ ) { resize( _capacity_ ); }
+	void reserve ( std::size_t _capacity_ ) { resize( _capacity_ ); }
 
 	void push_back ( T _value_ )
 	{
@@ -599,7 +600,7 @@ private:
 
 	T ( *parent_builder_ )( T const &, T const & );
 
-	void alloc ( std::size_t const _capacity_ )
+	void alloc ( std::size_t _capacity_ )
 	{
 		capacity_ = 2 * round_up_to_pow_2( _capacity_ );
 		head_     = ( T* ) std::malloc( sizeof( T ) * capacity_ );
@@ -648,7 +649,7 @@ private:
 		}
 	}
 
-	std::size_t round_up_to_pow_2 ( std::size_t const _size_ ) const noexcept
+	std::size_t round_up_to_pow_2 ( std::size_t _size_ ) const noexcept
 	{
 		auto log2 = std::log2( _size_ );
 
@@ -668,7 +669,7 @@ private:
 		}
 	}
 
-	bool is_index_in_range ( std::size_t const _index_ ) const noexcept { return _index_ < size_; }
+	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < capacity_ / 2; }
 
 #ifdef _WIN32
 	inline std::size_t max_size () const noexcept
@@ -695,7 +696,7 @@ public:
 	auto begin () const { return const_iterator{ head_ +     size_ }; }
 	auto   end () const { return const_iterator{ head_ + capacity_ }; }
 
-	inline T const & operator[] ( std::size_t const _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
+	inline T const & operator[] ( std::size_t _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
 
 	inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
 	inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
@@ -730,7 +731,7 @@ public:
 	{
 		alloc( _list_.size() );
 
-		for( auto el : _list_ )
+		for( auto const & el : _list_ )
 		{
 			head_[ ( capacity_ / 2 ) + size_ ] = el;
 			size_++;
@@ -741,11 +742,12 @@ public:
 	inline std::size_t     size () const noexcept { return         size_; }
 	inline std::size_t capacity () const noexcept { return capacity_ / 2; }
 
-	inline T const & at ( std::size_t const _index_ ) const
+	inline T const & at ( std::size_t _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+
 		}
 
 		return operator[]( _index_ );
@@ -755,7 +757,8 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+
 		}
 
 		_x_ += capacity_ / 2;
@@ -796,16 +799,16 @@ public:
 		return res;
 	}
 
-	void update ( std::size_t _index_, T const _value_ )
+	void update ( T _value_, std::size_t _index_ )
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds" );
+			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
 		}
 
 		_index_ += capacity_ / 2;
 
-		head_[ _index_ ] = _value_;
+		head_[ _index_ ] = std::move( _value_ );
 
 		for( _index_ /= 2; _index_ >= 1; _index_ /= 2 )
 		{
@@ -813,18 +816,23 @@ public:
 		}
 	}
 
-	void reserve ( std::size_t const _capacity_ ) { resize( _capacity_ ); construct_tree(); }
+	void reserve ( std::size_t _capacity_ ) { resize( _capacity_ ); construct_tree(); }
 
 	void push_back ( T _value_ )
 	{
 		if( size_ >= capacity_ / 2 )
 		{
 			resize();
-		}
 
-		head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
-		size_++;
-		construct_tree();
+			head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
+			size_++;
+
+			construct_tree();
+		}
+		else
+		{
+			update( _value_, size_++ );
+		}
 	}
 
 	template< class... Args >

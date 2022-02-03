@@ -401,7 +401,7 @@ TEST( SegmentUpdate, BasicAssertions )
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 1 );
 
-	segtree.update( 2, 0 );
+	segtree.update( 0, 2 );
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 0 );
 }
