@@ -152,7 +152,7 @@ public:
 	prefix_array ( prefix_array const &  ) = delete;
 	prefix_array ( prefix_array       && ) = delete;
 
-	prefix_array (                                           ) : capacity_ { DEFAULT_CAPACITY } { alloc(); };
+	prefix_array (                                     ) : capacity_ { DEFAULT_CAPACITY } { alloc(); };
 	prefix_array (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc(); };
 	prefix_array ( T ** _head_, std::size_t _capacity_ ) : capacity_ {       _capacity_ }
 	{
@@ -434,7 +434,7 @@ public:
 
 	inline T const & operator[] ( std::size_t _index_ ) const { return head_[ _index_ ]; }
 
-	fenwick_tree (                                           ) : capacity_ { DEFAULT_CAPACITY } { alloc(            ); }
+	fenwick_tree (                                     ) : capacity_ { DEFAULT_CAPACITY } { alloc(            ); }
 	fenwick_tree (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc( _capacity_ ); }
 	fenwick_tree ( T ** _head_, std::size_t _capacity_ ) : capacity_ {       _capacity_ }
 	{
