@@ -55,7 +55,8 @@ For the sake of efficiency the tree is stored as an array of _2n_ elements (wher
 
 ## <a name = "meta_range_queries"></a> meta range queries<br/>
 
-The idea behind **meta range queries** is to provide the same functionality as the **range queries** containers, but be fully evaluated _at compile time_.    
+The idea behind **meta range queries** is to provide the same functionality as the **range queries** containers, but be fully evaluated _at compile time_.   
+The implementations will eventually be merged to avoid redundancy.
 
 #### <a name = "meta_prefix_array"></a> meta prefix array <br/>
 
@@ -65,9 +66,11 @@ If we have a static array of integers known at compile time and we want to calcu
 int main ()
 {
     constexpr auto prefix = make_prefix< int, 5 >( { 1, 1, 1, 1, 1 } );
-    int range = prefix.range( 0, 4 );
+    constexpr int range = prefix.range( 0, 4 );
     
-    return 0;
+    static_assert( range == 5 );
+    
+    return range;
 }
 ```  
 Looking at the generated assembly:  
@@ -82,8 +85,8 @@ main:
         mov     DWORD PTR [rbp-32], 5    ;    prefix[ 4 ] aka prefix.range( 0, 4 )
         mov     QWORD PTR [rbp-24], 5    ;    prefix.size
         mov     QWORD PTR [rbp-16], 5    ;    prefix.capacity
-        mov     DWORD PTR [rbp-4], 5     ;    int range = prefix.range( 0, 4 )
-        mov     eax, 0
+        mov     DWORD PTR [rbp-4], 5     ;    range = prefix.range( 0, 4 )
+        mov     eax, 5
         pop     rbp
         ret
 ```
@@ -106,10 +109,11 @@ constexpr int sum_of_ranges ()
 }
 int main ()
 {
-    int sum = sum_of_ranges();
+    constexpr int sum = sum_of_ranges();
     
+    static_assert( sum == 15 );
     
-    return 0;
+    return sum;
 }
 ```
 would get compiled down to:  
@@ -117,8 +121,8 @@ would get compiled down to:
 main:
         push    rbp
         mov     rbp, rsp
-        mov     DWORD PTR [rbp-4], 15    ;    int sum = sum_of_ranges()
-        mov     eax, 0
+        mov     DWORD PTR [rbp-4], 15    ;    sum = sum_of_ranges()
+        mov     eax, 15
         pop     rbp
         ret
 ```    
