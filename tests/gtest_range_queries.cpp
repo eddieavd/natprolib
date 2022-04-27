@@ -52,6 +52,19 @@ TEST( PrefixInitListConstruct, BasicAssertions )
 
 	EXPECT_EQ( prefix.size(), 5 );
 }
+TEST( PrefixIterator, BasicAssertions )
+{
+	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
+
+	int sum = 0;
+
+	for( auto val : prefix )
+	{
+		sum += val;
+	}
+
+	EXPECT_EQ( sum, 15 );
+}
 TEST( PrefixRange, BasicAssertions )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
@@ -297,6 +310,19 @@ TEST( SegmentInitListConstruct, BasicAssertions )
 	segment_tree< int, decltype( pb1 ) > segtree( { 1, 1, 1, 1, 1 }, pb1 );
 
 	EXPECT_EQ( segtree.size(), 5 );
+}
+TEST( SegmentIterator, BasicAssertions )
+{
+	segment_tree< int, decltype( pb1 ) > segtree( { 1, 1, 1, 1, 1 }, pb1 );
+
+	int sum = 0;
+
+	for( auto val : segtree )
+	{
+		sum += val;
+	}
+
+	EXPECT_EQ( sum, 5 );
 }
 TEST( SegmentRange, BasicAssertions )
 {

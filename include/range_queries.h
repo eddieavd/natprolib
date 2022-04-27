@@ -196,7 +196,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds " );
 		}
 
 		return operator[]( _index_ );
@@ -211,7 +211,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+			throw std::out_of_range( "index out of bounds " );
 		}
 
 		return _x_ == 0 ?
@@ -227,7 +227,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _index_ == 0 ?
@@ -239,7 +239,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		T current = element_at( _index_ );
@@ -474,7 +474,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _index_ == 0 ?
@@ -486,7 +486,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _x_ == 0 ?
@@ -498,7 +498,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		T current = at( _index_++ );
@@ -514,7 +514,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 
 		}
 
@@ -591,7 +591,31 @@ template< typename T, ParentBuilder< T > PB, bool C,
 	  typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree_iterator
 {
-	//  TODO: implement
+	friend class segment_tree< T, PB >;
+	friend class segment_tree_iterator< T, PB, !C >;
+
+	using pointer   = std::conditional_t< C, T const *, T * >;
+	using reference = std::conditional_t< C, T const &, T & >;
+
+	pointer ptr_;
+
+	explicit segment_tree_iterator ( pointer _ptr_ ) : ptr_{ _ptr_ } {};
+
+public:
+	reference   operator*  (     ) const { return *ptr_; }
+	auto      & operator++ (     )       { ptr_++; return *this; }
+	auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+
+	template< bool R >
+	bool operator== ( segment_tree_iterator< T, PB, R > const & rhs ) const
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	bool operator!= ( segment_tree_iterator< T, PB, R > const & rhs ) const
+	{ return ptr_ != rhs.ptr_; }
+
+	operator segment_tree_iterator< T, PB, true > () const
+	{ return segment_tree_iterator< T, PB, true >{ ptr_ }; }
 };
 
 template< typename T, ParentBuilder< T > PB, typename U >
@@ -699,10 +723,10 @@ private:
 #endif
 
 public:
-	auto begin ()       { return       iterator{ head_ +     size_ }; }
-	auto   end ()       { return       iterator{ head_ + capacity_ }; }
-	auto begin () const { return const_iterator{ head_ +     size_ }; }
-	auto   end () const { return const_iterator{ head_ + capacity_ }; }
+	auto begin ()       { return       iterator{ head_ + ( capacity_ / 2 )         }; }
+	auto   end ()       { return       iterator{ head_ + ( capacity_ / 2 ) + size_ }; }
+	auto begin () const { return const_iterator{ head_ + ( capacity_ / 2 )         }; }
+	auto   end () const { return const_iterator{ head_ + ( capacity_ / 2 ) + size_ }; }
 
 	inline T const & operator[] ( std::size_t _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
 
@@ -754,7 +778,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 
 		}
 
@@ -765,7 +789,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+			throw std::out_of_range( "index out of bounds" );
 
 		}
 
@@ -811,7 +835,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		_index_ += capacity_ / 2;
