@@ -13,7 +13,27 @@
 
 #include "../include/range_queries.h"
 
-int compare1 ( int const &, int const & );
-int compare2 ( int const &, int const & );
 
-std::vector< int >* compare_vec_ptr ( std::vector< int > * const & lhs, std::vector< int > * const & rhs );
+auto pb1
+{
+	[]( int const & lhs, int const & rhs )
+	{
+		return lhs < rhs ? lhs : rhs;
+	}
+};
+
+auto pb2
+{
+	[]( int const & lhs, int const & rhs )
+	{
+		return lhs > rhs ? lhs : rhs;
+	}
+};
+
+auto pb_vec
+{
+	[]( std::vector< int > * lhs, std::vector< int > * rhs )
+	{
+		return ( *lhs )[ 0 ] > ( *rhs )[ 0 ] ? lhs : rhs;
+	}
+};

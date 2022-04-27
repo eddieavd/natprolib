@@ -4,6 +4,7 @@ gtest-build
 .cache
 *.sh
 *.in
+*.txt
 *.swp
 *.json
 .DS_Store

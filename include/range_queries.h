@@ -13,6 +13,7 @@
 #include <functional>
 #include <type_traits>
 #include <stdexcept>
+#include <concepts>
 
 #ifdef _WIN32
 #   include <windows.h>
@@ -195,7 +196,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds " );
 		}
 
 		return operator[]( _index_ );
@@ -210,7 +211,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+			throw std::out_of_range( "index out of bounds " );
 		}
 
 		return _x_ == 0 ?
@@ -226,7 +227,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _index_ == 0 ?
@@ -238,7 +239,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		T current = element_at( _index_ );
@@ -473,7 +474,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _index_ == 0 ?
@@ -485,7 +486,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _x_ == 0 ?
@@ -497,7 +498,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		T current = at( _index_++ );
@@ -513,7 +514,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 
 		}
 
@@ -576,29 +577,60 @@ public:
 };
 
 
-template< typename T, typename = std::enable_if_t< std::is_default_constructible_v< T > > >
+template< typename F, typename T >
+concept ParentBuilder = requires( F test, T const & obj )
+{
+	{ test( obj, obj ) } -> std::same_as< T >;
+};
+
+template< typename T, ParentBuilder< T > PB,
+	  typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree;
 
-template< typename T, bool C,
+template< typename T, ParentBuilder< T > PB, bool C,
 	  typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree_iterator
 {
-	//  TODO: implement
+	friend class segment_tree< T, PB >;
+	friend class segment_tree_iterator< T, PB, !C >;
+
+	using pointer   = std::conditional_t< C, T const *, T * >;
+	using reference = std::conditional_t< C, T const &, T & >;
+
+	pointer ptr_;
+
+	explicit segment_tree_iterator ( pointer _ptr_ ) : ptr_{ _ptr_ } {};
+
+public:
+	reference   operator*  (     ) const { return *ptr_; }
+	auto      & operator++ (     )       { ptr_++; return *this; }
+	auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+
+	template< bool R >
+	bool operator== ( segment_tree_iterator< T, PB, R > const & rhs ) const
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	bool operator!= ( segment_tree_iterator< T, PB, R > const & rhs ) const
+	{ return ptr_ != rhs.ptr_; }
+
+	operator segment_tree_iterator< T, PB, true > () const
+	{ return segment_tree_iterator< T, PB, true >{ ptr_ }; }
 };
 
-template< typename T, typename U >
+template< typename T, ParentBuilder< T > PB, typename U >
 class segment_tree
 {
 	using     value_type = T;
-	using       iterator = segment_tree_iterator< T, false >;
-	using const_iterator = segment_tree_iterator< T,  true >;
+	using       iterator = segment_tree_iterator< T, PB, false >;
+	using const_iterator = segment_tree_iterator< T, PB,  true >;
 
 private:
 	T           * head_    { nullptr };
 	std::size_t   size_    {       0 };
 	std::size_t   capacity_{       0 };
 
-	T ( *parent_builder_ )( T const &, T const & );
+	PB parent_builder_;
 
 	void alloc ( std::size_t _capacity_ )
 	{
@@ -649,16 +681,30 @@ private:
 		}
 	}
 
+	std::size_t msb64 ( std::size_t val ) const noexcept
+	{
+		val |= ( val >>  1 );
+		val |= ( val >>  2 );
+		val |= ( val >>  4 );
+		val |= ( val >>  8 );
+		val |= ( val >> 16 );
+		val |= ( val >> 32 );
+
+		return ( val & ~( val >> 1 ) );
+	}
+
 	std::size_t round_up_to_pow_2 ( std::size_t _size_ ) const noexcept
 	{
-		auto log2 = std::log2( _size_ );
+		std::size_t msb = msb64( _size_ );
 
-		if( log2 != std::floor( log2 ) )
+		if( _size_ == msb )
 		{
-			auto pow = std::ceil( log2 );
-			return std::pow( 2, pow );
+			return _size_;
 		}
-		return _size_;
+		else
+		{
+			return ( msb << 1 );
+		}
 	}
 
 	void construct_tree ()
@@ -691,19 +737,19 @@ private:
 #endif
 
 public:
-	auto begin ()       { return       iterator{ head_ +     size_ }; }
-	auto   end ()       { return       iterator{ head_ + capacity_ }; }
-	auto begin () const { return const_iterator{ head_ +     size_ }; }
-	auto   end () const { return const_iterator{ head_ + capacity_ }; }
+	auto begin ()       { return       iterator{ head_ + ( capacity_ / 2 )         }; }
+	auto   end ()       { return       iterator{ head_ + ( capacity_ / 2 ) + size_ }; }
+	auto begin () const { return const_iterator{ head_ + ( capacity_ / 2 )         }; }
+	auto   end () const { return const_iterator{ head_ + ( capacity_ / 2 ) + size_ }; }
 
 	inline T const & operator[] ( std::size_t _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
 
-	inline bool operator== ( segment_tree< T > const & rhs ) const { return head_ == rhs.head_; }
-	inline bool operator!= ( segment_tree< T > const & rhs ) const { return head_ != rhs.head_; }
+	inline bool operator== ( segment_tree< T, PB > const & rhs ) const { return head_ == rhs.head_; }
+	inline bool operator!= ( segment_tree< T, PB > const & rhs ) const { return head_ != rhs.head_; }
 
-	segment_tree (                                      T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
-	segment_tree (              std::size_t _capacity_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
-	segment_tree ( T ** _head_, std::size_t _capacity_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
+	segment_tree (                                      ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
+	segment_tree (              std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
+	segment_tree ( T ** _head_, std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( _capacity_ );
 
@@ -716,7 +762,7 @@ public:
 		construct_tree();
 	}
 	template< class Iterator >
-	segment_tree ( Iterator begin, Iterator const & end, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
+	segment_tree ( Iterator begin, Iterator const & end, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( std::distance( begin, end ) );
 
@@ -727,7 +773,7 @@ public:
 		}
 		construct_tree();
 	}
-	segment_tree ( std::initializer_list< T > const & _list_, T ( *_pb_ )( T const &, T const & ) ) : parent_builder_ { _pb_ }
+	segment_tree ( std::initializer_list< T > const & _list_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( _list_.size() );
 
@@ -746,7 +792,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 
 		}
 
@@ -757,7 +803,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _x_ ) + " " + std::to_string( _y_ ) );
+			throw std::out_of_range( "index out of bounds" );
 
 		}
 
@@ -803,7 +849,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds : " + std::to_string( _index_ ) );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		_index_ += capacity_ / 2;
@@ -847,8 +893,6 @@ public:
 		size_++;
 		construct_tree();
 	}
-
-	void set_parent_builder ( T ( *_pb_ )( T const &, T const & ) ) { parent_builder_ = _pb_; construct_tree(); }
 
 	~segment_tree () { free( head_ ); }
 };

@@ -9,9 +9,9 @@ option( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
 #configure_file( config.h.in config.h )
 
-set( CMAKE_CXX_STANDARD          17   )
+set( CMAKE_CXX_STANDARD          20   )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
-add_compile_options( -Wall -Wextra -pedantic -Werror )
+add_compile_options( -Wall -Wextra -pedantic -Werror -O3 )
 add_link_options( -fsanitize=address -fsanitize=undefined )
 
 add_subdirectory( tests   )
