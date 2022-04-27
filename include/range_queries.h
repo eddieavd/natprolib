@@ -681,16 +681,30 @@ private:
 		}
 	}
 
+	std::size_t msb64 ( std::size_t val ) const noexcept
+	{
+		val |= ( val >>  1 );
+		val |= ( val >>  2 );
+		val |= ( val >>  4 );
+		val |= ( val >>  8 );
+		val |= ( val >> 16 );
+		val |= ( val >> 32 );
+
+		return ( val & ~( val >> 1 ) );
+	}
+
 	std::size_t round_up_to_pow_2 ( std::size_t _size_ ) const noexcept
 	{
-		auto log2 = std::log2( _size_ );
+		std::size_t msb = msb64( _size_ );
 
-		if( log2 != std::floor( log2 ) )
+		if( _size_ == msb )
 		{
-			auto pow = std::ceil( log2 );
-			return std::pow( 2, pow );
+			return _size_;
 		}
-		return _size_;
+		else
+		{
+			return ( msb << 1 );
+		}
 	}
 
 	void construct_tree ()
