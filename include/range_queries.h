@@ -113,7 +113,7 @@ private:
 	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < size_; }
 
 #ifdef _WIN32
-	inline std::size_t max_size () const noexcept
+	std::size_t max_size () const noexcept
 	{
 		MEMORYSTATUSEX status;
 		status.dwLength = sizeof( status );
@@ -122,7 +122,7 @@ private:
 		return status.ullAvailPhys;
 	}
 #else
-	inline std::size_t max_size () const noexcept
+	std::size_t max_size () const noexcept
 	{
 		auto pages     = sysconf( _SC_PHYS_PAGES );
 		auto page_size = sysconf( _SC_PAGE_SIZE  );
@@ -141,13 +141,13 @@ public:
 	 *  @brief returns sum on range ( 0 ... _index_ )
 	 *  @param _index_ - index of last element in range
 	 */
-	inline T const & operator[] ( std::size_t _index_ ) const noexcept
+	T const & operator[] ( std::size_t _index_ ) const noexcept
 	{ return head_[ _index_ ]; }
 
-	inline bool operator== ( prefix_array< T, U > const & rhs ) const noexcept
+	bool operator== ( prefix_array< T, U > const & rhs ) const noexcept
 	{ return head_ == rhs.head_; }
 
-	inline bool operator!= ( prefix_array< T, U > const & rhs ) const noexcept
+	bool operator!= ( prefix_array< T, U > const & rhs ) const noexcept
 	{ return head_ != rhs.head_; }
 
 	prefix_array ( prefix_array const &  ) = delete;
@@ -185,8 +185,8 @@ public:
 		}
 	}
 
-	inline std::size_t     size () const noexcept { return     size_; }
-	inline std::size_t capacity () const noexcept { return capacity_; }
+	std::size_t     size () const noexcept { return     size_; }
+	std::size_t capacity () const noexcept { return capacity_; }
 
 	/**
 	 *  @brief returns sum on range ( 0 ... _index_ )
@@ -409,9 +409,9 @@ private:
 	}
 #endif
 
-	inline std::size_t p ( std::size_t k ) const noexcept { return k & -k; }
+	std::size_t p ( std::size_t k ) const noexcept { return k & -k; }
 
-	inline bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < capacity_; }
+	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < capacity_; }
 
 	T sum_to_index ( std::size_t _index_ ) const
 	{
@@ -433,7 +433,7 @@ public:
 	auto begin () const { return const_iterator{ head_         }; }
 	auto   end () const { return const_iterator{ head_ + size_ }; }
 
-	inline T const & operator[] ( std::size_t _index_ ) const { return head_[ _index_ ]; }
+	T const & operator[] ( std::size_t _index_ ) const { return head_[ _index_ ]; }
 
 	fenwick_tree (                                     ) : capacity_ { DEFAULT_CAPACITY } { alloc(            ); }
 	fenwick_tree (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc( _capacity_ ); }
@@ -467,8 +467,8 @@ public:
 		}
 	}
 
-	inline std::size_t     size () const noexcept { return     size_; }
-	inline std::size_t capacity () const noexcept { return capacity_; }
+	std::size_t     size () const noexcept { return     size_; }
+	std::size_t capacity () const noexcept { return capacity_; }
 
 	T at ( std::size_t _index_ ) const
 	{
@@ -718,7 +718,7 @@ private:
 	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < capacity_ / 2; }
 
 #ifdef _WIN32
-	inline std::size_t max_size () const noexcept
+	std::size_t max_size () const noexcept
 	{
 		MEMORYSTATUSEX status;
 		status.dwLength = sizeof( status );
@@ -727,7 +727,7 @@ private:
 		return status.ullAvailPhys;
 	}
 #else
-	inline std::size_t max_size () const noexcept
+	std::size_t max_size () const noexcept
 	{
 		auto pages     = sysconf( _SC_PHYS_PAGES );
 		auto page_size = sysconf( _SC_PAGE_SIZE  );
@@ -742,10 +742,10 @@ public:
 	auto begin () const { return const_iterator{ head_ + ( capacity_ / 2 )         }; }
 	auto   end () const { return const_iterator{ head_ + ( capacity_ / 2 ) + size_ }; }
 
-	inline T const & operator[] ( std::size_t _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
+	T const & operator[] ( std::size_t _index_ ) const noexcept { return head_[ ( capacity_ / 2 ) + _index_ ]; }
 
-	inline bool operator== ( segment_tree< T, PB > const & rhs ) const { return head_ == rhs.head_; }
-	inline bool operator!= ( segment_tree< T, PB > const & rhs ) const { return head_ != rhs.head_; }
+	bool operator== ( segment_tree< T, PB > const & rhs ) const { return head_ == rhs.head_; }
+	bool operator!= ( segment_tree< T, PB > const & rhs ) const { return head_ != rhs.head_; }
 
 	segment_tree (                                      ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
 	segment_tree (              std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
@@ -785,10 +785,10 @@ public:
 		construct_tree();
 	}
 
-	inline std::size_t     size () const noexcept { return         size_; }
-	inline std::size_t capacity () const noexcept { return capacity_ / 2; }
+	std::size_t     size () const noexcept { return         size_; }
+	std::size_t capacity () const noexcept { return capacity_ / 2; }
 
-	inline T const & at ( std::size_t _index_ ) const
+	T const & at ( std::size_t _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
@@ -799,7 +799,7 @@ public:
 		return operator[]( _index_ );
 	}
 
-	inline T range ( std::size_t _x_, std::size_t _y_ ) const
+	T range ( std::size_t _x_, std::size_t _y_ ) const
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
