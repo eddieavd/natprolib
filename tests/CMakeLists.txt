@@ -1,4 +1,4 @@
-if( CTEST )
+if( METATEST )
 	add_library( test_meta_range_queries test_meta_range_queries.cpp )
 
 elseif( GTEST )

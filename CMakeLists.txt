@@ -1,29 +1,26 @@
-cmake_minimum_required( VERSION 3.16 )
+cmake_minimum_required( VERSION 3.23 )
 
 project( natprolib_test VERSION 1.0 )
 
-option( CTEST "Build dumb test suite" OFF )
-option( GTEST "Build gtest suite"     OFF )
-option( MAIN  "Build main.cpp"        OFF )
-option( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
-
-#configure_file( config.h.in config.h )
+option( METATEST "Test meta_rq"       OFF )
+option( GTEST    "Build gtest suite"  OFF )
+option( CMAKE_EXPORT_COMPILE_COMMANDS ON  )
 
 set( CMAKE_CXX_STANDARD          20   )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
 add_compile_options( -Wall -Wextra -pedantic -Werror -O3 )
-add_link_options( -fsanitize=address -fsanitize=undefined )
+#add_link_options( -fsanitize=address -fsanitize=undefined )
 
-add_subdirectory( tests   )
 add_subdirectory( include )
+add_subdirectory( tests   )
 
-if( CTEST )
+if( METATEST )
 	list( APPEND EXTRA_LIBS test_meta_range_queries )
 	list( APPEND EXTRA_INCLUDES "$(PROJECT_SOURCE_DIR)/tests" )
-elseif( MAIN )
-	list( APPEND EXTRA_LIBS natprolib )
-	list( APPEND EXTRA_INCLUDES "$(PROJECT_SOURCE_DIR)/include" )
 endif()
+
+list( APPEND EXTRA_LIBS natprolib )
+list( APPEND EXTRA_INCLUDES "$(PROJECT_SOURCE_DIR)/include" )
 
 add_executable( natprolib_test main.cpp )
 

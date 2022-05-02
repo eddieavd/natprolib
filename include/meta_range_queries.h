@@ -11,6 +11,7 @@
 #include <initializer_list>
 #include <type_traits>
 #include <stdexcept>
+#include <utility>
 
 #define DEFAULT_SIZE 16
 
