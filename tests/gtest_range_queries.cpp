@@ -14,21 +14,21 @@
 using namespace natprolib::range_queries;
 
 
-TEST( PrefixDefaultConstruct, BasicAssertions )
+TEST( PrefixTest, PrefixDefaultConstruct )
 {
 	prefix_array< int > prefix;
 
 	EXPECT_EQ( prefix.size(), 0 );
 	EXPECT_EQ( prefix.capacity(), DEFAULT_CAPACITY);
 }
-TEST( PrefixReserveConstruct, BasicAssertions )
+TEST( PrefixTest, PrefixReserveConstruct )
 {
 	prefix_array< int > prefix( CUSTOM_CAPACITY );
 
 	EXPECT_EQ( prefix.size(), 0 );
 	EXPECT_EQ( prefix.capacity(), CUSTOM_CAPACITY );
 }
-TEST( PrefixPointerConstruct, BasicAssertions )
+TEST( PrefixTest, PrefixPointerConstruct )
 {
 	int array[] = { 1, 1, 1, 1, 1 };
 	int * ptr = array;
@@ -38,7 +38,7 @@ TEST( PrefixPointerConstruct, BasicAssertions )
 	EXPECT_EQ( prefix.size(), 5 );
 	EXPECT_EQ( prefix.capacity(), 5 );
 }
-TEST( PrefixIteratorConstruct, BasicAssertions )
+TEST( PrefixTest, PrefixIteratorConstruct )
 {
 	std::vector< int > vec( { 1, 1, 1, 1, 1 } );
 
@@ -46,13 +46,13 @@ TEST( PrefixIteratorConstruct, BasicAssertions )
 
 	EXPECT_EQ( prefix.size(), 5 );
 }
-TEST( PrefixInitListConstruct, BasicAssertions )
+TEST( PrefixTest, PrefixInitListConstruct )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
 	EXPECT_EQ( prefix.size(), 5 );
 }
-TEST( PrefixIterator, BasicAssertions )
+TEST( PrefixTest, PrefixIterator )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
@@ -65,7 +65,7 @@ TEST( PrefixIterator, BasicAssertions )
 
 	EXPECT_EQ( sum, 15 );
 }
-TEST( PrefixRange, BasicAssertions )
+TEST( PrefixTest, PrefixRange )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
@@ -74,7 +74,7 @@ TEST( PrefixRange, BasicAssertions )
 	EXPECT_EQ( prefix.range( 3, 3 ), 1 );
 	EXPECT_EQ( prefix.range( 2, 4 ), 3 );
 }
-TEST( PrefixAt, BasicAssertions )
+TEST( PrefixTest, PrefixAt )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
@@ -82,7 +82,7 @@ TEST( PrefixAt, BasicAssertions )
 	EXPECT_EQ( prefix.at( 2 ), 3 );
 	EXPECT_EQ( prefix.at( 4 ), 5 );
 }
-TEST( PrefixElementAt, BasicAssertions )
+TEST( PrefixTest, PrefixElementAt )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
@@ -90,7 +90,7 @@ TEST( PrefixElementAt, BasicAssertions )
 	EXPECT_EQ( prefix.element_at( 2 ), 1 );
 	EXPECT_EQ( prefix.element_at( 4 ), 1 );
 }
-TEST( PrefixPushBack, BasicAssertions )
+TEST( PrefixTest, PrefixPushBack )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
@@ -102,7 +102,7 @@ TEST( PrefixPushBack, BasicAssertions )
 	EXPECT_EQ( prefix.size(), 6 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
 }
-TEST( PrefixEmplaceBack, BasicAssertions )
+TEST( PrefixTest, PrefixEmplaceBack )
 {
 	prefix_array< int > prefix( { 1, 1, 1, 1, 1 } );
 
@@ -114,7 +114,7 @@ TEST( PrefixEmplaceBack, BasicAssertions )
 	EXPECT_EQ( prefix.size(), 6 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
 }
-TEST( PrefixPushArray, BasicAssertions )
+TEST( PrefixTest, PrefixPushArray )
 {
 	prefix_array< int > prefix( { 1, 1, 1 } );
 
@@ -126,7 +126,7 @@ TEST( PrefixPushArray, BasicAssertions )
 	EXPECT_EQ( prefix.size(), 6 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
 }
-TEST( PrefixReserve, BasicAssertions )
+TEST( PrefixTest, PrefixReserve )
 {
 	prefix_array< int > prefix;
 
@@ -144,21 +144,21 @@ TEST( PrefixReserve, BasicAssertions )
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-TEST( FenwickDefaultConstruct, BasicAssertions )
+TEST( FenwickTest, FenwickDefaultConstruct )
 {
 	fenwick_tree< int > ftree;
 
 	EXPECT_EQ( ftree.size(), 0 );
 	EXPECT_EQ( ftree.capacity(), DEFAULT_CAPACITY );
 }
-TEST( FenwickReserveConstruct, BasicAssertions )
+TEST( FenwickTest, FenwickReserveConstruct )
 {
 	fenwick_tree< int > ftree( CUSTOM_CAPACITY );
 
 	EXPECT_EQ( ftree.size(), 0 );
 	EXPECT_EQ( ftree.capacity(), CUSTOM_CAPACITY );
 }
-TEST( FenwickPointerConstruct, BasicAssertions )
+TEST( FenwickTest, FenwickPointerConstruct )
 {
 	int array[] = { 1, 1, 1, 1, 1 };
 	int * ptr = array;
@@ -167,7 +167,7 @@ TEST( FenwickPointerConstruct, BasicAssertions )
 
 	EXPECT_EQ( ftree.size(), 5 );
 }
-TEST( FenwickIteratorConstruct, BasicAssertions )
+TEST( FenwickTest, FenwickIteratorConstruct )
 {
 	std::vector< int > vec( { 1, 1, 1, 1, 1 } );
 
@@ -175,13 +175,13 @@ TEST( FenwickIteratorConstruct, BasicAssertions )
 
 	EXPECT_EQ( ftree.size(), 5 );
 }
-TEST( FenwickInitListConstruct, BasicAssertions )
+TEST( FenwickTest, FenwickInitListConstruct )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
 
 	EXPECT_EQ( ftree.size(), 5 );
 }
-TEST( FenwickRange, BasicAssertions )
+TEST( FenwickTest, FenwickRange )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
 
@@ -190,7 +190,7 @@ TEST( FenwickRange, BasicAssertions )
 	EXPECT_EQ( ftree.range( 3, 3 ), 1 );
 	EXPECT_EQ( ftree.range( 2, 4 ), 3 );
 }
-TEST( FenwickAt, BasicAssertions )
+TEST( FenwickTest, FenwickAt )
 {
 	fenwick_tree< int > ftree( { 1, 2, 3, 4, 5 } );
 
@@ -198,7 +198,7 @@ TEST( FenwickAt, BasicAssertions )
 	EXPECT_EQ( ftree.at( 2 ), 3 );
 	EXPECT_EQ( ftree.at( 4 ), 5 );
 }
-TEST( FenwickUpdate, BasicAssertions )
+TEST( FenwickTest, FenwickUpdate )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
 
@@ -210,7 +210,7 @@ TEST( FenwickUpdate, BasicAssertions )
 	EXPECT_EQ( ftree.at( 2 ), 3 );
 	EXPECT_EQ( ftree.range( 0, 4 ), 7 );
 }
-TEST( FenwickAdd, BasicAssertions )
+TEST( FenwickTest, FenwickAdd )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
 
@@ -222,7 +222,7 @@ TEST( FenwickAdd, BasicAssertions )
 	EXPECT_EQ( ftree.at( 2 ), 3 );
 	EXPECT_EQ( ftree.range( 0, 4 ), 7 );
 }
-TEST( FenwickPushBack, BasicAssertions )
+TEST( FenwickTest, FenwickPushBack )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
 
@@ -234,7 +234,7 @@ TEST( FenwickPushBack, BasicAssertions )
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
 }
-TEST( FenwickEmplaceBack, BasicAssertions )
+TEST( FenwickTest, FenwickEmplaceBack )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1, 1, 1 } );
 
@@ -246,7 +246,7 @@ TEST( FenwickEmplaceBack, BasicAssertions )
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
 }
-TEST( FenwickPushArray, BasicAssertions )
+TEST( FenwickTest, FenwickPushArray )
 {
 	fenwick_tree< int > ftree( { 1, 1, 1 } );
 
@@ -258,7 +258,7 @@ TEST( FenwickPushArray, BasicAssertions )
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
 }
-TEST( FenwickReserve, BasicAssertions )
+TEST( FenwickTest, FenwickReserve )
 {
 	fenwick_tree< int > ftree;
 
@@ -273,21 +273,21 @@ TEST( FenwickReserve, BasicAssertions )
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-TEST( SegmentParentBuilderConstruct, BasicAssertions )
+TEST( SegmentTest, SegmentParentBuilderConstruct )
 {
 	segment_tree< int, decltype( pb1 ) > segtree( pb1 );
 
 	EXPECT_EQ( segtree.size(), 0 );
 	EXPECT_EQ( segtree.capacity(), DEFAULT_CAPACITY );
 }
-TEST( SegmentReserveConstruct, BasicAssertions )
+TEST( SegmentTest, SegmentReserveConstruct )
 {
 	segment_tree< int, decltype( pb1 ) > segtree( CUSTOM_CAPACITY, pb1 );
 
 	EXPECT_EQ( segtree.size(), 0 );
 	EXPECT_EQ( segtree.capacity(), CUSTOM_CAPACITY );
 }
-TEST( SegmentPointerConstruct, BasicAssertions )
+TEST( SegmentTest, SegmentPointerConstruct )
 {
 	int array[] = { 1, 1, 1, 1, 1 };
 	int * ptr = array;
@@ -297,7 +297,7 @@ TEST( SegmentPointerConstruct, BasicAssertions )
 	EXPECT_EQ( segtree.size(), 5 );
 	EXPECT_EQ( segtree.capacity(), 8 );  //  original array gets extended to closest power of two
 }
-TEST( SegmentIteratorConstruct, BasicAssertions )
+TEST( SegmentTest, SegmentIteratorConstruct )
 {
 	std::vector< int > vec( { 1, 1, 1, 1, 1 } );
 
@@ -305,13 +305,13 @@ TEST( SegmentIteratorConstruct, BasicAssertions )
 
 	EXPECT_EQ( segtree.size(), 5 );
 }
-TEST( SegmentInitListConstruct, BasicAssertions )
+TEST( SegmentTest, SegmentInitListConstruct )
 {
 	segment_tree< int, decltype( pb1 ) > segtree( { 1, 1, 1, 1, 1 }, pb1 );
 
 	EXPECT_EQ( segtree.size(), 5 );
 }
-TEST( SegmentIterator, BasicAssertions )
+TEST( SegmentTest, SegmentIterator )
 {
 	segment_tree< int, decltype( pb1 ) > segtree( { 1, 1, 1, 1, 1 }, pb1 );
 
@@ -324,13 +324,13 @@ TEST( SegmentIterator, BasicAssertions )
 
 	EXPECT_EQ( sum, 5 );
 }
-TEST( SegmentRange, BasicAssertions )
+TEST( SegmentTest, SegmentRange )
 {
 	segment_tree< int, decltype( pb1 ) > segtree( { 1, 2, 3, 4, 5 }, pb1 );
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 1 );
 }
-TEST( SegmentPushBack, BasicAssertions )
+TEST( SegmentTest, SegmentPushBack )
 {
 	segment_tree< int, decltype( pb2 ) > segtree( { 1, 2, 3, 4, 5 }, pb2 );
 
@@ -342,7 +342,7 @@ TEST( SegmentPushBack, BasicAssertions )
 	EXPECT_EQ( segtree.size(), 6 );
 	EXPECT_EQ( segtree.range( 0, 5 ), 6 );
 }
-TEST( SegmentEmplaceBack, BasicAssertions )
+TEST( SegmentTest, SegmentEmplaceBack )
 {
 	struct some_data
 	{
@@ -401,7 +401,7 @@ TEST( SegmentEmplaceBack, BasicAssertions )
 	EXPECT_EQ( segtree.size(), 3 );
 	EXPECT_EQ( segtree.range( 0, 2 ), 3 );
 }
-TEST( SegmentEmplaceVector, BasicAssertions )  //  not really emplacing vectors yet, just pointers; i'm working on it i promise
+TEST( SegmentTest, SegmentEmplaceVector )
 {
 	std::vector< int > vec1( {  1,  2,  3 } );
  	std::vector< int > vec2( {  4,  5,  6 } );
@@ -414,7 +414,7 @@ TEST( SegmentEmplaceVector, BasicAssertions )  //  not really emplacing vectors 
 
  	EXPECT_EQ( segtree.range( 0, 3 ), &vec4 );
 }
-TEST( SegmentUpdate, BasicAssertions )
+TEST( SegmentTest, SegmentUpdate )
 {
 	segment_tree< int, decltype( pb1 ) > segtree( { 1, 2, 3, 4, 5 }, pb1 );
 
@@ -424,7 +424,7 @@ TEST( SegmentUpdate, BasicAssertions )
 
 	EXPECT_EQ( segtree.range( 0, 4 ), 0 );
 }
-TEST( SegmentParentBuilder, BasicAssertions )
+TEST( SegmentTest, SegmentParentBuilder )
 {
 	struct node
 	{
