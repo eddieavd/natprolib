@@ -4,15 +4,18 @@ project( natprolib_test VERSION 1.0 )
 
 option( METATEST "Test meta_rq"       OFF )
 option( GTEST    "Build gtest suite"  OFF )
+option( GBENCH   "Build benchmarks"   OFF )
 option( CMAKE_EXPORT_COMPILE_COMMANDS ON  )
 
 set( CMAKE_CXX_STANDARD          20   )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
+
 add_compile_options( -Wall -Wextra -pedantic -Werror -O3 )
-#add_link_options( -fsanitize=address -fsanitize=undefined )
+add_link_options( -fsanitize=address -fsanitize=undefined )
 
 add_subdirectory( include )
 add_subdirectory( tests   )
+add_subdirectory( bench   )
 
 if( METATEST )
 	list( APPEND EXTRA_LIBS test_meta_range_queries )
