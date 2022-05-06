@@ -31,7 +31,7 @@ auto pb
 };
 
 static void vector_push_back  ( benchmark::State & state );
-static void set_push_back     ( benchmark::State & state );
+static void stdset_insert     ( benchmark::State & state );
 static void prefix_push_back  ( benchmark::State & state );
 static void fenwick_push_back ( benchmark::State & state );
 static void segment_push_back ( benchmark::State & state );

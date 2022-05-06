@@ -43,7 +43,7 @@ static void vector_push_back ( benchmark::State & state )
 	}
 }
 
-static void set_push_back ( benchmark::State & state )
+static void stdset_insert ( benchmark::State & state )
 {
 	srand( time( nullptr ) );
 
@@ -327,7 +327,7 @@ static void segment_range_sum ( benchmark::State & state )
 
 //                                                         (  num push_backs )
 BENCHMARK( vector_push_back  )->RangeMultiplier( 4 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMillisecond );
-BENCHMARK( set_push_back     )->RangeMultiplier( 4 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMillisecond );
+BENCHMARK( stdset_insert     )->RangeMultiplier( 4 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMillisecond );
 BENCHMARK( prefix_push_back  )->RangeMultiplier( 4 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMillisecond );
 BENCHMARK( fenwick_push_back )->RangeMultiplier( 4 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMillisecond );
 BENCHMARK( segment_push_back )->RangeMultiplier( 4 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMillisecond );
