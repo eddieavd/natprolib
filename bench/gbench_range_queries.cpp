@@ -7,7 +7,6 @@
 //
 
 #include "gbench_range_queries.hpp"
-#include <benchmark/benchmark.h>
 
 
 namespace npl_benchmark
