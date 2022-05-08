@@ -22,24 +22,94 @@ namespace range_queries
 {
 
 
-auto pb
+template< typename T, typename Container >
+static void bm_push_back ( benchmark::State & state )
 {
-	[]( int const & lhs, int const & rhs )
+	srand( time( nullptr ) );
+
+	for( auto _ : state )
 	{
-		return lhs + rhs;
+		state.PauseTiming();
+		int num;
+		Container c;
+		state.ResumeTiming();
+
+		for( auto i = 0; i < state.range( 0 ); i++ )
+		{
+			state.PauseTiming();
+			num = rand();
+			state.ResumeTiming();
+
+			if constexpr( std::is_same_v< Container, std::set< T > > )
+			{
+				c.insert( num );
+			}
+			else
+			{
+				c.push_back( num );
+			}
+
+			benchmark::ClobberMemory();
+		}
+
+		benchmark::DoNotOptimize( c );
 	}
-};
+}
 
-static void vector_push_back  ( benchmark::State & state );
-static void stdset_insert     ( benchmark::State & state );
-static void prefix_push_back  ( benchmark::State & state );
-static void fenwick_push_back ( benchmark::State & state );
-static void segment_push_back ( benchmark::State & state );
+template< typename T, typename Container >
+static void bm_range_sum ( benchmark::State & state )
+{
+	srand( time( nullptr ) );
 
-static void vector_range_sum  ( benchmark::State & state );
-static void prefix_range_sum  ( benchmark::State & state );
-static void fenwick_range_sum ( benchmark::State & state );
-static void segment_range_sum ( benchmark::State & state );
+	Container c;
+
+	for( auto i = 0; i < state.range( 0 ); i++ )
+	{
+		c.push_back( rand() );
+	}
+
+	double      avg_range  = 0;
+	std::size_t iterations = 0;
+
+	for( auto _ : state )
+	{
+		state.PauseTiming();
+
+		T res = 0;
+		std::size_t x;
+		std::size_t y;
+
+		x = rand() % c.size();
+		y = rand() % c.size();
+
+		if( x > y )
+		{
+			std::swap( x, y );
+		}
+
+		iterations++;
+		avg_range += y - x;
+
+		state.ResumeTiming();
+
+		if constexpr( std::is_same_v< Container, std::vector< T > > )
+		{
+			for( auto i = x; i < y; i++ )
+			{
+				res += c[ i ];
+			}
+		}
+		else
+		{
+			res = c.range( x, y );
+		}
+
+		benchmark::DoNotOptimize( res );
+	}
+
+	state.counters[      "size" ] = state.range( 0 );
+	state.counters[ "avg_range" ] = avg_range / iterations;
+}
 
 
 } // namespace range_queries
