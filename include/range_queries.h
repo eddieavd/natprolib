@@ -57,7 +57,9 @@ class prefix_array_iterator
 public:
 	reference   operator*  (     ) const { return *ptr_; }
 	auto      & operator++ (     )       { ptr_++; return *this; }
+	auto      & operator-- (     )       { ptr_--; return *this; }
 	auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+	auto        operator-- ( int )       { auto it = *this; --*this; return it; }
 
 	template< bool R >
 	bool operator== ( prefix_array_iterator< T, R > const & rhs ) const
@@ -583,7 +585,16 @@ concept ParentBuilder = requires( F test, T const & obj )
 	{ test( obj, obj ) } -> std::same_as< T >;
 };
 
-template< typename T, ParentBuilder< T > PB,
+template< typename T >
+auto pb_default_
+{
+	[]( T const & lhs, T const & rhs )
+	{
+		return lhs + rhs;
+	}
+};
+
+template< typename T, ParentBuilder< T > PB = decltype( pb_default_< T > ),
 	  typename = std::enable_if_t< std::is_default_constructible_v< T > > >
 class segment_tree;
 
@@ -604,7 +615,9 @@ class segment_tree_iterator
 public:
 	reference   operator*  (     ) const { return *ptr_; }
 	auto      & operator++ (     )       { ptr_++; return *this; }
+	auto      & operator-- (     )       { ptr_--; return *this; }
 	auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+	auto        operator-- ( int )       { auto it = *this; --*this; return it; }
 
 	template< bool R >
 	bool operator== ( segment_tree_iterator< T, PB, R > const & rhs ) const
@@ -747,6 +760,7 @@ public:
 	bool operator== ( segment_tree< T, PB > const & rhs ) const { return head_ == rhs.head_; }
 	bool operator!= ( segment_tree< T, PB > const & rhs ) const { return head_ != rhs.head_; }
 
+	segment_tree (                                                                      ) : parent_builder_ { pb_default_< T > } { alloc( DEFAULT_CAPACITY ); }
 	segment_tree (                                      ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc( DEFAULT_CAPACITY ); }
 	segment_tree (              std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ } { alloc(       _capacity_ ); }
 	segment_tree ( T ** _head_, std::size_t _capacity_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
