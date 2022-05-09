@@ -327,7 +327,9 @@ class fenwick_tree_iterator
 public:
 	reference   operator*  (     ) const { return *ptr_; }
 	auto      & operator++ (     )       { ptr_++; return *this; }
+	auto      & operator-- (     )       { ptr_--; return *this; }
 	auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+	auto        operator-- ( int )       { auto it = *this; --*this; return it; }
 
 	template< bool R >
 	bool operator== ( fenwick_tree_iterator< T, R > const & rhs ) const noexcept

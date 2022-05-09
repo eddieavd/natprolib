@@ -22,6 +22,14 @@ namespace range_queries
 {
 
 
+/**
+ *
+ *	benchmarking speed of push_backs/inserts
+ *	creates container of type Container and performs n insertions of random numbers
+ *	where n is the range passed to the benchmark
+ *	time includes call to rand() cause reasons...
+ *
+ **/
 template< typename T, typename Container >
 static void bm_push_back ( benchmark::State & state )
 {
@@ -36,9 +44,7 @@ static void bm_push_back ( benchmark::State & state )
 
 		for( auto i = 0; i < state.range( 0 ); i++ )
 		{
-			state.PauseTiming();
 			num = rand();
-			state.ResumeTiming();
 
 			if constexpr( std::is_same_v< Container, std::set< T > > )
 			{
@@ -56,6 +62,13 @@ static void bm_push_back ( benchmark::State & state )
 	}
 }
 
+/**
+ *
+ *	benchmarking speed of calculating sum on range [ x, y ]
+ *	repeats calculation 1000 times cause the timing wasn't precise enough otherwise
+ *	there's probably a smarter way to fix this...
+ *
+ **/
 template< typename T, typename Container >
 static void bm_range_sum ( benchmark::State & state )
 {
@@ -92,16 +105,19 @@ static void bm_range_sum ( benchmark::State & state )
 
 		state.ResumeTiming();
 
-		if constexpr( std::is_same_v< Container, std::vector< T > > )
+		for( auto i = 0; i < 1000; i++ )
 		{
-			for( auto i = x; i < y; i++ )
+			if constexpr( std::is_same_v< Container, std::vector< T > > )
 			{
-				res += c[ i ];
+				for( auto i = x; i < y; i++ )
+				{
+					res += c[ i ];
+				}
 			}
-		}
-		else
-		{
-			res = c.range( x, y );
+			else
+			{
+				res += c.range( x, y );
+			}
 		}
 
 		benchmark::DoNotOptimize( res );

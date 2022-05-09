@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.23 )
+cmake_minimum_required( VERSION 3.22 )
 
 project( natprolib_test VERSION 1.0 )
 
@@ -11,7 +11,7 @@ set( CMAKE_CXX_STANDARD          20   )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
 
 add_compile_options( -Wall -Wextra -pedantic -Werror -O3 )
-add_link_options( -fsanitize=address -fsanitize=undefined )
+#add_link_options( -fsanitize=address -fsanitize=undefined )
 
 add_subdirectory( include )
 add_subdirectory( tests   )
