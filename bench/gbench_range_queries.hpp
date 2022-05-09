@@ -36,12 +36,8 @@ static void bm_push_back ( benchmark::State & state )
 
 	for( auto _ : state )
 	{
-		state.PauseTiming();
-
 		int num = rand();
 		Container c;
-
-		state.ResumeTiming();
 
 		for( auto i = 0; i < state.range( 0 ); i++ )
 		{
@@ -66,7 +62,7 @@ static void bm_push_back ( benchmark::State & state )
 /**
  *
  *	benchmarking speed of calculating sum on range [ x, y ]
- *	where y - x equals container.size / 4
+ *	where y - x is around container.size / 4
  *
  **/
 template< typename T, typename Container >
@@ -81,8 +77,8 @@ static void bm_range_sum ( benchmark::State & state )
 		c.push_back( rand() );
 	}
 
-	std::size_t x = rand() % ( c.size() / 2 );
-	std::size_t y = x + ( c.size() / 4 );
+	std::size_t x = ( rand() % ( c.size() / 2 ) ) + ( rand() % 64 - 32 );;
+	std::size_t y = x + ( c.size() / 4 ) + ( rand() % 64 - 32 );
 
 	std::size_t range = y - x;
 
