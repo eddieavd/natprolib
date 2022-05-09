@@ -27,7 +27,6 @@ namespace range_queries
  *	benchmarking speed of push_backs/inserts
  *	creates container of type Container and performs n insertions of random numbers
  *	where n is the range passed to the benchmark
- *	time includes call to rand() cause reasons...
  *
  **/
 template< typename T, typename Container >
@@ -38,13 +37,13 @@ static void bm_push_back ( benchmark::State & state )
 	for( auto _ : state )
 	{
 		state.PauseTiming();
-		int num;
+		int num = rand();
 		Container c;
 		state.ResumeTiming();
 
 		for( auto i = 0; i < state.range( 0 ); i++ )
 		{
-			num = rand();
+			num++;
 
 			if constexpr( std::is_same_v< Container, std::set< T > > )
 			{
@@ -65,8 +64,7 @@ static void bm_push_back ( benchmark::State & state )
 /**
  *
  *	benchmarking speed of calculating sum on range [ x, y ]
- *	repeats calculation 1000 times cause the timing wasn't precise enough otherwise
- *	there's probably a smarter way to fix this...
+ *	where y - x is around container.size / 4
  *
  **/
 template< typename T, typename Container >
@@ -81,50 +79,32 @@ static void bm_range_sum ( benchmark::State & state )
 		c.push_back( rand() );
 	}
 
-	double      avg_range  = 0;
-	std::size_t iterations = 0;
+	std::size_t x = rand() % ( c.size() / 2 );
+	std::size_t y = x + ( c.size() / 4 ) + ( rand() % 32 );
+
+	std::size_t range = y - x;
 
 	for( auto _ : state )
 	{
-		state.PauseTiming();
-
 		T res = 0;
-		std::size_t x;
-		std::size_t y;
 
-		x = rand() % c.size();
-		y = rand() % c.size();
-
-		if( x > y )
+		if constexpr( std::is_same_v< Container, std::vector< T > > )
 		{
-			std::swap( x, y );
+			for( auto i = x; i < y; i++ )
+			{
+				res += c[ i ];
+			}
 		}
-
-		iterations++;
-		avg_range += y - x;
-
-		state.ResumeTiming();
-
-		for( auto i = 0; i < 1000; i++ )
+		else
 		{
-			if constexpr( std::is_same_v< Container, std::vector< T > > )
-			{
-				for( auto i = x; i < y; i++ )
-				{
-					res += c[ i ];
-				}
-			}
-			else
-			{
-				res += c.range( x, y );
-			}
+			res += c.range( x, y );
 		}
 
 		benchmark::DoNotOptimize( res );
 	}
 
-	state.counters[      "size" ] = state.range( 0 );
-	state.counters[ "avg_range" ] = avg_range / iterations;
+	state.counters[ "range" ] = range;
+	state.counters[  "size" ] = state.range( 0 );
 }
 
 
