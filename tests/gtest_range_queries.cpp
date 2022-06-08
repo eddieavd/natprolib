@@ -128,7 +128,7 @@ TEST( PrefixTest, PrefixPushArray )
 	EXPECT_EQ( prefix.size(), 3 );
 	EXPECT_EQ( prefix.range( 0, 2 ), 3 );
 
-	prefix.push_array( 1, 1, 1 );
+	prefix.push_back( 1, 1, 1 );
 
 	EXPECT_EQ( prefix.size(), 6 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
@@ -140,7 +140,7 @@ TEST( PrefixTest, PrefixReserve )
 	EXPECT_EQ( prefix.size(), 0 );
 	EXPECT_EQ( prefix.capacity(), DEFAULT_CAPACITY );
 
-	prefix.push_array( 1, 1, 1, 1, 1 );
+	prefix.push_back( 1, 1, 1, 1, 1 );
 
 	prefix.reserve( 2 * DEFAULT_CAPACITY );
 
@@ -267,7 +267,7 @@ TEST( FenwickTest, FenwickPushArray )
 	EXPECT_EQ( ftree.size(), 3 );
 	EXPECT_EQ( ftree.range( 0, 2 ), 3 );
 
-	ftree.push_array( 1, 1, 1 );
+	ftree.push_back( 1, 1, 1 );
 
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
