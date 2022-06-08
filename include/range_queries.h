@@ -479,7 +479,7 @@ public:
 
 	T range () const
 	{
-		return range( 0, 0, size_x_ - 1, size_y_ - 1 );
+		return range( 0, 0, ( size_x_ - 1 ) % capacity_x_, ( size_y_ - 1 ) % capacity_y_ );
 	}
 
 	T element_at ( std::size_t _x_, std::size_t _y_ ) const
