@@ -9,6 +9,7 @@
 #pragma once
 
 #include <initializer_list>
+#include <iterator>
 #include <type_traits>
 #include <stdexcept>
 #include <utility>
@@ -174,6 +175,215 @@ template< typename T, std::size_t Size >
 constexpr auto make_prefix ( T value )
 {
 	return prefix_array< T, Size >( value );
+}
+
+
+template< typename T, std::size_t Size_x = DEFAULT_SIZE, std::size_t Size_y = DEFAULT_SIZE,
+	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+class prefix_2d;
+
+template< typename T, bool C, std::size_t Size = DEFAULT_SIZE * DEFAULT_SIZE,
+	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+class prefix_2d_iterator
+{
+	friend class prefix_2d< T >;
+	friend class prefix_2d_iterator< T, !C >;
+
+public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
+
+	constexpr reference   operator* (     ) const { return *ptr_; }
+	constexpr auto      & operator++(     )       { ptr_++; return *this; }
+	constexpr auto      & operator--(     )       { ptr_--; return *this; }
+	constexpr auto        operator++( int )       { auto it = *this; ++*this; return it; }
+	constexpr auto        operator--( int )       { auto it = *this; --*this; return it; }
+
+	template< bool R >
+	constexpr bool operator== ( prefix_2d_iterator< T, R > const & rhs ) const
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	constexpr bool operator!= ( prefix_2d_iterator< T, R > const & rhs ) const
+	{ return ptr_ != rhs.ptr_; }
+
+	constexpr operator prefix_2d_iterator< T, true > () const
+	{ return prefix_2d_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit constexpr prefix_2d_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
+};
+
+template< typename T, std::size_t Size_x, std::size_t Size_y, typename U >
+class prefix_2d
+{
+	using     value_type = T;
+	using       iterator = prefix_2d_iterator< T, false >;
+	using const_iterator = prefix_2d_iterator< T,  true >;
+
+private:
+	T           data_[ Size_x ][ Size_y ]      ;
+	std::size_t size_x_                   { 0 };
+	std::size_t size_y_                   { 0 };
+	std::size_t capacity_x_          { Size_x };
+	std::size_t capacity_y_          { Size_y };
+
+	constexpr bool is_index_in_range ( std::size_t _x_, std::size_t _y_ ) const noexcept { return _x_ * capacity_y_ + _y_ < size_x_ * capacity_y_ + size_y_; }
+
+public:
+	          auto begin ()       { return       iterator{ data_                                       }; }
+		  auto   end ()       { return       iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
+	constexpr auto begin () const { return const_iterator{ data_                                       }; }
+	constexpr auto   end () const { return const_iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
+
+	constexpr auto     size_x () const noexcept { return     size_x_; }
+	constexpr auto     size_y () const noexcept { return     size_y_; }
+	constexpr auto capacity_x () const noexcept { return capacity_x_; }
+	constexpr auto capacity_y () const noexcept { return capacity_y_; }
+
+	constexpr T const * operator[] ( std::size_t _index_ ) const
+	{ return data_[ _index_ ]; }
+
+	constexpr prefix_2d ( std::initializer_list< T > const & _list_ )
+	{
+		for( auto & t : _list_ )
+		{
+			if( size_x_ >= Size_x )
+			{
+				break;
+			}
+
+			if( size_x_ != 0 && size_y_ != 0 )
+			{
+				data_[ size_x_ ][ size_y_ ] = t
+					+ data_[ size_x_ - 1 ][ size_y_     ]
+					+ data_[ size_x_     ][ size_y_ - 1 ]
+					- data_[ size_x_ - 1 ][ size_y_ - 1 ];
+			}
+			else if( size_x_ != 0 )
+			{
+				data_[ size_x_ ][ size_y_ ] = t + data_[ size_x_ - 1 ][ size_y_ ];
+			}
+			else if( size_y_ != 0 )
+			{
+				data_[ size_x_ ][ size_y_ ] = t + data_[ size_x_ ][ size_y_ - 1 ];
+			}
+			else
+			{
+				data_[ size_x_ ][ size_y_ ] = t;
+			}
+
+			size_y_++;
+
+			if( size_y_ >= Size_y )
+			{
+				size_x_++;
+				size_y_ = 0;
+			}
+		}
+	}
+
+	constexpr prefix_2d ( T _value_ )
+	{
+		for( size_x_ = 0; size_x_ < capacity_x_; ++size_x_ )
+		{
+			for( size_y_ = 0; size_y_ < capacity_y_; ++size_y_ )
+			{
+				if( size_x_ != 0 && size_y_ != 0 )
+				{
+					data_[ size_x_ ][ size_y_ ] = _value_
+						+ data_[ size_x_ - 1 ][ size_y_     ]
+						+ data_[ size_x_     ][ size_y_ - 1 ]
+						- data_[ size_x_ - 1 ][ size_y_ - 1 ];
+				}
+				else if( size_x_ != 0 )
+				{
+					data_[ size_x_ ][ size_y_ ] = _value_ + data_[ size_x_ - 1 ][ size_y_ ];
+				}
+				else if( size_y_ != 0 )
+				{
+					data_[ size_x_ ][ size_y_ ] = _value_ + data_[ size_x_ ][ size_y_ - 1 ];
+				}
+				else
+				{
+					data_[ size_x_ ][ size_y_ ] = _value_;
+				}
+			}
+		}
+
+		size_y_ = 0;
+	}
+
+	constexpr T const & at ( std::size_t _x_, std::size_t _y_ ) const
+	{
+		if( !is_index_in_range( _x_, _y_ ) )
+		{
+			throw std::out_of_range( "index out of bounds" );
+		}
+
+		return data_[ _x_ ][ _y_ ];
+	}
+
+	constexpr T range ( std::size_t _x1_, std::size_t _y1_, std::size_t _x2_, std::size_t _y2_ ) const
+	{
+		if( !is_index_in_range( _x1_, _y1_ ) || !is_index_in_range( _x2_, _y2_ ) )
+		{
+			throw std::out_of_range( "index out of bounds" );
+		}
+
+		if( _x1_ == 0 && _y1_ == 0 )
+		{
+			return data_[ _x2_ ][ _y2_ ];
+		}
+		else if( _x1_ == 0 )
+		{
+			return data_[ _x2_ ][ _y2_ ] - data_[ _x2_ ][ _y1_ - 1 ];
+		}
+		else if( _y1_ == 0 )
+		{
+			return data_[ _x2_ ][ _y2_ ] - data_[ _x1_ - 1 ][ _y2_ ];
+		}
+		else
+		{
+			return data_[ _x2_ ][ _y2_ ]
+				- data_[ _x2_     ][ _y1_ - 1 ]
+				- data_[ _x1_ - 1 ][ _y2_     ]
+				+ data_[ _x1_ - 1 ][ _y1_ - 1 ];
+		}
+	}
+
+	constexpr T range () const
+	{
+		return range( 0, 0, ( size_x_ - 1 ) % capacity_x_, ( size_y_ - 1 ) % capacity_y_ );
+	}
+
+	constexpr T element_at ( std::size_t _x_, std::size_t _y_ ) const
+	{
+		return range( _x_, _y_, _x_, _y_ );
+	}
+};
+
+template< typename T, std::size_t Size_x, std::size_t Size_y >
+constexpr auto make_prefix_2d ( std::initializer_list< T > const & list )
+{
+	return prefix_2d< T, Size_x, Size_y >( list );
+}
+
+template< typename T >
+constexpr auto make_prefix_2d ( T value )
+{
+	return prefix_2d< T >( value );
+}
+
+template< typename T, std::size_t Size_x, std::size_t Size_y >
+constexpr auto make_prefix_2d ( T value )
+{
+	return prefix_2d< T, Size_x, Size_y >( value );
 }
 
 
