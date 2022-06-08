@@ -284,6 +284,13 @@ public:
 	}
 
 	template< typename... Args >
+	void push_back ( T _value_, Args... _values_ )
+	{
+		push_back( _value_ );
+		push_back( _values_... );
+	}
+
+	template< typename... Args >
 	void emplace_back ( Args&&... args )
 	{
 		if( capacity_ <= size_ ) { resize(); }
@@ -298,17 +305,6 @@ public:
 			head_[ size_ ] += head_[ size_ - 1 ];
 		}
 		size_++;
-	}
-
-	void push_array ( T _value_ )
-	{
-		push_back( _value_ );
-	}
-	template< typename... Args >
-	void push_array( T _value_, Args... _values_ )
-	{
-		push_back( _value_ );
-		push_array( _values_... );
 	}
 
 	~prefix_array () { free( head_ ); }
@@ -567,6 +563,13 @@ public:
 		}
 	}
 
+	template< typename... Args >
+	void push_back ( T _value_, Args... _values_ )
+	{
+		push_back( _value_ );
+		push_back( _values_... );
+	}
+
 	template < typename... Args >
 	void emplace_back ( Args&&... args )
 	{
@@ -582,17 +585,6 @@ public:
 		{
 			update( T( args... ), size_ - 1 );
 		}
-	}
-
-	void push_array ( T _value_ )
-	{
-		push_back( _value_ );
-	}
-	template< typename... Args >
-	void push_array( T _value_, Args... _values_ )
-	{
-		push_back( _value_ );
-		push_array( _values_... );
 	}
 
 	~fenwick_tree () { free( head_ ); }
