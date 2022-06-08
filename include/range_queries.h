@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <memory>
-#include <functional>
+#include <iterator>
 #include <type_traits>
 #include <stdexcept>
 #include <concepts>
@@ -47,14 +47,13 @@ class prefix_array_iterator
 	friend class prefix_array< T >;
 	friend class prefix_array_iterator< T, !C >;
 
-	using pointer   = std::conditional_t< C, T const *, T * >;
-	using reference = std::conditional_t< C, T const &, T & >;
-
-	pointer ptr_;
-
-	explicit prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
-
 public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
+
 	reference   operator*  (     ) const { return *ptr_; }
 	auto      & operator++ (     )       { ptr_++; return *this; }
 	auto      & operator-- (     )       { ptr_--; return *this; }
@@ -71,6 +70,11 @@ public:
 
 	operator prefix_array_iterator< T, true > () const
 	{ return prefix_array_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
 };
 // raw pointers ahead, it's 2021, i deserve to be punished
 template< typename T, typename U >
@@ -207,7 +211,7 @@ public:
 	{
 		if( !is_index_in_range( _index_ ) )
 		{
-			throw std::out_of_range( "index out of bounds " );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return operator[]( _index_ );
@@ -222,7 +226,7 @@ public:
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
 		{
-			throw std::out_of_range( "index out of bounds " );
+			throw std::out_of_range( "index out of bounds" );
 		}
 
 		return _x_ == 0 ?
@@ -312,6 +316,243 @@ public:
 
 
 template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+class prefix_2d;
+
+template< typename T, bool C,
+	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+class prefix_2d_iterator
+{
+	friend class prefix_2d< T >;
+	friend class prefix_2d_iterator< T, !C >;
+
+public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
+
+	reference   operator* (     ) const { return *ptr_; }
+	auto      & operator++(     )       { ptr_++; return *this; }
+	auto      & operator--(     )       { ptr_--; return *this; }
+	auto        operator++( int )       { auto it = *this; ++*this; return it; }
+	auto        operator--( int )       { auto it = *this; --*this; return it; }
+
+	template< bool R >
+	bool operator== ( prefix_2d_iterator< T, R > const & rhs ) const
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	bool operator!= ( prefix_2d_iterator< T, R > const & rhs ) const
+	{ return ptr_ != rhs.ptr_; }
+
+	operator prefix_2d_iterator< T, true > () const
+	{ return prefix_2d_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit prefix_2d_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
+};
+
+template< typename T, typename U >
+class prefix_2d
+{
+	using     value_type = T;
+	using       iterator = prefix_2d_iterator< T, false >;
+	using const_iterator = prefix_2d_iterator< T,  true >;
+
+private:
+	T           * data_ { nullptr };
+	std::size_t   size_x_     { 0 };
+	std::size_t   size_y_     { 0 };
+	std::size_t   capacity_x_ { 0 };
+	std::size_t   capacity_y_ { 0 };
+
+	void alloc ()
+	{
+		data_ = ( T* ) std::malloc( sizeof( T ) * capacity_x_ * capacity_y_ );
+
+		if( !data_ )
+		{
+			throw std::bad_alloc();
+		}
+	}
+
+	bool is_index_in_range ( std::size_t _x_, std::size_t _y_ ) const noexcept { return _x_ * capacity_y_ + _y_ < size_x_ * capacity_y_ + size_y_; }
+
+#ifdef _WIN32
+	std::size_t max_size () const noexcept
+	{
+		return 0;
+	}
+#else
+	std::size_t max_size () const noexcept
+	{
+		auto pages     = sysconf( _SC_PHYS_PAGES );
+		auto page_size = sysconf( _SC_PAGE_SIZE  );
+
+		return pages * page_size;
+	}
+#endif
+
+public:
+	auto begin ()       { return       iterator{ data_                                       }; }
+	auto   end ()       { return       iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
+	auto begin () const { return const_iterator{ data_                                       }; }
+	auto   end () const { return const_iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
+
+	T const & operator[] ( std::size_t _index_ ) const noexcept
+	{ return data_[ _index_ ]; }
+
+	prefix_2d (                                                            ) : capacity_x_{ DEFAULT_CAPACITY }, capacity_y_{ DEFAULT_CAPACITY } { alloc();                 }
+	prefix_2d (                                           T const & _fill_ ) : capacity_x_{ DEFAULT_CAPACITY }, capacity_y_{ DEFAULT_CAPACITY } { alloc(); fill( _fill_ ); }
+	prefix_2d ( std::size_t _cap_x_, std::size_t _cap_y_                   ) : capacity_x_{          _cap_x_ }, capacity_y_{          _cap_y_ } { alloc();                 }
+	prefix_2d ( std::size_t _cap_x_, std::size_t _cap_y_, T const & _fill_ ) : capacity_x_{          _cap_x_ }, capacity_y_{          _cap_y_ } { alloc(), fill( _fill_ ); }
+	prefix_2d ( std::size_t _cap_x_, std::size_t _cap_y_,
+			std::initializer_list< T > const & _list_ ) : capacity_x_{ _cap_x_ }, capacity_y_{ _cap_y_ } { alloc(); fill( _list_ ); }
+
+	void fill ( T _value_ )
+	{
+		for( std::size_t i = 0; i < capacity_x_ * capacity_y_; ++i )
+		{
+			push_back( _value_ );
+		}
+	}
+
+	void fill ( std::initializer_list< T > const & _list_ )
+	{
+		if( _list_.size() > capacity_x_ * capacity_y_ )
+		{
+			throw std::out_of_range( "init list too large" );
+		}
+
+		for( T const & t : _list_ )
+		{
+			push_back( t );
+		}
+	}
+
+	std::size_t     size_x () const noexcept { return     size_x_; }
+	std::size_t     size_y () const noexcept { return     size_y_; }
+	std::size_t capacity_x () const noexcept { return capacity_x_; }
+	std::size_t capacity_y () const noexcept { return capacity_y_; }
+
+	T const & at ( std::size_t _x_, std::size_t _y_ ) const
+	{
+		if( !is_index_in_range( _x_, _y_ ) )
+		{
+			throw std::out_of_range( "index out of bounds" );
+		}
+
+		return data_[ _x_ * capacity_y_ + _y_ ];
+	}
+
+	T range ( std::size_t _x1_, std::size_t _y1_,
+			std::size_t _x2_, std::size_t _y2_ ) const
+	{
+		if( !is_index_in_range( _x1_, _y1_ ) || !is_index_in_range( _x2_, _y2_ ) )
+		{
+			throw std::out_of_range( "index out of bounds" );
+		}
+
+		if( _x1_ == 0 && _y1_ == 0 )
+		{
+			return data_[ _x2_ * capacity_y_ + _y2_ ];
+		}
+		else if( _x1_ == 0 )
+		{
+			return data_[ _x2_ * capacity_y_ + _y2_ ] - data_[ _x2_ * capacity_y_ + _y1_ - 1 ];
+		}
+		else if( _y1_ == 0 )
+		{
+			return data_[ _x2_ * capacity_y_ + _y2_ ] - data_[ ( _x1_ - 1 ) * capacity_y_ + _y2_ ];
+		}
+		else
+		{
+			return data_[ _x2_ * capacity_y_ + _y2_ ]
+				- data_[   _x2_       * capacity_y_ + _y1_ - 1 ]
+				- data_[ ( _x1_ - 1 ) * capacity_y_ + _y2_     ]
+				+ data_[ ( _x1_ - 1 ) * capacity_y_ + _y1_ - 1 ];
+		}
+	}
+
+	T range () const
+	{
+		return range( 0, 0, size_x_ - 1, size_y_ - 1 );
+	}
+
+	T element_at ( std::size_t _x_, std::size_t _y_ ) const
+	{
+		return range( _x_, _y_, _x_, _y_ );
+	}
+
+	void update ( T _value_, std::size_t _x_, std::size_t _y_ )
+	{
+		if( !is_index_in_range( _x_, _y_ ) )
+		{
+			throw std::out_of_range( "index out of bounds" );
+		}
+
+		auto diff = _value_ - element_at( _x_, _y_ );
+
+		for( std::size_t i = _x_; i < size_x_; ++i )
+		{
+			for( std::size_t j = _y_; j < size_y_; ++j )
+			{
+				data_[ i * capacity_y_ + j ] += diff;
+			}
+		}
+	}
+
+	void push_back ( T _value_ )
+	{
+		if( size_x_ >= capacity_x_ )
+		{
+			return;
+		}
+
+		if( size_x_ == 0  && size_y_ == 0 )
+		{
+			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_;
+		}
+		else if( size_x_ == 0 )
+		{
+			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_ + data_[ size_x_ * capacity_y_ + size_y_ - 1 ];
+		}
+		else if( size_y_ == 0 )
+		{
+			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_ + data_[ ( size_x_ - 1 ) * capacity_y_ + size_y_ ];
+		}
+		else
+		{
+			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_
+				+ data_[ ( size_x_ - 1 ) * capacity_y_ + size_y_     ]
+				+ data_[   size_x_       * capacity_y_ + size_y_ - 1 ]
+				- data_[ ( size_x_ - 1 ) * capacity_y_ + size_y_ - 1 ];
+		}
+
+		size_y_++;
+
+		if( size_y_ >= capacity_y_ )
+		{
+			size_x_++;
+			size_y_ = 0;
+		}
+	}
+
+	template< typename... Args >
+	void push_back ( T _value_, Args... _values_ )
+	{
+		push_back( _value_ );
+		push_back( _values_... );
+	}
+
+	~prefix_2d () { free( data_ ); }
+};
+
+
+template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
 class fenwick_tree;
 
 template< typename T, bool C,
@@ -322,14 +563,13 @@ class fenwick_tree_iterator
 	friend class fenwick_tree< T >;
 	friend class fenwick_tree_iterator< T, !C >;
 
-	using pointer   = std::conditional_t< C, T const *, T * >;
-	using reference = std::conditional_t< C, T const &, T & >;
-
-	pointer ptr_;
-
-	explicit fenwick_tree_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
-
 public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
+
 	reference   operator*  (     ) const { return *ptr_; }
 	auto      & operator++ (     )       { ptr_++; return *this; }
 	auto      & operator-- (     )       { ptr_--; return *this; }
@@ -346,6 +586,11 @@ public:
 
 	operator fenwick_tree_iterator< T, true > () const
 	{ return fenwick_tree_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit fenwick_tree_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
 };
 
 template< typename T, typename U >
@@ -617,14 +862,13 @@ class segment_tree_iterator
 	friend class segment_tree< T, PB >;
 	friend class segment_tree_iterator< T, PB, !C >;
 
-	using pointer   = std::conditional_t< C, T const *, T * >;
-	using reference = std::conditional_t< C, T const &, T & >;
-
-	pointer ptr_;
-
-	explicit segment_tree_iterator ( pointer _ptr_ ) : ptr_{ _ptr_ } {};
-
 public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
+
 	reference   operator*  (     ) const { return *ptr_; }
 	auto      & operator++ (     )       { ptr_++; return *this; }
 	auto      & operator-- (     )       { ptr_--; return *this; }
@@ -641,6 +885,11 @@ public:
 
 	operator segment_tree_iterator< T, PB, true > () const
 	{ return segment_tree_iterator< T, PB, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit segment_tree_iterator ( pointer _ptr_ ) : ptr_{ _ptr_ } {};
 };
 
 template< typename T, ParentBuilder< T > PB, typename U >
