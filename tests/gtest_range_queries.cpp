@@ -151,6 +151,127 @@ TEST( PrefixTest, PrefixReserve )
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
+TEST( Prefix2dTest, Prefix2dDefaultConstruct )
+{
+	prefix_2d< int > prefix;
+
+	EXPECT_EQ( prefix.size_x(), 0 );
+	EXPECT_EQ( prefix.size_y(), 0 );
+	EXPECT_EQ( prefix.capacity_x(), DEFAULT_CAPACITY );
+	EXPECT_EQ( prefix.capacity_y(), DEFAULT_CAPACITY );
+}
+TEST( Prefix2dTest, Prefix2dReserveConstruct )
+{
+	prefix_2d< int > prefix( CUSTOM_CAPACITY, CUSTOM_CAPACITY );
+
+	EXPECT_EQ( prefix.size_x(), 0 );
+	EXPECT_EQ( prefix.size_y(), 0 );
+	EXPECT_EQ( prefix.capacity_x(), CUSTOM_CAPACITY );
+	EXPECT_EQ( prefix.capacity_y(), CUSTOM_CAPACITY );
+}
+TEST( Prefix2dTest, Prefix2dFillDefaultConstruct )
+{
+	prefix_2d prefix( 1 );
+
+	EXPECT_EQ( prefix.size_x(), DEFAULT_CAPACITY );
+	EXPECT_EQ( prefix.size_y(), 0 );
+	EXPECT_EQ( prefix.capacity_x(), DEFAULT_CAPACITY );
+	EXPECT_EQ( prefix.capacity_y(), DEFAULT_CAPACITY );
+}
+TEST( Prefix2dTest, Prefix2dFillCustomConstruct )
+{
+	prefix_2d prefix( CUSTOM_CAPACITY, CUSTOM_CAPACITY, 1 );
+
+	EXPECT_EQ( prefix.size_x(), CUSTOM_CAPACITY );
+	EXPECT_EQ( prefix.size_y(), 0 );
+	EXPECT_EQ( prefix.capacity_x(), CUSTOM_CAPACITY );
+	EXPECT_EQ( prefix.capacity_y(), CUSTOM_CAPACITY );
+}
+TEST( Prefix2dTest, Prefix2dInitListConstruct )
+{
+	prefix_2d prefix( 2, 2, { 1, 1, 1, 1 } );
+
+	EXPECT_EQ( prefix.size_x(), 2 );
+	EXPECT_EQ( prefix.size_y(), 0 );
+	EXPECT_EQ( prefix.capacity_x(), 2 );
+	EXPECT_EQ( prefix.capacity_y(), 2 );
+}
+TEST( Prefix2dTest, Prefix2dIterator )
+{
+	prefix_2d prefix( 4, 4, 1 );
+
+	int sum = 0;
+
+	for( auto val : prefix )
+	{
+		sum += val;
+	}
+
+	EXPECT_EQ( sum, 100 );
+}
+TEST( Prefix2dTest, Prefix2dRange )
+{
+	prefix_2d prefix( 4, 4, 1 );
+
+	EXPECT_EQ( prefix.range( 0, 0, 3, 3 ), 16 );
+	EXPECT_EQ( prefix.range( 0, 0, 1, 2 ),  6 );
+	EXPECT_EQ( prefix.range( 0, 2, 2, 3 ),  6 );
+	EXPECT_EQ( prefix.range( 1, 1, 3, 3 ),  9 );
+	EXPECT_EQ( prefix.range( 1, 2, 3, 3 ),  6 );
+}
+TEST( Prefix2dTest, Prefix2dAt )
+{
+	prefix_2d prefix( 4, 4, 1 );
+
+	EXPECT_EQ( prefix.at( 0, 0 ),  1 );
+	EXPECT_EQ( prefix.at( 1, 1 ),  4 );
+	EXPECT_EQ( prefix.at( 2, 2 ),  9 );
+	EXPECT_EQ( prefix.at( 3, 3 ), 16 );
+	EXPECT_EQ( prefix.at( 2, 3 ), 12 );
+	EXPECT_EQ( prefix.at( 3, 1 ),  8 );
+}
+TEST( Prefix2dTest, Prefix2dElementAt )
+{
+	prefix_2d prefix( 4, 4, 1 );
+
+	EXPECT_EQ( prefix.element_at( 0, 0 ), 1 );
+	EXPECT_EQ( prefix.element_at( 1, 1 ), 1 );
+	EXPECT_EQ( prefix.element_at( 2, 2 ), 1 );
+	EXPECT_EQ( prefix.element_at( 3, 3 ), 1 );
+	EXPECT_EQ( prefix.element_at( 0, 2 ), 1 );
+	EXPECT_EQ( prefix.element_at( 3, 1 ), 1 );
+	EXPECT_EQ( prefix.element_at( 2, 0 ), 1 );
+}
+TEST( Prefix2dTest, Prefix2dPushBack )
+{
+	prefix_2d< int > prefix( 2, 2 );
+
+	EXPECT_EQ( prefix.size_x(), 0 );
+	EXPECT_EQ( prefix.size_y(), 0 );
+
+	prefix.push_back( 1 );
+
+	EXPECT_EQ( prefix.size_x(), 0 );
+	EXPECT_EQ( prefix.size_y(), 1 );
+
+	prefix.push_back( 1 );
+
+	EXPECT_EQ( prefix.size_x(), 1 );
+	EXPECT_EQ( prefix.size_y(), 0 );
+
+	prefix.push_back( 1 );
+
+	EXPECT_EQ( prefix.size_x(), 1 );
+	EXPECT_EQ( prefix.size_y(), 1 );
+
+	prefix.push_back( 1 );
+
+	EXPECT_EQ( prefix.size_x(), 2 );
+	EXPECT_EQ( prefix.size_y(), 0 );
+}
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+////////////////////////////////////////////////
 TEST( FenwickTest, FenwickDefaultConstruct )
 {
 	fenwick_tree< int > ftree;
