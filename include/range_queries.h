@@ -167,6 +167,15 @@ public:
 		}
 		*_head_ = nullptr;
 	}
+	prefix_array ( std::size_t _count_, T _value_ ) : capacity_ { _count_ }
+	{
+		alloc();
+
+		for( std::size_t i = 0; i < _count_; i++ )
+		{
+			push_back( _value_ );
+		}
+	}
 	prefix_array ( std::initializer_list< T > const & _list_ ) : capacity_ { _list_.size() }
 	{
 		alloc();
@@ -176,14 +185,14 @@ public:
 			push_back( it );
 		}
 	}
-	template< class Iterator >
-	prefix_array ( Iterator begin, Iterator const & end ) : capacity_ { DEFAULT_CAPACITY }
+	template< typename Iterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< Iterator >::value_type, void > > >
+	prefix_array ( Iterator begin, Iterator end ) : capacity_ { DEFAULT_CAPACITY }
 	{
 		alloc();
 
-		for( ; begin != end; begin++ )
+		while( begin != end )
 		{
-			push_back( *begin );
+			push_back( *begin++ );
 		}
 	}
 
@@ -451,6 +460,15 @@ public:
 		}
 		*_head_ = nullptr;
 	}
+	fenwick_tree ( std::size_t _count_, T _value_ ) : capacity_ { _count_ }
+	{
+		alloc( _count_ );
+
+		for( std::size_t i = 0; i < _count_; i++ )
+		{
+			update( _value_, size_++ );
+		}
+	}
 	fenwick_tree ( std::initializer_list< T > const & _list_ ) : capacity_ { _list_.size() }
 	{
 		alloc( capacity_ );
@@ -460,14 +478,14 @@ public:
 			update( t, size_++ );
 		}
 	}
-	template< class Iterator >
-	fenwick_tree ( Iterator begin, Iterator const & end ) : capacity_ { static_cast< std::size_t >( std::distance( begin, end ) ) }
+	template< typename Iterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< Iterator >::value_type, void > > >
+	fenwick_tree ( Iterator begin, Iterator end ) : capacity_ { static_cast< std::size_t >( std::distance( begin, end ) ) }
 	{
 		alloc( capacity_ );
 
-		for( ; begin != end; begin++ )
+		while( begin != end )
 		{
-			update( *begin, size_++ );
+			update( *begin++, size_++ );
 		}
 	}
 
@@ -777,14 +795,25 @@ public:
 		*_head_ = nullptr;
 		construct_tree();
 	}
-	template< class Iterator >
-	segment_tree ( Iterator begin, Iterator const & end, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
+	segment_tree ( std::size_t _count_, T _value_, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
+	{
+		alloc( _count_ );
+
+		for( std::size_t i = 0; i < _count_; i++ )
+		{
+			head_[ ( capacity_ / 2 ) + i ] = _value_;
+			size_++;
+		}
+		construct_tree();
+	}
+	template< typename Iterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< Iterator >::value_type, void > > >
+	segment_tree ( Iterator begin, Iterator end, ParentBuilder< T > auto && _pb_ ) : parent_builder_ { _pb_ }
 	{
 		alloc( std::distance( begin, end ) );
 
-		for( ; begin != end; begin++ )
+		while( begin != end )
 		{
-			head_[ ( capacity_ / 2 ) + size_ ] = *begin;
+			head_[ ( capacity_ / 2 ) + size_ ] = *begin++;
 			size_++;
 		}
 		construct_tree();

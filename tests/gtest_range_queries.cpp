@@ -38,6 +38,13 @@ TEST( PrefixTest, PrefixPointerConstruct )
 	EXPECT_EQ( prefix.size(), 5 );
 	EXPECT_EQ( prefix.capacity(), 5 );
 }
+TEST( PrefixTest, PrefixFillConstruct )
+{
+	prefix_array< int > prefix( CUSTOM_CAPACITY, 1 );
+
+	EXPECT_EQ( prefix.size(), CUSTOM_CAPACITY );
+	EXPECT_EQ( prefix.capacity(), CUSTOM_CAPACITY );
+}
 TEST( PrefixTest, PrefixIteratorConstruct )
 {
 	std::vector< int > vec( { 1, 1, 1, 1, 1 } );
@@ -166,6 +173,13 @@ TEST( FenwickTest, FenwickPointerConstruct )
 	fenwick_tree< int > ftree( &ptr, 5 );
 
 	EXPECT_EQ( ftree.size(), 5 );
+}
+TEST( FenwickTest, FenwickFillConstruct )
+{
+	fenwick_tree< int > ftree( CUSTOM_CAPACITY, 1 );
+
+	EXPECT_EQ( ftree.size(), CUSTOM_CAPACITY );
+	EXPECT_EQ( ftree.capacity(), CUSTOM_CAPACITY );
 }
 TEST( FenwickTest, FenwickIteratorConstruct )
 {
@@ -296,6 +310,12 @@ TEST( SegmentTest, SegmentPointerConstruct )
 
 	EXPECT_EQ( segtree.size(), 5 );
 	EXPECT_EQ( segtree.capacity(), 8 );  //  original array gets extended to closest power of two
+}
+TEST( SegmentTest, SegmentFillConstruct )
+{
+	segment_tree< int, decltype( pb1 ) > segtree( CUSTOM_CAPACITY, 1, pb1 );
+
+	EXPECT_EQ( segtree.size(), CUSTOM_CAPACITY );
 }
 TEST( SegmentTest, SegmentIteratorConstruct )
 {
