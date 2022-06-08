@@ -161,7 +161,7 @@ public:
 	{
 		alloc();
 
-		for( std::size_t i = 0; i < _capacity_; i++ )
+		for( std::size_t i = 0; i < _capacity_; ++i )
 		{
 			push_back( ( *_head_ )[ i ] );
 		}
@@ -171,7 +171,7 @@ public:
 	{
 		alloc();
 
-		for( std::size_t i = 0; i < _count_; i++ )
+		for( std::size_t i = 0; i < _count_; ++i )
 		{
 			push_back( _value_ );
 		}
@@ -256,7 +256,7 @@ public:
 		T current = element_at( _index_ );
 		T diff    = _value_ - current;
 
-		for( std::size_t i = _index_; i < size_; i++ )
+		for( std::size_t i = _index_; i < size_; ++i )
 		{
 			head_[ i ] += diff;
 		}
@@ -454,7 +454,7 @@ public:
 	{
 		alloc( _capacity_ );
 
-		for( std::size_t i = 0; i < _capacity_; i++ )
+		for( std::size_t i = 0; i < _capacity_; ++i )
 		{
 			update( ( *_head_ )[ i ], size_++ );
 		}
@@ -464,7 +464,7 @@ public:
 	{
 		alloc( _count_ );
 
-		for( std::size_t i = 0; i < _count_; i++ )
+		for( std::size_t i = 0; i < _count_; ++i )
 		{
 			update( _value_, size_++ );
 		}
@@ -678,7 +678,7 @@ private:
 
 		if( tmp )
 		{
-			for( std::size_t i = 0; i < size_; i++ )
+			for( std::size_t i = 0; i < size_; ++i )
 			{
 				tmp[ new_cap / 2 + i ] = head_[ capacity_ / 2 + i ];
 			}
@@ -702,7 +702,7 @@ private:
 
 		if( tmp )
 		{
-			for( std::size_t i = 0; i < size_; i++ )
+			for( std::size_t i = 0; i < size_; ++i )
 			{
 				tmp[ _capacity_ / 2 + i ] = head_[ capacity_ / 2 + i ];
 			}
@@ -787,7 +787,7 @@ public:
 	{
 		alloc( _capacity_ );
 
-		for( std::size_t i = 0; i < _capacity_; i++ )
+		for( std::size_t i = 0; i < _capacity_; ++i )
 		{
 			head_[ ( capacity_ / 2 ) + i ] = ( *_head_ )[ i ];
 			size_++;
@@ -799,7 +799,7 @@ public:
 	{
 		alloc( _count_ );
 
-		for( std::size_t i = 0; i < _count_; i++ )
+		for( std::size_t i = 0; i < _count_; ++i )
 		{
 			head_[ ( capacity_ / 2 ) + i ] = _value_;
 			size_++;

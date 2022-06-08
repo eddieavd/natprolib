@@ -111,7 +111,7 @@ public:
 	}
 	constexpr prefix_array ( T _value_ )
 	{
-		for( std::size_t i = 0; i < Size; i++ )
+		for( std::size_t i = 0; i < Size; ++i )
 		{
 			data_[ size_ ] = _value_;
 
