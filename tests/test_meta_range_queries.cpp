@@ -26,6 +26,16 @@ void prefix_make_prefix ()
 
 	static_assert( prefix_2.size() == 5 );
 	static_assert( prefix_2.capacity() == 5 );
+
+	constexpr auto prefix_3 = make_prefix< int >( 1 );
+
+	static_assert( prefix_3.size() == 16 );
+	static_assert( prefix_3.capacity() == 16 );
+
+	constexpr auto prefix_4 = make_prefix< int, 5 >( 1 );
+
+	static_assert( prefix_4.size() == 5 );
+	static_assert( prefix_4.capacity() == 5 );
 }
 void prefix_range ()
 {
@@ -79,6 +89,16 @@ void ftree_make_ftree ()
 
 	static_assert( ftree_2.size() == 5 );
 	static_assert( ftree_2.capacity() == 5 );
+
+	constexpr auto ftree_3 = make_ftree( 1 );
+
+	static_assert( ftree_3.size() == 16 );
+	static_assert( ftree_3.capacity() == 16 );
+
+	constexpr auto ftree_4 = make_ftree< int, 5 >( 1 );
+
+	static_assert( ftree_4.size() == 5 );
+	static_assert( ftree_4.capacity() == 5 );
 }
 void ftree_range ()
 {

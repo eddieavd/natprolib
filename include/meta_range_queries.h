@@ -108,7 +108,20 @@ public:
 				break;
 			}
 		}
-	};
+	}
+	constexpr prefix_array ( T _value_ )
+	{
+		for( std::size_t i = 0; i < Size; i++ )
+		{
+			data_[ size_ ] = _value_;
+
+			if( size_ > 0 )
+			{
+				data_[ size_ ] += data_[ size_ - 1 ];
+			}
+			size_++;
+		}
+	}
 
 	constexpr T const & at ( std::size_t const _index_ ) const
 	{
@@ -149,6 +162,18 @@ template< typename T, std::size_t Size >
 constexpr auto make_prefix ( std::initializer_list< T > const & list )
 {
 	return prefix_array< T, Size >( list );
+}
+
+template< typename T >
+constexpr auto make_prefix ( T value )
+{
+	return prefix_array< T >( value );
+}
+
+template< typename T, std::size_t Size >
+constexpr auto make_prefix ( T value )
+{
+	return prefix_array< T, Size >( value );
 }
 
 
@@ -276,6 +301,14 @@ public:
 		}
 	}
 
+	constexpr fenwick_tree ( T _value_ )
+	{
+		while( size_ < Size )
+		{
+			update( _value_, size_++ );
+		}
+	}
+
 	constexpr T at ( std::size_t const _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
@@ -311,6 +344,18 @@ template< typename T, std::size_t Size >
 constexpr auto make_ftree ( std::initializer_list< T > const & list )
 {
 	return fenwick_tree< T, Size >( list );
+}
+
+template< typename T >
+constexpr auto make_ftree ( T value )
+{
+	return fenwick_tree< T >( value );
+}
+
+template< typename T, std::size_t Size >
+constexpr auto make_ftree ( T value )
+{
+	return fenwick_tree< T, Size >( value );
 }
 
 
