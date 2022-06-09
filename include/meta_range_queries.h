@@ -41,14 +41,13 @@ class prefix_array_iterator
 	friend class prefix_array< T, Size >;
 	friend class prefix_array_iterator< T, !C, Size >;
 
-	using pointer   = std::conditional_t< C, T const *, T * >;
-	using reference = std::conditional_t< C, T const &, T & >;
-
-	pointer ptr_;
-
-	explicit constexpr prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
-
 public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
+
 	constexpr reference   operator*  (     ) const { return *ptr_; }
 	constexpr auto      & operator++ (     )       { ptr_++; return *this; }
 	constexpr auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
@@ -63,6 +62,11 @@ public:
 
 	constexpr operator prefix_array_iterator< T, true, Size > () const
 	{ return prefix_array_iterator< T, true, Size >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit constexpr prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
 };
 
 template< typename T, std::size_t Size, typename U >
@@ -182,12 +186,12 @@ template< typename T, std::size_t Size_x = DEFAULT_SIZE, std::size_t Size_y = DE
 	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
 class prefix_2d;
 
-template< typename T, bool C, std::size_t Size = DEFAULT_SIZE * DEFAULT_SIZE,
+template< typename T, bool C, std::size_t Size_x = DEFAULT_SIZE, std::size_t Size_y = DEFAULT_SIZE,
 	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
 class prefix_2d_iterator
 {
-	friend class prefix_2d< T >;
-	friend class prefix_2d_iterator< T, !C >;
+	friend class prefix_2d< T, Size_x, Size_y >;
+	friend class prefix_2d_iterator< T, !C, Size_x, Size_y >;
 
 public:
 	using difference_type   = std::ptrdiff_t;
@@ -202,16 +206,16 @@ public:
 	constexpr auto        operator++( int )       { auto it = *this; ++*this; return it; }
 	constexpr auto        operator--( int )       { auto it = *this; --*this; return it; }
 
-	template< bool R >
-	constexpr bool operator== ( prefix_2d_iterator< T, R > const & rhs ) const
+	template< bool R, std::size_t Size_x_, std::size_t Size_y_ >
+	constexpr bool operator== ( prefix_2d_iterator< T, R, Size_x_, Size_y_ > const & rhs ) const
 	{ return ptr_ == rhs.ptr_; }
 
-	template< bool R >
-	constexpr bool operator!= ( prefix_2d_iterator< T, R > const & rhs ) const
+	template< bool R, std::size_t Size_x_, std::size_t Size_y_ >
+	constexpr bool operator!= ( prefix_2d_iterator< T, R, Size_x_, Size_y_ > const & rhs ) const
 	{ return ptr_ != rhs.ptr_; }
 
-	constexpr operator prefix_2d_iterator< T, true > () const
-	{ return prefix_2d_iterator< T, true >{ ptr_ }; }
+	constexpr operator prefix_2d_iterator< T, true, Size_x, Size_y > () const
+	{ return prefix_2d_iterator< T, true, Size_x, Size_y >{ ptr_ }; }
 
 private:
 	pointer ptr_;
@@ -223,8 +227,8 @@ template< typename T, std::size_t Size_x, std::size_t Size_y, typename U >
 class prefix_2d
 {
 	using     value_type = T;
-	using       iterator = prefix_2d_iterator< T, false >;
-	using const_iterator = prefix_2d_iterator< T,  true >;
+	using       iterator = prefix_2d_iterator< T, false, Size_x, Size_y >;
+	using const_iterator = prefix_2d_iterator< T,  true, Size_x, Size_y >;
 
 private:
 	T           data_[ Size_x ][ Size_y ]      ;
@@ -236,10 +240,10 @@ private:
 	constexpr bool is_index_in_range ( std::size_t _x_, std::size_t _y_ ) const noexcept { return _x_ * capacity_y_ + _y_ < size_x_ * capacity_y_ + size_y_; }
 
 public:
-	          auto begin ()       { return       iterator{ data_                                       }; }
-		  auto   end ()       { return       iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
-	constexpr auto begin () const { return const_iterator{ data_                                       }; }
-	constexpr auto   end () const { return const_iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
+	          auto begin ()       { return       iterator{ &data_[          0 ][          0 ] }; }
+		  auto   end ()       { return       iterator{ &data_[ Size_x - 1 ][ Size_y - 2 ] }; }
+	constexpr auto begin () const { return const_iterator{ &data_[          0 ][          0 ] }; }
+	constexpr auto   end () const { return const_iterator{ &data_[ Size_x - 1 ][ Size_y - 2 ] }; }
 
 	constexpr auto     size_x () const noexcept { return     size_x_; }
 	constexpr auto     size_y () const noexcept { return     size_y_; }
@@ -398,8 +402,12 @@ class fenwick_tree_iterator
 	friend class fenwick_tree< T, Size >;
 	friend class fenwick_tree_iterator< T, !C, Size >;
 
-	using pointer   = std::conditional_t< C, T const *, T * >;
-	using reference = std::conditional_t< C, T const &, T & >;
+public:
+	using difference_type   = std::ptrdiff_t;
+	using value_type        = T;
+	using pointer           = std::conditional_t< C, T const *, T * >;
+	using reference         = std::conditional_t< C, T const &, T & >;
+	using iterator_category = std::random_access_iterator_tag;
 
 	pointer ptr_;
 
