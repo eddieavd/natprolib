@@ -22,6 +22,12 @@ void prefix_at ();
 void prefix_element_at ();
 void prefix_iterator ();
 
+void prefix_2d_make_prefix_2d ();
+void prefix_2d_range ();
+void prefix_2d_at ();
+void prefix_2d_element_at ();
+void prefix_2d_iterator ();
+
 void ftree_make_ftree ();
 void ftree_range ();
 void ftree_at ();
