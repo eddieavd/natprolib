@@ -50,7 +50,9 @@ public:
 
 	constexpr reference   operator*  (     ) const { return *ptr_; }
 	constexpr auto      & operator++ (     )       { ptr_++; return *this; }
+	constexpr auto      & operator-- (     )       { ptr_--; return *this; }
 	constexpr auto        operator++ ( int )       { auto it = *this; ++*this; return it; }
+	constexpr auto        operator-- ( int )       { auto it = *this; --*this; return it; }
 
 	template< bool R, std::size_t Size_ >
 	constexpr bool operator== ( prefix_array_iterator< T, R, Size_ > const & rhs ) const
@@ -416,7 +418,9 @@ public:
 public:
 	constexpr reference   operator* (     ) const { return *ptr_; }
 	constexpr auto      & operator++(     )       { ptr_++; return *this; }
+	constexpr auto      & operator--(     )       { ptr_--; return *this; }
 	constexpr auto        operator++( int )       { auto it = *this; ++*this; return it; }
+	constexpr auto        operator--( int )       { auto it = *this; --*this; return it; }
 
 	template< bool R, std::size_t Size_ >
 	constexpr bool operator== ( fenwick_tree_iterator< T, R, Size_ > const & rhs ) const
