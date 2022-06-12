@@ -148,126 +148,53 @@ TEST( PrefixTest, PrefixReserve )
 	EXPECT_EQ( prefix.range( 0, 4 ), 5 );
 	EXPECT_EQ( prefix.capacity(), 2 * DEFAULT_CAPACITY );
 }
-////////////////////////////////////////////////
-////////////////////////////////////////////////
-////////////////////////////////////////////////
-TEST( Prefix2dTest, Prefix2dDefaultConstruct )
+TEST( PrefixTest, Prefix2D )
 {
-	prefix_2d< int > prefix;
+	prefix_array< int > prefix( 4, 1 );
 
-	EXPECT_EQ( prefix.size_x(), 0 );
-	EXPECT_EQ( prefix.size_y(), 0 );
-	EXPECT_EQ( prefix.capacity_x(), DEFAULT_CAPACITY );
-	EXPECT_EQ( prefix.capacity_y(), DEFAULT_CAPACITY );
+	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
+//	or simply
+//	prefix_array prefix_2d( 4, prefix );
+
+	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 3, 3 ), 16 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 1, 1 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 2 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 1, 0, 2, 1 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 1, 1, 2, 2 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 3 ),  6 );
+
+	EXPECT_EQ( prefix_2d.at( 0 ), prefix );
+	EXPECT_EQ( prefix_2d.at( 1 ), prefix + prefix );
+
+	EXPECT_EQ( prefix_2d.element_at( 0 ), prefix );
+	EXPECT_EQ( prefix_2d.element_at( 2 ), prefix );
+
+	prefix_array< prefix_array< int > > prefix_2d_1( { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 } } );
+
+	EXPECT_EQ( prefix_2d, prefix_2d_1 );
 }
-TEST( Prefix2dTest, Prefix2dReserveConstruct )
+TEST( PrefixTest, Prefix3D )
 {
-	prefix_2d< int > prefix( CUSTOM_CAPACITY, CUSTOM_CAPACITY );
+	prefix_array< int > prefix( 4, 1 );
+	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
+	prefix_array< prefix_array< prefix_array< int > > > prefix_3d( 4, prefix_2d );
+//	again simply
+//	prefix_array prefix_3d( 4, prefix_2d );
 
-	EXPECT_EQ( prefix.size_x(), 0 );
-	EXPECT_EQ( prefix.size_y(), 0 );
-	EXPECT_EQ( prefix.capacity_x(), CUSTOM_CAPACITY );
-	EXPECT_EQ( prefix.capacity_y(), CUSTOM_CAPACITY );
+	EXPECT_EQ( prefix_3d.range< int >( 0, 0, 0, 3, 3, 3 ), 64 );
+	EXPECT_EQ( prefix_3d.element_at< int >( 2, 2, 2 )    ,  1 );
+	EXPECT_EQ( prefix_3d.at< int >( 3, 3, 3 )            , 64 );
 }
-TEST( Prefix2dTest, Prefix2dFillDefaultConstruct )
+TEST( PrefixTest, Prefix4D )  //  just to flex
 {
-	prefix_2d prefix( 1 );
+	prefix_array< int > prefix( 4, 1 );
+	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
+	prefix_array< prefix_array< prefix_array< int > > > prefix_3d( 4, prefix_2d );
+	prefix_array< prefix_array< prefix_array< prefix_array< int > > > > prefix_4d( 4, prefix_3d );
 
-	EXPECT_EQ( prefix.size_x(), DEFAULT_CAPACITY );
-	EXPECT_EQ( prefix.size_y(), 0 );
-	EXPECT_EQ( prefix.capacity_x(), DEFAULT_CAPACITY );
-	EXPECT_EQ( prefix.capacity_y(), DEFAULT_CAPACITY );
-}
-TEST( Prefix2dTest, Prefix2dFillCustomConstruct )
-{
-	prefix_2d prefix( CUSTOM_CAPACITY, CUSTOM_CAPACITY, 1 );
-
-	EXPECT_EQ( prefix.size_x(), CUSTOM_CAPACITY );
-	EXPECT_EQ( prefix.size_y(), 0 );
-	EXPECT_EQ( prefix.capacity_x(), CUSTOM_CAPACITY );
-	EXPECT_EQ( prefix.capacity_y(), CUSTOM_CAPACITY );
-}
-TEST( Prefix2dTest, Prefix2dInitListConstruct )
-{
-	prefix_2d prefix( 2, 2, { 1, 1, 1, 1 } );
-
-	EXPECT_EQ( prefix.size_x(), 2 );
-	EXPECT_EQ( prefix.size_y(), 0 );
-	EXPECT_EQ( prefix.capacity_x(), 2 );
-	EXPECT_EQ( prefix.capacity_y(), 2 );
-}
-TEST( Prefix2dTest, Prefix2dIterator )
-{
-	prefix_2d prefix( 4, 4, 1 );
-
-	int sum = 0;
-
-	for( auto val : prefix )
-	{
-		sum += val;
-	}
-
-	EXPECT_EQ( sum, 100 );
-}
-TEST( Prefix2dTest, Prefix2dRange )
-{
-	prefix_2d prefix( 4, 4, 1 );
-
-	EXPECT_EQ( prefix.range( 0, 0, 3, 3 ), 16 );
-	EXPECT_EQ( prefix.range( 0, 0, 1, 2 ),  6 );
-	EXPECT_EQ( prefix.range( 0, 2, 2, 3 ),  6 );
-	EXPECT_EQ( prefix.range( 1, 1, 3, 3 ),  9 );
-	EXPECT_EQ( prefix.range( 1, 2, 3, 3 ),  6 );
-}
-TEST( Prefix2dTest, Prefix2dAt )
-{
-	prefix_2d prefix( 4, 4, 1 );
-
-	EXPECT_EQ( prefix.at( 0, 0 ),  1 );
-	EXPECT_EQ( prefix.at( 1, 1 ),  4 );
-	EXPECT_EQ( prefix.at( 2, 2 ),  9 );
-	EXPECT_EQ( prefix.at( 3, 3 ), 16 );
-	EXPECT_EQ( prefix.at( 2, 3 ), 12 );
-	EXPECT_EQ( prefix.at( 3, 1 ),  8 );
-}
-TEST( Prefix2dTest, Prefix2dElementAt )
-{
-	prefix_2d prefix( 4, 4, 1 );
-
-	EXPECT_EQ( prefix.element_at( 0, 0 ), 1 );
-	EXPECT_EQ( prefix.element_at( 1, 1 ), 1 );
-	EXPECT_EQ( prefix.element_at( 2, 2 ), 1 );
-	EXPECT_EQ( prefix.element_at( 3, 3 ), 1 );
-	EXPECT_EQ( prefix.element_at( 0, 2 ), 1 );
-	EXPECT_EQ( prefix.element_at( 3, 1 ), 1 );
-	EXPECT_EQ( prefix.element_at( 2, 0 ), 1 );
-}
-TEST( Prefix2dTest, Prefix2dPushBack )
-{
-	prefix_2d< int > prefix( 2, 2 );
-
-	EXPECT_EQ( prefix.size_x(), 0 );
-	EXPECT_EQ( prefix.size_y(), 0 );
-
-	prefix.push_back( 1 );
-
-	EXPECT_EQ( prefix.size_x(), 0 );
-	EXPECT_EQ( prefix.size_y(), 1 );
-
-	prefix.push_back( 1 );
-
-	EXPECT_EQ( prefix.size_x(), 1 );
-	EXPECT_EQ( prefix.size_y(), 0 );
-
-	prefix.push_back( 1 );
-
-	EXPECT_EQ( prefix.size_x(), 1 );
-	EXPECT_EQ( prefix.size_y(), 1 );
-
-	prefix.push_back( 1 );
-
-	EXPECT_EQ( prefix.size_x(), 2 );
-	EXPECT_EQ( prefix.size_y(), 0 );
+	EXPECT_EQ( prefix_4d.range( 0, 3 ).range< int >( 0, 0, 0, 3, 3, 3 ), 256 );
+	EXPECT_EQ( prefix_4d.element_at( 3 ).element_at< int >( 3, 3, 3 )  ,   1 );
+	EXPECT_EQ( prefix_4d.at( 3 ).at< int >( 3, 3, 3 )                  , 256 );
 }
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////

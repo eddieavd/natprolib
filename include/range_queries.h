@@ -33,15 +33,13 @@ namespace range_queries
 
 /**
  *  prefix array
- *  vector-like container limited to arithmetic types
- *  holds sum of all previous elements at each index
+ *  container holding sum of all previous elements at each index
  *  allows for constant-time sum queries on any interval
  */
-template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+template< typename T >
 class prefix_array;
 
-template< typename T, bool C,
-	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
+template< typename T, bool C >
 class prefix_array_iterator
 {
 	friend class prefix_array< T >;
@@ -76,8 +74,8 @@ private:
 
 	explicit prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {};
 };
-// raw pointers ahead, it's 2021, i deserve to be punished
-template< typename T, typename U >
+
+template< typename T >
 class prefix_array
 {
 	using     value_type = T;
@@ -85,33 +83,34 @@ class prefix_array
 	using const_iterator = prefix_array_iterator< T,  true >;
 
 private:
-	T           * head_{ nullptr };
-	std::size_t   size_      { 0 };
-	std::size_t   capacity_  { 0 };
+	T           * data_ { nullptr };
+	std::size_t   size_       { 0 };
+	std::size_t   capacity_   { 0 };
 
-	void alloc  () { head_ = ( T* ) std::malloc( sizeof( T ) * capacity_ ); if( !head_ ) throw std::bad_alloc(); }
+	void alloc  () { data_ = ( T* ) std::malloc( sizeof( T ) * capacity_ ); if( !data_ ) throw std::bad_alloc(); }
 	void resize ()
 	{
-		auto new_cap = ( capacity_ + 1 ) * 1.618;  // golden ratio magic
-		auto tmp = ( T* ) std::realloc( head_, sizeof( T ) * new_cap );
+		auto new_cap = ( capacity_ + 1 ) * 1.618;
+		auto tmp = ( T* ) std::realloc( data_, sizeof( T ) * new_cap );
 
 		if( tmp )
 		{
-			head_     = tmp;
+			data_     = tmp;
 			capacity_ = new_cap;
 		}
 	}
+
 	void resize ( std::size_t _capacity_ )
 	{
 		if( _capacity_ > max_size() )
 		{
 			throw std::out_of_range( "capacity > max_size" );
 		}
-		auto tmp = ( T* ) std::realloc( head_, sizeof( T ) * _capacity_ );
+		auto tmp = ( T* ) std::realloc( data_, sizeof( T ) * _capacity_ );
 
 		if( tmp )
 		{
-			head_     = tmp;
+			data_     = tmp;
 			capacity_ = _capacity_;
 		}
 	}
@@ -119,78 +118,61 @@ private:
 	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < size_; }
 
 #ifdef _WIN32
-	std::size_t max_size () const noexcept
-	{
-		MEMORYSTATUSEX status;
-		status.dwLength = sizeof( status );
-		GlobalMemoryStatusEx( &status );
+        std::size_t max_size () const noexcept
+        {
+                MEMORYSTATUSEX status;
+                status.dwLength = sizeof( status );
+                GlobalMemoryStatusEx( &status );
 
-		return status.ullAvailPhys;
-	}
+                return status.ullAvailPhys;
+        }
 #else
-	std::size_t max_size () const noexcept
-	{
-		auto pages     = sysconf( _SC_PHYS_PAGES );
-		auto page_size = sysconf( _SC_PAGE_SIZE  );
+        std::size_t max_size () const noexcept
+        {
+                auto pages     = sysconf( _SC_PHYS_PAGES );
+                auto page_size = sysconf( _SC_PAGE_SIZE  );
 
-		return pages * page_size;
-	}
+                return pages * page_size;
+        }
 #endif
 
 public:
-	auto begin ()       { return       iterator{ head_         }; }
-	auto   end ()       { return       iterator{ head_ + size_ }; }
-	auto begin () const { return const_iterator{ head_         }; }
-	auto   end () const { return const_iterator{ head_ + size_ }; }
+	auto begin ()       { return       iterator{ data_         }; }
+	auto   end ()       { return       iterator{ data_ + size_ }; }
+	auto begin () const { return const_iterator{ data_         }; }
+	auto   end () const { return const_iterator{ data_ + size_ }; }
 
-	/**
-	 *  @brief returns sum on range ( 0 ... _index_ )
-	 *  @param _index_ - index of last element in range
-	 */
-	T const & operator[] ( std::size_t _index_ ) const noexcept
-	{ return head_[ _index_ ]; }
-
-	bool operator== ( prefix_array< T, U > const & rhs ) const noexcept
-	{ return head_ == rhs.head_; }
-
-	bool operator!= ( prefix_array< T, U > const & rhs ) const noexcept
-	{ return head_ != rhs.head_; }
-
-	prefix_array ( prefix_array const &  ) = delete;
-	prefix_array ( prefix_array       && ) = delete;
-
-	prefix_array (                                     ) : capacity_ { DEFAULT_CAPACITY } { alloc(); };
-	prefix_array (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc(); };
+	prefix_array (                                     ) : capacity_ { DEFAULT_CAPACITY } { alloc(); }
+	prefix_array (              std::size_t _capacity_ ) : capacity_ {       _capacity_ } { alloc(); }
 	prefix_array ( T ** _head_, std::size_t _capacity_ ) : capacity_ {       _capacity_ }
 	{
 		alloc();
 
-		for( std::size_t i = 0; i < _capacity_; ++i )
+		for( std::size_t i = 0; i < capacity_; ++i )
 		{
-			push_back( ( *_head_ )[ i ] );
+			data_[ i ] = ( *_head_ )[ i ];
+
+			if( i > 0 )
+			{
+				data_[ i ] += data_[ i - 1 ];
+			}
+
+			size_++;
 		}
+
 		*_head_ = nullptr;
 	}
 	prefix_array ( std::size_t _count_, T _value_ ) : capacity_ { _count_ }
 	{
 		alloc();
 
-		for( std::size_t i = 0; i < _count_; ++i )
+		for( std::size_t i = 0; i < capacity_; ++i )
 		{
 			push_back( _value_ );
 		}
 	}
-	prefix_array ( std::initializer_list< T > const & _list_ ) : capacity_ { _list_.size() }
-	{
-		alloc();
-
-		for( T const & it : _list_ )
-		{
-			push_back( it );
-		}
-	}
 	template< typename Iterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< Iterator >::value_type, void > > >
-	prefix_array ( Iterator begin, Iterator end ) : capacity_ { DEFAULT_CAPACITY }
+	prefix_array ( Iterator begin, Iterator end ) : capacity_ { static_cast< std::size_t >( std::distance( begin, end ) ) }
 	{
 		alloc();
 
@@ -199,14 +181,92 @@ public:
 			push_back( *begin++ );
 		}
 	}
+	prefix_array ( std::initializer_list< T > const & _list_ ) : capacity_ { _list_.size() }
+	{
+		alloc();
+
+		for( T const & val : _list_ )
+		{
+			push_back( val );
+		}
+	}
+
+	auto & operator+= ( prefix_array< T > const & _rhs_ ) const
+	{
+		assert( size_ == _rhs_.size_ );
+
+		for( std::size_t i = 0; i < size_; ++i )
+		{
+			data_[ i ] += _rhs_.data_[ i ];
+		}
+
+		return *this;
+	}
+
+	auto operator+ ( prefix_array< T > const & _rhs_ ) const
+	{
+		assert( size_ == _rhs_.size_ );
+
+		prefix_array< T > res( size_ );
+
+		for( std::size_t i = 0; i < size_; ++i )
+		{
+			res.push_back( element_at( i ) + _rhs_.element_at( i ) );
+		}
+
+		return res;
+	}
+
+	auto & operator-= ( prefix_array< T > const & _rhs_ ) const
+	{
+		assert( size_ == _rhs_.size_ );
+
+		for( std::size_t i = 0; i < size_; ++i )
+		{
+			data_[ i ] -= _rhs_.data_[ i ];
+		}
+
+		return *this;
+	}
+
+	auto operator- ( prefix_array< T > const & _rhs_ ) const
+	{
+		assert( size_ == _rhs_.size_ );
+
+		prefix_array< T > res( size_ );
+
+		for( std::size_t i = 0; i < size_; ++i )
+		{
+			res.push_back( element_at( i ) - _rhs_.element_at( i ) );
+		}
+
+		return res;
+	}
+
+	bool operator== ( prefix_array< T > const & _rhs_ ) const
+	{
+		if( size_ != _rhs_.size_ )
+		{
+			return false;
+		}
+
+		for( std::size_t i = 0; i < size_; ++i )
+		{
+			if( element_at( i ) != _rhs_.element_at( i ) )
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	T const & operator[] ( std::size_t _index_ ) const noexcept
+	{ return data_[ _index_ ]; }
 
 	std::size_t     size () const noexcept { return     size_; }
 	std::size_t capacity () const noexcept { return capacity_; }
 
-	/**
-	 *  @brief returns sum on range ( 0 ... _index_ )
-	 *  @param _index_ - index of last element in range
-	 */
 	T const & at ( std::size_t _index_ ) const
 	{
 		if( !is_index_in_range( _index_ ) )
@@ -217,11 +277,18 @@ public:
 		return operator[]( _index_ );
 	}
 
-	/**
-	 *  @brief returns sum on range ( _x_ ... _y_ )
-	 *  @param _x_ - index of first element in range
-	 *  @param _y_ - index of last element in range
-	 */
+	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< U > > > >
+	U const & at ( std::size_t _x_, std::size_t _y_ ) const
+	{
+		return at( _x_ ).at( _y_ );
+	}
+
+	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< prefix_array< U > > > > >
+	U const & at ( std::size_t _x_, std::size_t _y_, std::size_t _z_ ) const
+	{
+		return at( _x_ ).at( _y_ ).at( _z_ );
+	}
+
 	T range ( std::size_t _x_, std::size_t _y_ ) const
 	{
 		if( !is_index_in_range( _x_ ) || !is_index_in_range( _y_ ) )
@@ -234,321 +301,85 @@ public:
 			operator[]( _y_ ) - operator[]( _x_ - 1 );
 	}
 
-	/**
-	 *  @brief returns original value of element
-	 *  @param _index_ - index of the element
-	 */
-	T element_at ( std::size_t _index_ ) const
+	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< U > > > >
+	U range ( std::size_t _x1_, std::size_t _y1_, std::size_t _x2_, std::size_t _y2_ ) const
 	{
-		if( !is_index_in_range( _index_ ) )
-		{
-			throw std::out_of_range( "index out of bounds" );
-		}
-
-		return _index_ == 0 ?
-			operator[]( _index_ ) :
-			operator[]( _index_ ) - operator[]( _index_ - 1 );
+		return range( _x1_, _x2_ ).range( _y1_, _y2_ );
 	}
 
-	void update ( T _value_, std::size_t _index_ )
+	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< prefix_array< U > > > > >
+	U range ( std::size_t _x1_, std::size_t _y1_, std::size_t _z1_,
+			std::size_t _x2_, std::size_t _y2_, std::size_t _z2_ ) const
 	{
-		if( !is_index_in_range( _index_ ) )
-		{
-			throw std::out_of_range( "index out of bounds" );
-		}
+		return range( _x1_, _x2_ ).range( _y1_, _y2_ ).range( _z1_, _z2_ );
+	}
 
-		T current = element_at( _index_ );
-		T diff    = _value_ - current;
+	T element_at ( std::size_t _index_ ) const
+	{
+		return range( _index_, _index_ );
+	}
 
-		for( std::size_t i = _index_; i < size_; ++i )
-		{
-			head_[ i ] += diff;
-		}
+	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< U > > > >
+	U element_at ( std::size_t _x_, std::size_t _y_ ) const
+	{
+		return element_at( _x_ ).element_at( _y_ );
+	}
+
+	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< prefix_array< U > > > > >
+	U element_at ( std::size_t _x_, std::size_t _y_, std::size_t _z_ ) const
+	{
+		return element_at( _x_ ).element_at( _y_ ).element_at( _z_ );
 	}
 
 	void reserve ( std::size_t _capacity_ ) { resize( _capacity_ ); }
 
-	/**
-	 *  @brief inserts element at the end and adds previous sum
-	 *  @param _value_ - value to be pushed back
-	 */
 	void push_back ( T _value_ )
 	{
-		if( capacity_ <= size_ ) { resize(); }
+		if( size_ >= capacity_ )
+		{
+			resize();
+		}
 
 		if( size_ == 0 )
 		{
-			head_[ size_ ] = _value_;
+			data_[ size_ ] = _value_;
 		}
 		else
 		{
-			head_[ size_ ] = head_[ size_ - 1 ] + _value_;
+			data_[ size_ ] = _value_ + data_[ size_ - 1 ];
 		}
+
 		size_++;
 	}
 
 	template< typename... Args >
-	void push_back ( T _value_, Args... _values_ )
+	void push_back ( T _value_, Args&&... _args_ )
 	{
 		push_back( _value_ );
-		push_back( _values_... );
+		push_back( _args_... );
 	}
 
 	template< typename... Args >
-	void emplace_back ( Args&&... args )
+	void emplace_back ( Args&&... _args_ )
 	{
-		if( capacity_ <= size_ ) { resize(); }
+		if( size_ >= capacity_ )
+		{
+			resize();
+		}
 
 		if( size_ == 0 )
 		{
-			head_[ size_ ] = T ( args... );
+			data_[ size_ ] = std::move( T( _args_... ) );
 		}
 		else
 		{
-			head_[ size_ ] = T ( args... );
-			head_[ size_ ] += head_[ size_ - 1 ];
+			data_[ size_ ] = T( _args_... ) + data_[ size_ - 1 ];
 		}
+
 		size_++;
 	}
 
-	~prefix_array () { free( head_ ); }
-};
-
-
-template< typename T, typename = std::enable_if_t< std::is_arithmetic_v< T > > >
-class prefix_2d;
-
-template< typename T, bool C,
-	  typename = std::enable_if_t< std::is_arithmetic_v< T > > >
-class prefix_2d_iterator
-{
-	friend class prefix_2d< T >;
-	friend class prefix_2d_iterator< T, !C >;
-
-public:
-	using difference_type   = std::ptrdiff_t;
-	using value_type        = T;
-	using pointer           = std::conditional_t< C, T const *, T * >;
-	using reference         = std::conditional_t< C, T const &, T & >;
-	using iterator_category = std::random_access_iterator_tag;
-
-	reference   operator* (     ) const { return *ptr_; }
-	auto      & operator++(     )       { ptr_++; return *this; }
-	auto      & operator--(     )       { ptr_--; return *this; }
-	auto        operator++( int )       { auto it = *this; ++*this; return it; }
-	auto        operator--( int )       { auto it = *this; --*this; return it; }
-
-	template< bool R >
-	bool operator== ( prefix_2d_iterator< T, R > const & rhs ) const
-	{ return ptr_ == rhs.ptr_; }
-
-	template< bool R >
-	bool operator!= ( prefix_2d_iterator< T, R > const & rhs ) const
-	{ return ptr_ != rhs.ptr_; }
-
-	operator prefix_2d_iterator< T, true > () const
-	{ return prefix_2d_iterator< T, true >{ ptr_ }; }
-
-private:
-	pointer ptr_;
-
-	explicit prefix_2d_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
-};
-
-template< typename T, typename U >
-class prefix_2d
-{
-	using     value_type = T;
-	using       iterator = prefix_2d_iterator< T, false >;
-	using const_iterator = prefix_2d_iterator< T,  true >;
-
-private:
-	T           * data_ { nullptr };
-	std::size_t   size_x_     { 0 };
-	std::size_t   size_y_     { 0 };
-	std::size_t   capacity_x_ { 0 };
-	std::size_t   capacity_y_ { 0 };
-
-	void alloc ()
-	{
-		data_ = ( T* ) std::malloc( sizeof( T ) * capacity_x_ * capacity_y_ );
-
-		if( !data_ )
-		{
-			throw std::bad_alloc();
-		}
-	}
-
-	bool is_index_in_range ( std::size_t _x_, std::size_t _y_ ) const noexcept { return _x_ * capacity_y_ + _y_ < size_x_ * capacity_y_ + size_y_; }
-
-#ifdef _WIN32
-	std::size_t max_size () const noexcept
-	{
-		return 0;
-	}
-#else
-	std::size_t max_size () const noexcept
-	{
-		auto pages     = sysconf( _SC_PHYS_PAGES );
-		auto page_size = sysconf( _SC_PAGE_SIZE  );
-
-		return pages * page_size;
-	}
-#endif
-
-public:
-	auto begin ()       { return       iterator{ data_                                       }; }
-	auto   end ()       { return       iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
-	auto begin () const { return const_iterator{ data_                                       }; }
-	auto   end () const { return const_iterator{ data_ + ( size_x_ * capacity_y_ + size_y_ ) }; }
-
-	T const & operator[] ( std::size_t _index_ ) const noexcept
-	{ return data_[ _index_ ]; }
-
-	prefix_2d (                                                            ) : capacity_x_{ DEFAULT_CAPACITY }, capacity_y_{ DEFAULT_CAPACITY } { alloc();                 }
-	prefix_2d (                                           T const & _fill_ ) : capacity_x_{ DEFAULT_CAPACITY }, capacity_y_{ DEFAULT_CAPACITY } { alloc(); fill( _fill_ ); }
-	prefix_2d ( std::size_t _cap_x_, std::size_t _cap_y_                   ) : capacity_x_{          _cap_x_ }, capacity_y_{          _cap_y_ } { alloc();                 }
-	prefix_2d ( std::size_t _cap_x_, std::size_t _cap_y_, T const & _fill_ ) : capacity_x_{          _cap_x_ }, capacity_y_{          _cap_y_ } { alloc(), fill( _fill_ ); }
-	prefix_2d ( std::size_t _cap_x_, std::size_t _cap_y_,
-			std::initializer_list< T > const & _list_ ) : capacity_x_{ _cap_x_ }, capacity_y_{ _cap_y_ } { alloc(); fill( _list_ ); }
-
-	void fill ( T _value_ )
-	{
-		for( std::size_t i = 0; i < capacity_x_ * capacity_y_; ++i )
-		{
-			push_back( _value_ );
-		}
-	}
-
-	void fill ( std::initializer_list< T > const & _list_ )
-	{
-		if( _list_.size() > capacity_x_ * capacity_y_ )
-		{
-			throw std::out_of_range( "init list too large" );
-		}
-
-		for( T const & t : _list_ )
-		{
-			push_back( t );
-		}
-	}
-
-	std::size_t     size_x () const noexcept { return     size_x_; }
-	std::size_t     size_y () const noexcept { return     size_y_; }
-	std::size_t capacity_x () const noexcept { return capacity_x_; }
-	std::size_t capacity_y () const noexcept { return capacity_y_; }
-
-	T const & at ( std::size_t _x_, std::size_t _y_ ) const
-	{
-		if( !is_index_in_range( _x_, _y_ ) )
-		{
-			throw std::out_of_range( "index out of bounds" );
-		}
-
-		return data_[ _x_ * capacity_y_ + _y_ ];
-	}
-
-	T range ( std::size_t _x1_, std::size_t _y1_,
-			std::size_t _x2_, std::size_t _y2_ ) const
-	{
-		if( !is_index_in_range( _x1_, _y1_ ) || !is_index_in_range( _x2_, _y2_ ) )
-		{
-			throw std::out_of_range( "index out of bounds" );
-		}
-
-		if( _x1_ == 0 && _y1_ == 0 )
-		{
-			return data_[ _x2_ * capacity_y_ + _y2_ ];
-		}
-		else if( _x1_ == 0 )
-		{
-			return data_[ _x2_ * capacity_y_ + _y2_ ] - data_[ _x2_ * capacity_y_ + _y1_ - 1 ];
-		}
-		else if( _y1_ == 0 )
-		{
-			return data_[ _x2_ * capacity_y_ + _y2_ ] - data_[ ( _x1_ - 1 ) * capacity_y_ + _y2_ ];
-		}
-		else
-		{
-			return data_[ _x2_ * capacity_y_ + _y2_ ]
-				- data_[   _x2_       * capacity_y_ + _y1_ - 1 ]
-				- data_[ ( _x1_ - 1 ) * capacity_y_ + _y2_     ]
-				+ data_[ ( _x1_ - 1 ) * capacity_y_ + _y1_ - 1 ];
-		}
-	}
-
-	T range () const
-	{
-		return range( 0, 0, ( size_x_ - 1 ) % capacity_x_, ( size_y_ - 1 ) % capacity_y_ );
-	}
-
-	T element_at ( std::size_t _x_, std::size_t _y_ ) const
-	{
-		return range( _x_, _y_, _x_, _y_ );
-	}
-
-	void update ( T _value_, std::size_t _x_, std::size_t _y_ )
-	{
-		if( !is_index_in_range( _x_, _y_ ) )
-		{
-			throw std::out_of_range( "index out of bounds" );
-		}
-
-		auto diff = _value_ - element_at( _x_, _y_ );
-
-		for( std::size_t i = _x_; i < size_x_; ++i )
-		{
-			for( std::size_t j = _y_; j < size_y_; ++j )
-			{
-				data_[ i * capacity_y_ + j ] += diff;
-			}
-		}
-	}
-
-	void push_back ( T _value_ )
-	{
-		if( size_x_ >= capacity_x_ )
-		{
-			return;
-		}
-
-		if( size_x_ == 0  && size_y_ == 0 )
-		{
-			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_;
-		}
-		else if( size_x_ == 0 )
-		{
-			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_ + data_[ size_x_ * capacity_y_ + size_y_ - 1 ];
-		}
-		else if( size_y_ == 0 )
-		{
-			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_ + data_[ ( size_x_ - 1 ) * capacity_y_ + size_y_ ];
-		}
-		else
-		{
-			data_[ size_x_ * capacity_y_ + size_y_ ] = _value_
-				+ data_[ ( size_x_ - 1 ) * capacity_y_ + size_y_     ]
-				+ data_[   size_x_       * capacity_y_ + size_y_ - 1 ]
-				- data_[ ( size_x_ - 1 ) * capacity_y_ + size_y_ - 1 ];
-		}
-
-		size_y_++;
-
-		if( size_y_ >= capacity_y_ )
-		{
-			size_x_++;
-			size_y_ = 0;
-		}
-	}
-
-	template< typename... Args >
-	void push_back ( T _value_, Args... _values_ )
-	{
-		push_back( _value_ );
-		push_back( _values_... );
-	}
-
-	~prefix_2d () { free( data_ ); }
+	~prefix_array () {};
 };
 
 
