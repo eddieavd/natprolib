@@ -82,60 +82,6 @@ class prefix_array
 	using       iterator = prefix_array_iterator< T, false >;
 	using const_iterator = prefix_array_iterator< T,  true >;
 
-private:
-	T           * data_ { nullptr };
-	std::size_t   size_       { 0 };
-	std::size_t   capacity_   { 0 };
-
-	void alloc  () { data_ = ( T* ) std::malloc( sizeof( T ) * capacity_ ); if( !data_ ) throw std::bad_alloc(); }
-	void resize ()
-	{
-		auto new_cap = ( capacity_ + 1 ) * 1.618;
-		auto tmp = ( T* ) std::realloc( data_, sizeof( T ) * new_cap );
-
-		if( tmp )
-		{
-			data_     = tmp;
-			capacity_ = new_cap;
-		}
-	}
-
-	void resize ( std::size_t _capacity_ )
-	{
-		if( _capacity_ > max_size() )
-		{
-			throw std::out_of_range( "capacity > max_size" );
-		}
-		auto tmp = ( T* ) std::realloc( data_, sizeof( T ) * _capacity_ );
-
-		if( tmp )
-		{
-			data_     = tmp;
-			capacity_ = _capacity_;
-		}
-	}
-
-	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < size_; }
-
-#ifdef _WIN32
-        std::size_t max_size () const noexcept
-        {
-                MEMORYSTATUSEX status;
-                status.dwLength = sizeof( status );
-                GlobalMemoryStatusEx( &status );
-
-                return status.ullAvailPhys;
-        }
-#else
-        std::size_t max_size () const noexcept
-        {
-                auto pages     = sysconf( _SC_PHYS_PAGES );
-                auto page_size = sysconf( _SC_PAGE_SIZE  );
-
-                return pages * page_size;
-        }
-#endif
-
 public:
 	auto begin ()       { return       iterator{ data_         }; }
 	auto   end ()       { return       iterator{ data_ + size_ }; }
@@ -150,14 +96,7 @@ public:
 
 		for( std::size_t i = 0; i < capacity_; ++i )
 		{
-			data_[ i ] = ( *_head_ )[ i ];
-
-			if( i > 0 )
-			{
-				data_[ i ] += data_[ i - 1 ];
-			}
-
-			size_++;
+			push_back( ( *_head_ )[ i ] );
 		}
 
 		*_head_ = nullptr;
@@ -193,7 +132,10 @@ public:
 
 	auto & operator+= ( prefix_array< T > const & _rhs_ ) const
 	{
-		assert( size_ == _rhs_.size_ );
+		if( size_ != _rhs_.size_ )
+		{
+			throw std::out_of_range( "size != rhs.size" );
+		}
 
 		for( std::size_t i = 0; i < size_; ++i )
 		{
@@ -205,7 +147,10 @@ public:
 
 	auto operator+ ( prefix_array< T > const & _rhs_ ) const
 	{
-		assert( size_ == _rhs_.size_ );
+		if( size_ != _rhs_.size_ )
+		{
+			throw std::out_of_range( "size != rhs.size" );
+		}
 
 		prefix_array< T > res( size_ );
 
@@ -219,7 +164,10 @@ public:
 
 	auto & operator-= ( prefix_array< T > const & _rhs_ ) const
 	{
-		assert( size_ == _rhs_.size_ );
+		if( size_ != _rhs_.size_ )
+		{
+			throw std::out_of_range( "size != rhs.size" );
+		}
 
 		for( std::size_t i = 0; i < size_; ++i )
 		{
@@ -231,7 +179,10 @@ public:
 
 	auto operator- ( prefix_array< T > const & _rhs_ ) const
 	{
-		assert( size_ == _rhs_.size_ );
+		if( size_ != _rhs_.size_ )
+		{
+			throw std::out_of_range( "size != rhs.size" );
+		}
 
 		prefix_array< T > res( size_ );
 
@@ -243,7 +194,7 @@ public:
 		return res;
 	}
 
-	bool operator== ( prefix_array< T > const & _rhs_ ) const
+	bool operator== ( prefix_array< T > const & _rhs_ ) const noexcept
 	{
 		if( size_ != _rhs_.size_ )
 		{
@@ -277,12 +228,14 @@ public:
 		return operator[]( _index_ );
 	}
 
+	//  2D overload
 	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< U > > > >
 	U const & at ( std::size_t _x_, std::size_t _y_ ) const
 	{
 		return at( _x_ ).at( _y_ );
 	}
 
+	//  3D overload
 	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< prefix_array< U > > > > >
 	U const & at ( std::size_t _x_, std::size_t _y_, std::size_t _z_ ) const
 	{
@@ -301,12 +254,14 @@ public:
 			operator[]( _y_ ) - operator[]( _x_ - 1 );
 	}
 
+	//  2D overload
 	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< U > > > >
 	U range ( std::size_t _x1_, std::size_t _y1_, std::size_t _x2_, std::size_t _y2_ ) const
 	{
 		return range( _x1_, _x2_ ).range( _y1_, _y2_ );
 	}
 
+	//  3D overload
 	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< prefix_array< U > > > > >
 	U range ( std::size_t _x1_, std::size_t _y1_, std::size_t _z1_,
 			std::size_t _x2_, std::size_t _y2_, std::size_t _z2_ ) const
@@ -319,12 +274,14 @@ public:
 		return range( _index_, _index_ );
 	}
 
+	//  2D overload
 	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< U > > > >
 	U element_at ( std::size_t _x_, std::size_t _y_ ) const
 	{
 		return element_at( _x_ ).element_at( _y_ );
 	}
 
+	//  3D overload
 	template< typename U, typename = std::enable_if_t< std::is_same_v< T, prefix_array< prefix_array< U > > > > >
 	U element_at ( std::size_t _x_, std::size_t _y_, std::size_t _z_ ) const
 	{
@@ -379,7 +336,70 @@ public:
 		size_++;
 	}
 
-	~prefix_array () {};
+	~prefix_array ()
+	{
+		for( std::size_t i = 0; i < size_; ++i )
+		{
+			~( *data_ )[ i ];
+		}
+
+		free( data_ );
+	}
+
+private:
+	T           * data_ { nullptr };
+	std::size_t   size_       { 0 };
+	std::size_t   capacity_   { 0 };
+
+	void alloc  () { data_ = ( T* ) std::malloc( sizeof( T ) * capacity_ ); if( !data_ ) throw std::bad_alloc(); }
+	void resize ()
+	{
+		auto new_cap = ( capacity_ + 1 ) * 1.618;  //  golden ratio magic
+		auto tmp = ( T* ) std::realloc( data_, sizeof( T ) * new_cap );
+
+		if( tmp )
+		{
+			data_     = tmp;
+			capacity_ = new_cap;
+		}
+	}
+
+	void resize ( std::size_t _capacity_ )
+	{
+		if( _capacity_ > max_size() )
+		{
+			throw std::out_of_range( "capacity > max_size" );
+		}
+
+		auto tmp = ( T* ) std::realloc( data_, sizeof( T ) * _capacity_ );
+
+		if( tmp )
+		{
+			data_     = tmp;
+			capacity_ = _capacity_;
+		}
+	}
+
+	bool is_index_in_range ( std::size_t _index_ ) const noexcept { return _index_ < size_; }
+
+#ifdef _WIN32
+        std::size_t max_size () const noexcept
+        {
+                MEMORYSTATUSEX status;
+                status.dwLength = sizeof( status );
+                GlobalMemoryStatusEx( &status );
+
+                return status.ullAvailPhys;
+        }
+#else
+        std::size_t max_size () const noexcept
+        {
+                auto pages     = sysconf( _SC_PHYS_PAGES );
+                auto page_size = sysconf( _SC_PAGE_SIZE  );
+
+                return pages * page_size;
+        }
+#endif
 };
 
 
