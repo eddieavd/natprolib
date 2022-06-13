@@ -78,11 +78,11 @@ private:
 template< typename T >
 class prefix_array
 {
+public:
 	using     value_type = T;
 	using       iterator = prefix_array_iterator< T, false >;
 	using const_iterator = prefix_array_iterator< T,  true >;
 
-public:
 	auto begin ()       { return       iterator{ data_         }; }
 	auto   end ()       { return       iterator{ data_ + size_ }; }
 	auto begin () const { return const_iterator{ data_         }; }
