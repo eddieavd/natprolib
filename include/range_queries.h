@@ -336,15 +336,7 @@ public:
 		size_++;
 	}
 
-	~prefix_array ()
-	{
-		for( std::size_t i = 0; i < size_; ++i )
-		{
-			~( *data_ )[ i ];
-		}
-
-		free( data_ );
-	}
+	~prefix_array () {}
 
 private:
 	T           * data_ { nullptr };
