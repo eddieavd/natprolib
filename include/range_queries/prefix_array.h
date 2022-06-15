@@ -281,36 +281,36 @@ public:
 	prefix_array ( size_type _n_, value_type const & _x_                             );
 	prefix_array ( size_type _n_, value_type const & _x_, allocator_type const & _a_ );
 
-	template< typename InputIterator >
+	template< typename InputIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< InputIterator >::value_type, void > > >
 	prefix_array ( InputIterator _first_,
-			typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-			                          !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+			typename std::enable_if_t< is_cpp17_input_iterator< InputIterator   >::value &&
+			                          !is_cpp17_forward_iterator< InputIterator >::value &&
 						   std::is_constructible_v<
 							value_type,
 							typename std::iterator_traits< InputIterator >::reference
 						>,
 						InputIterator > _last_ );
 
-	template< typename InputIterator >
+	template< typename InputIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< InputIterator >::value_type, void > > >
 	prefix_array ( InputIterator _first_, InputIterator _last_, allocator_type const & _a_,
-			typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-			                          !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+			typename std::enable_if_t< is_cpp17_input_iterator< InputIterator   >::value &&
+			                          !is_cpp17_forward_iterator< InputIterator >::value &&
 						   std::is_constructible_v<
 						 	value_type,
 							typename std::iterator_traits< InputIterator >::reference
 						> > * = 0 );
-	template< typename ForwardIterator >
+	template< typename ForwardIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< ForwardIterator >::value_type, void > > >
 	prefix_array ( ForwardIterator _first_,
-			typename std::enable_if_t< std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+			typename std::enable_if_t< is_cpp17_forward_iterator< ForwardIterator >::value &&
 						   std::is_constructible_v<
 						 	value_type,
 							typename std::iterator_traits< ForwardIterator >:: reference
 						>,
 						ForwardIterator > _last_ );
 
-	template< typename ForwardIterator >
+	template< typename ForwardIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< ForwardIterator >::value_type, void > > >
 	prefix_array ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _a_,
-			typename std::enable_if_t< std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+			typename std::enable_if_t< is_cpp17_forward_iterator< ForwardIterator >::value &&
 						   std::is_constructible_v<
 						 	value_type,
 							typename std::iterator_traits< ForwardIterator >::reference
@@ -324,7 +324,7 @@ public:
 	}
 
 	prefix_array ( prefix_array const & _x_                                                );
-	prefix_array ( prefix_array const & _x_, std::__identity< allocator_type > const & _a_ );
+	prefix_array ( prefix_array const & _x_, _identity< allocator_type > const & _a_ );
 
 	prefix_array & operator= ( prefix_array const & _x_ );
 
@@ -332,7 +332,7 @@ public:
 	prefix_array ( std::initializer_list< value_type > _list_, allocator_type const & _a_ );
 
 	prefix_array ( prefix_array && _x_                                                ) noexcept;
-	prefix_array ( prefix_array && _x_, std::__identity< allocator_type > const & _a_ );
+	prefix_array ( prefix_array && _x_, _identity< allocator_type > const & _a_ );
 
 	prefix_array & operator= ( prefix_array && _x_ )
 		noexcept(( std::__noexcept_move_assign_container< Allocator, _alloc_traits >::value ));
@@ -340,11 +340,11 @@ public:
 	prefix_array & operator= ( std::initializer_list< value_type > _list_ )
 	{ assign( _list_.begin(), _list_.end() ); return *this; }
 
-	template< typename InputIterator >
+	template< typename InputIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< InputIterator >::value_type, void > > >
 		typename std::enable_if_t
 		<
-			 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-			!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+			 is_cpp17_input_iterator< InputIterator   >::value &&
+			!is_cpp17_forward_iterator< InputIterator >::value &&
 			 std::is_constructible_v<
 			 	value_type,
 				typename std::iterator_traits< InputIterator >::reference
@@ -353,10 +353,10 @@ public:
 		>
 	assign ( InputIterator _first_, InputIterator _last_ );
 
-	template< typename ForwardIterator >
+	template< typename ForwardIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< ForwardIterator >::value_type, void > > >
 		typename std::enable_if_t
 		<
-			std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+			is_cpp17_forward_iterator< ForwardIterator >::value &&
 			std::is_constructible_v<
 				value_type,
 				typename std::iterator_traits< ForwardIterator >::reference
@@ -555,11 +555,11 @@ private:
 	iterator emplace ( const_iterator _position_, Args&&... _args_ );
 
 	iterator insert ( const_iterator _position_, size_type _n_, const_reference _x_ );
-	template< typename InputIterator >
+	template< typename InputIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< InputIterator >::value_type, void > > >
 		typename std::enable_if_t
 		<
-			 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-			!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+			 is_cpp17_input_iterator< InputIterator   >::value &&
+			!is_cpp17_forward_iterator< InputIterator >::value &&
 			 std::is_constructible_v<
 			 	value_type,
 				typename std::iterator_traits< InputIterator >::reference
@@ -568,10 +568,10 @@ private:
 		>
 	insert ( const_iterator _position_, InputIterator _first_, InputIterator _last_ );
 
-	template< typename ForwardIterator >
+	template< typename ForwardIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< ForwardIterator >::value_type, void > > >
 		typename std::enable_if_t
 		<
-			std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+			is_cpp17_forward_iterator< ForwardIterator >::value &&
 			std::is_constructible_v<
 				value_type,
 				typename std::iterator_traits< ForwardIterator >::reference
@@ -621,10 +621,10 @@ private:
 	void _construct_at_end ( size_type _n_                      );
 	void _construct_at_end ( size_type _n_, const_reference _x_ );
 
-	template< typename ForwardIterator >
+	template< typename ForwardIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< ForwardIterator >::value_type, void > > >
 		typename std::enable_if_t
 		<
-			std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value,
+			is_cpp17_forward_iterator< ForwardIterator >::value,
 			void
 		>
 	_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type _n_ );
@@ -901,10 +901,10 @@ prefix_array< T, Allocator >::_construct_at_end ( size_type _n_, const_reference
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
+template< typename ForwardIterator, typename U >
 typename std::enable_if_t
 <
-	std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value,
+	is_cpp17_forward_iterator< ForwardIterator >::value,
 	void
 >
 prefix_array< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, [[ maybe_unused ]] size_type _n_ )
@@ -1007,10 +1007,10 @@ prefix_array< T, Allocator >::prefix_array ( size_type _n_, value_type const & _
 }
 
 template< typename T, typename Allocator >
-template< typename InputIterator >
+template< typename InputIterator, typename U >
 prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
-		typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-					  !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+		typename std::enable_if_t< is_cpp17_input_iterator< InputIterator   >::value &&
+					  !is_cpp17_forward_iterator< InputIterator >::value &&
 					   std::is_constructible_v<
 					   	value_type,
 						typename std::iterator_traits< InputIterator >::reference
@@ -1026,10 +1026,10 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
 }
 
 template< typename T, typename Allocator >
-template< typename InputIterator >
+template< typename InputIterator, typename U >
 prefix_array< T, Allocator >::prefix_array ( InputIterator _first_, InputIterator _last_, allocator_type const & _a_,
-		typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-			                  !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+		typename std::enable_if_t< is_cpp17_input_iterator< InputIterator   >::value &&
+			                  !is_cpp17_forward_iterator< InputIterator >::value &&
 					   std::is_constructible_v<
 						 	value_type,
 							typename std::iterator_traits< InputIterator >::reference
@@ -1045,9 +1045,9 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_, InputIterato
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
+template< typename ForwardIterator, typename U >
 prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_,
-		typename std::enable_if_t< std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+		typename std::enable_if_t< is_cpp17_forward_iterator< ForwardIterator >::value &&
 					   std::is_constructible_v<
 					   	value_type,
 						typename std::iterator_traits< ForwardIterator >::reference
@@ -1066,9 +1066,9 @@ prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_,
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
+template< typename ForwardIterator, typename U >
 prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _a_,
-		typename std::enable_if_t< std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+		typename std::enable_if_t< is_cpp17_forward_iterator< ForwardIterator >::value &&
 					   std::is_constructible_v<
 					 	value_type,
 						typename std::iterator_traits< ForwardIterator >::reference
@@ -1106,7 +1106,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array const & _x_ )
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( prefix_array const & _x_, std::__identity< allocator_type > const & _a_ )
+prefix_array< T, Allocator >::prefix_array ( prefix_array const & _x_, _identity< allocator_type > const & _a_ )
 	: _base( _a_ )
 {
 #if _NPL_DEBUG_LEVEL == 2
@@ -1139,7 +1139,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array && _x_ ) noexcept
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator >::prefix_array ( prefix_array && _x_, std::__identity< allocator_type > const & _a_ )
+prefix_array< T, Allocator >::prefix_array ( prefix_array && _x_, _identity< allocator_type > const & _a_ )
 	: _base( _a_ )
 {
 #if _NPL_DEBUG_LEVEL == 2
@@ -1241,11 +1241,11 @@ prefix_array< T, Allocator >::operator= ( prefix_array const & _x_ )
 }
 
 template< typename T, typename Allocator >
-template< typename InputIterator >
+template< typename InputIterator, typename U >
 typename std::enable_if_t
 <
-	 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-	!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+	 is_cpp17_input_iterator< InputIterator   >::value &&
+	!is_cpp17_forward_iterator< InputIterator >::value &&
 	 std::is_constructible_v<
 	 	T,
 		typename std::iterator_traits< InputIterator >::reference
@@ -1263,10 +1263,10 @@ prefix_array< T, Allocator >::assign ( InputIterator _first_, InputIterator _las
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
+template< typename ForwardIterator, typename U >
 typename std::enable_if_t
 <
-	std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+	is_cpp17_forward_iterator< ForwardIterator >::value &&
 	std::is_constructible_v<
 		T,
 		typename std::iterator_traits< ForwardIterator >::reference
@@ -1923,11 +1923,11 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, size_type _n_,
 }
 
 template< typename T, typename Allocator >
-template< typename InputIterator >
+template< typename InputIterator, typename U >
 typename std::enable_if_t
 <
-	 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
-	!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
+	 is_cpp17_input_iterator< InputIterator   >::value &&
+	!is_cpp17_forward_iterator< InputIterator >::value &&
 	 std::is_constructible_v<
 	 	T,
 		typename std::iterator_traits< InputIterator >::reference
@@ -1984,10 +1984,10 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, InputIterator 
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
+template< typename ForwardIterator, typename U >
 typename std::enable_if_t
 <
-	std::__has_iterator_category_convertible_to< ForwardIterator, std::forward_iterator_tag >::value &&
+	is_cpp17_forward_iterator< ForwardIterator >::value &&
 	std::is_constructible_v<
 		T,
 		typename std::iterator_traits< ForwardIterator >::reference
