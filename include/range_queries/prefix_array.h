@@ -53,8 +53,53 @@ void _prefix_array_base_common< B >::_throw_out_of_range () const
 
 extern template class NPL_EXTERN_TEMPLATE_VIS _prefix_array_base_common< true >;
 
+template< typename T, typename Allocator = std::allocator< T > >
+class _prefix_array_base;
 
 template< typename T, typename Allocator = std::allocator< T > >
+class prefix_array;
+
+template< typename T, bool C, typename Allocator = std::allocator< T > >
+class _prefix_array_base_iterator
+{
+	friend class prefix_array< T, Allocator >;
+	friend class _prefix_array_base< T, Allocator >;
+	friend class _prefix_array_base_iterator< T, !C, Allocator >;
+
+public:
+	using        value_type = T;
+	using     _alloc_traits = typename std::allocator_traits< Allocator >;
+	using   difference_type = typename _alloc_traits::difference_type;
+	using           pointer = typename _alloc_traits::pointer;
+	using     const_pointer = typename _alloc_traits::const_pointer;
+	using         reference = value_type &;
+	using   const_reference = value_type const &;
+	using iterator_category = std::random_access_iterator_tag;
+
+	reference   operator* (     ) const { return *ptr_; }
+	auto      & operator++(     )       { ptr_++; return *this; }
+	auto      & operator--(     )       { ptr_--; return *this; }
+	auto        operator++( int )       { auto it = *this; ++*this; return it; }
+	auto        operator--( int )       { auto it = *this; --*this; return it; }
+
+	template< bool R >
+	bool operator== ( _prefix_array_base_iterator< T, R, Allocator > const & rhs ) const noexcept
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	bool operator!= ( _prefix_array_base_iterator< T, R, Allocator > const & rhs ) const noexcept
+	{ return ptr_ != rhs.ptr_; }
+
+	operator _prefix_array_base_iterator< T, true > () const
+	{ return _prefix_array_base_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit _prefix_array_base_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
+};
+
+template< typename T, typename Allocator >
 class _prefix_array_base
 	: protected _prefix_array_base_common< true >
 {
@@ -69,12 +114,14 @@ protected:
 	using const_reference = value_type const &;
 	using         pointer = typename _alloc_traits::pointer;
 	using   const_pointer = typename _alloc_traits::const_pointer;
-	using        iterator = pointer;  //  hmm
-	using  const_iterator = const_pointer;  //  hmm
+//	using        iterator = pointer;
+//	using  const_iterator = const_pointer;
+	using        iterator = _prefix_array_base_iterator< T, false, Allocator >;
+	using  const_iterator = _prefix_array_base_iterator< T,  true, Allocator >;
 
 	pointer begin_;
 	pointer end_;
-	_VSTD::__compressed_pair< pointer, allocator_type > end_cap_;
+	std::__compressed_pair< pointer, allocator_type > end_cap_;
 
 	allocator_type       & _alloc ()       noexcept { return end_cap_.second(); }
 	allocator_type const & _alloc () const noexcept { return end_cap_.second(); }
@@ -113,7 +160,7 @@ protected:
 
 	[[ noreturn ]] void _throw_length_error () const
 	{
-#ifndef _NPL_NO_EXCEPTIONS
+#ifndef NPL_NO_EXCEPTIONS
 		_prefix_array_base_common< true >::_throw_length_error();
 #else
 		std::abort();
@@ -122,7 +169,7 @@ protected:
 
 	[[ noreturn ]] void _throw_out_of_range () const
 	{
-#ifndef _NPL_NO_EXCEPTIONS
+#ifndef NPL_NO_EXCEPTIONS
 		_prefix_array_base_common< true >::_throw_out_of_range();
 #else
 		std::abort();
@@ -196,87 +243,41 @@ _prefix_array_base< T, Allocator >::~_prefix_array_base ()
 	}
 }
 
-
-template< typename T, typename Allocator = std::allocator< T > >
-class prefix_array;
-
-
-template< typename T, bool C, typename Allocator = std::allocator< T > >
-class prefix_array_iterator
-{
-	friend class prefix_array< T, Allocator >;
-	friend class prefix_array_iterator< T, !C, Allocator >;
-
-public:
-	using value_type        = T;
-	using _alloc_traits     = typename std::allocator_traits< Allocator >;
-	using difference_type   = typename _alloc_traits::difference_type;
-	using pointer           = typename _alloc_traits::pointer;
-	using const_pointer     = typename _alloc_traits::const_pointer;
-	using reference         = value_type &;
-	using const_reference   = value_type const &;
-	using iterator_category = std::random_access_iterator_tag;
-
-	reference   operator* (     ) const { return *ptr_; }
-	auto      & operator++(     )       { ptr_++; return *this; }
-	auto      & operator--(     )       { ptr_--; return *this; }
-	auto        operator++( int )       { auto it = *this; ++*this; return it; }
-	auto        operator--( int )       { auto it = *this; --*this; return it; }
-
-	template< bool R >
-	bool operator== ( prefix_array_iterator< T, R, Allocator > const & rhs ) const noexcept
-	{ return ptr_ == rhs.ptr_; }
-
-	template< bool R >
-	bool operator!= ( prefix_array_iterator< T, R, Allocator > const & rhs ) const noexcept
-	{ return ptr_ != rhs.ptr_; }
-
-	operator prefix_array_iterator< T, true > () const
-	{ return prefix_array_iterator< T, true >{ ptr_ }; }
-
-private:
-	pointer ptr_;
-
-	explicit prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
-};
-
-
 template< typename T, typename Allocator >
 class prefix_array
 	: private _prefix_array_base< T, Allocator >
 {
 private:
-	using _base                    = _prefix_array_base< T, Allocator >;
-	using _default_allocator_type  = std::allocator< T >;
+	using _base                   = _prefix_array_base< T, Allocator >;
+	using _default_allocator_type = std::allocator< T >;
 public:
-	using _self                    = prefix_array;
-	using value_type               = T;
-	using allocator_type           = Allocator;
-	using _alloc_traits            = typename _base::_alloc_traits;
-	using       reference          = typename _base::reference;
-	using const_reference          = typename _base::const_reference;
-	using size_type                = typename _base::size_type;
-	using difference_type          = typename _base::difference_type;
-	using       pointer            = typename _base::pointer;
-	using const_pointer            = typename _base::const_pointer;
-
-	using               iterator = prefix_array_iterator< T, false, Allocator >;
-	using         const_iterator = prefix_array_iterator< T,  true, Allocator >;
-	using       reverse_iterator = std::reverse_iterator<       iterator >;
-	using const_reverse_iterator = std::reverse_iterator< const_iterator >;
+	using                   _self = prefix_array;
+	using              value_type = T;
+	using          allocator_type = Allocator;
+	using           _alloc_traits = typename _base::_alloc_traits;
+	using               reference = typename _base::reference;
+	using         const_reference = typename _base::const_reference;
+	using               size_type = typename _base::size_type;
+	using         difference_type = typename _base::difference_type;
+	using                 pointer = typename _base::pointer;
+	using           const_pointer = typename _base::const_pointer;
+	using                iterator = typename _base::iterator;
+	using          const_iterator = typename _base::const_iterator;
+	using        reverse_iterator = std::reverse_iterator<       iterator >;
+	using  const_reverse_iterator = std::reverse_iterator< const_iterator >;
 
 	static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
 			"Allocator::value_type != value_type" );
 
 	prefix_array () noexcept( std::is_nothrow_default_constructible_v< allocator_type > )
 	{
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	}
 
 	explicit prefix_array ( allocator_type const & _a_ ) noexcept : _base( _a_ )
 	{
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	}
 
@@ -324,7 +325,7 @@ public:
 	~prefix_array ()
 	{
 		_annotate_delete();
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	}
 
@@ -607,7 +608,7 @@ public:
 
 	bool _invariants () const;
 
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 	bool _dereferenceable ( const_iterator const * _i_                     ) const;
 	bool _decrementable   ( const_iterator const * _i_                     ) const;
 	bool _addable         ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
@@ -964,7 +965,7 @@ prefix_array< T, Allocator >::_append ( size_type _n_, const_reference _x_ )
 template< typename T, typename Allocator >
 prefix_array< T, Allocator >::prefix_array ( size_type _n_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _n_ > 0 )
 	{
@@ -977,7 +978,7 @@ template< typename T, typename Allocator >
 prefix_array< T, Allocator >::prefix_array ( size_type _n_, allocator_type const & _a_ )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _n_ > 0 )
 	{
@@ -989,7 +990,7 @@ prefix_array< T, Allocator >::prefix_array ( size_type _n_, allocator_type const
 template< typename T, typename Allocator >
 prefix_array< T, Allocator >::prefix_array ( size_type _n_, value_type const & _x_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _n_ > 0 )
 	{
@@ -1002,7 +1003,7 @@ template< typename T, typename Allocator >
 prefix_array< T, Allocator >::prefix_array ( size_type _n_, value_type const & _x_, allocator_type const & _a_ )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _n_ > 0 )
 	{
@@ -1022,7 +1023,7 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
 					>,
 		InputIterator > _last_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	for( ; _first_ != _last_; ++_first_ )
 	{
@@ -1041,7 +1042,7 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_, InputIterato
 					> > * )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	for( ; _first_ != _last_; ++_first_ )
 	{
@@ -1059,7 +1060,7 @@ prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_,
 					>,
 					ForwardIterator > _last_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	size_type _n_ = static_cast< size_type >( std::distance( _first_, _last_ ) );
 
@@ -1080,7 +1081,7 @@ prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_, ForwardIte
 					> > * )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	size_type _n_ = static_cast< size_type >( std::distance( _first_, _last_ ) );
 
@@ -1095,7 +1096,7 @@ template< typename T, typename Allocator >
 prefix_array< T, Allocator >::prefix_array ( prefix_array const & _x_ )
 	: _base( _alloc_traits::select_on_container_copy_construction( _x_._alloc() ) )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	size_type _n_ = _x_.size();
 
@@ -1114,7 +1115,7 @@ template< typename T, typename Allocator >
 prefix_array< T, Allocator >::prefix_array ( prefix_array const & _x_, _identity< allocator_type > const & _a_ )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	size_type _n_ = _x_.size();
 
@@ -1134,7 +1135,7 @@ inline
 prefix_array< T, Allocator >::prefix_array ( prefix_array && _x_ ) noexcept
 	: _base( std::move( _x_._alloc() ) )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	this->begin_     = _x_.begin_;
 	this->end_       = _x_.end_;
@@ -1147,7 +1148,7 @@ inline
 prefix_array< T, Allocator >::prefix_array ( prefix_array && _x_, _identity< allocator_type > const & _a_ )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _a_ == _x_._alloc() )
 	{
@@ -1167,7 +1168,7 @@ template< typename T, typename Allocator >
 inline
 prefix_array< T, Allocator >::prefix_array ( std::initializer_list< value_type > _list_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _list_.size() > 0 )
 	{
@@ -1181,7 +1182,7 @@ inline
 prefix_array< T, Allocator >::prefix_array ( std::initializer_list< value_type > _list_, allocator_type const & _a_ )
 	: _base( _a_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	if( _list_.size() )
 	{
@@ -1349,7 +1350,7 @@ inline
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::_make_iter ( pointer _p_ ) noexcept
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 	return iterator( this, _p_ );
 #else
 	return iterator( _p_ );
@@ -1361,7 +1362,7 @@ inline
 typename prefix_array< T, Allocator >::const_iterator
 prefix_array< T, Allocator >::_make_iter ( pointer _p_ ) const noexcept
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 	return iterator( this, _p_ );
 #else
 	return iterator( _p_ );
@@ -1596,14 +1597,14 @@ prefix_array< T, Allocator >::shrink_to_fit () noexcept
 {
 	if( capacity() > size() )
 	{
-#ifndef _NPL_NO_EXCEPTIONS
+#ifndef NPL_NO_EXCEPTIONS
 		try
 		{
 #endif
 			allocator_type & a = this->_alloc();
 			std::__split_buffer< value_type, allocator_type & > b( size(), size(), a );
 			_swap_out_circular_buffer( b );
-#ifndef _NPL_NO_EXCEPTIONS
+#ifndef NPL_NO_EXCEPTIONS
 		}
 		catch( ... )
 		{
@@ -1724,7 +1725,7 @@ inline
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::erase ( const_iterator _position_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	NPL_ASSERT( _position_ != end(), "prefix_array::erase( iterator ) called with a non-dereferenceable iterator" );
 
@@ -1742,7 +1743,7 @@ template< typename T, typename Allocator >
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::erase ( const_iterator _first_, const_iterator _last_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	NPL_ASSERT( _first_ <= _last_, "prefix_array::erase( first, last ) called with invalid range" );
 
@@ -1781,7 +1782,7 @@ template< typename T, typename Allocator >
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::insert ( const_iterator _position_, const_reference _x_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	pointer p = this->begin_ + ( _position_ - begin() );
 
@@ -1819,7 +1820,7 @@ template< typename T, typename Allocator >
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::insert ( const_iterator _position_, value_type && _x_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	pointer p = this->begin_ + ( _position_ - begin() );
 
@@ -1852,7 +1853,7 @@ template< typename... Args >
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::emplace ( const_iterator _position_, Args&&... _args_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	pointer p = this->begin_ + ( _position_ - begin() );
 
@@ -1885,7 +1886,7 @@ template< typename T, typename Allocator >
 typename prefix_array< T, Allocator >::iterator
 prefix_array< T, Allocator >::insert ( const_iterator _position_, size_type _n_, const_reference _x_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	pointer p = this->begin_ + ( _position_ - begin() );
 
@@ -1941,7 +1942,7 @@ typename std::enable_if_t
 >
 prefix_array< T, Allocator >::insert ( const_iterator _position_, InputIterator _first_, InputIterator _last_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	difference_type   off      = _position_ - begin();
 	pointer           p        = this->begin_ + off;
@@ -1957,7 +1958,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, InputIterator 
 
 	if( _first_ != _last_ )
 	{
-#ifndef _NPL_NO_EXCEPTIONS
+#ifndef NPL_NO_EXCEPTIONS
 		try
 		{
 #endif
@@ -1970,7 +1971,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, InputIterator 
 
 			p = this->begin_ + old_p;
 			old_last = this->begin_ + old_size;
-#ifndef _NPL_NO_EXCEPTIONS
+#ifndef NPL_NO_EXCEPTIONS
 		}
 		catch( ... )
 		{
@@ -2001,7 +2002,7 @@ typename std::enable_if_t
 >
 prefix_array< T, Allocator >::insert ( const_iterator _position_, ForwardIterator _first_, ForwardIterator _last_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 	pointer p = this->begin_ + ( _position_ - begin() );
 	difference_type n = std::distance( _first_, _last_ );
@@ -2089,7 +2090,7 @@ prefix_array< T, Allocator >::swap ( prefix_array & _x_ )
 
 	std::__swap_allocator( this->_alloc(), _x_._alloc(),
 			std::integral_constant< bool, _alloc_traits::propagate_on_container_swap::value >() );
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 }
 
@@ -2122,7 +2123,7 @@ prefix_array< T, Allocator >::_invariants () const
 	return true;
 }
 
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 
 template< typename T, typename Allocator >
 bool
@@ -2161,7 +2162,7 @@ inline
 void
 prefix_array< T, Allocator >::_invalidate_all_iterators ()
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #endif
 }
 
@@ -2170,7 +2171,7 @@ inline
 void
 prefix_array< T, Allocator >::_invalidate_iterators_past ( pointer _new_last_ )
 {
-#if _NPL_DEBUG_LEVEL == 2
+#if NPL_DEBUG_LEVEL == 2
 #else
 	( ( void ) _new_last_ );
 #endif
