@@ -28,10 +28,8 @@ struct _value_init_tag   {};
 template< typename Alloc, typename Ptr >
 void _construct_forward_with_exception_guarantees ( Alloc & _a_, Ptr _begin1_, Ptr _end1_, Ptr & _begin2_ )
 {
-        static_assert( is_cpp17_move_insertable< Alloc >::value,
+        static_assert( is_cpp17_move_insertable_v< Alloc >,
                         "The specified type does not meet the requirements of Cpp17MoveInsertable" );
-        static_assert( std::__is_cpp17_move_insertable< Alloc >::value,
-                        "lol" );
         using _alloc_traits = std::allocator_traits< Alloc >;
 
         for( ; _begin1_ != _end1_; ++_begin1_, ( void )++_begin2_ )
@@ -49,7 +47,7 @@ void _construct_forward_with_exception_guarantees ( Alloc & _a_, Ptr _begin1_, P
 template< typename Alloc, typename T,
           typename std::enable_if_t
         <
-                ( is_default_allocator< Alloc >::value || !has_construct< Alloc, T*, T >::value ) &&
+                ( is_default_allocator_v< Alloc > || !has_construct_v< Alloc, T*, T > ) &&
                   std::is_trivially_move_constructible_v< T >
         >
 >
@@ -67,7 +65,7 @@ void _construct_forward_with_exception_guarantees ( Alloc &, T* _begin1_, T* _en
 template< typename Alloc, typename Ptr >
 void _construct_backward_with_exception_guarantees ( Alloc & _a_, Ptr _begin1_, Ptr _end1_, Ptr & _end2_ )
 {
-        static_assert( is_cpp17_move_insertable< Alloc >::value,
+        static_assert( is_cpp17_move_insertable_v< Alloc >,
                         "The specified type does not meet the requirements of Cpp17MoveInsertable" );
         using _alloc_traits = std::allocator_traits< Alloc >;
 
@@ -87,7 +85,7 @@ void _construct_backward_with_exception_guarantees ( Alloc & _a_, Ptr _begin1_, 
 template< typename Alloc, typename T,
           typename = typename std::enable_if_t
         <
-                ( is_default_allocator< Alloc >::value || !has_construct< Alloc, T*, T >::value ) &&
+                ( is_default_allocator_v< Alloc > || !has_construct_v< Alloc, T*, T > ) &&
                   std::is_trivially_move_constructible_v< T >
         >
 >
