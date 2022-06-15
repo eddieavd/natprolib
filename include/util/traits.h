@@ -32,7 +32,7 @@ template< typename Alloc, typename... Args >
 struct has_construct : decltype( test_has_construct< Alloc, Args... >( 0 ) ) {};
 
 template< typename Alloc,
-	bool = has_construct< Alloc, typename Alloc::value_type*,  typename Alloc::value_type&& >::value && !is_default_allocator< Alloc >::value >
+	bool = has_construct< Alloc, typename Alloc::value_type*, typename Alloc::value_type&& >::value && !is_default_allocator< Alloc >::value >
 struct is_cpp17_move_insertable;
 template< typename Alloc >
 struct is_cpp17_move_insertable< Alloc, true > : std::true_type {};
@@ -43,11 +43,11 @@ template< typename T >
 struct has_iterator_category
 {
 private:
-    struct _two {char _lx; char _lxx;};
-    template< typename U > static _two _test( ... );
-    template< typename U > static char _test( typename U::iterator_category* = 0 );
+	struct _two {char _lx; char _lxx;};
+	template< typename U > static _two _test( ... );
+	template< typename U > static char _test( typename U::iterator_category* = 0 );
 public:
-    static const bool value = sizeof( _test< T >( 0 ) ) == 1;
+	static bool const value = sizeof( _test< T >( 0 ) ) == 1;
 };
 
 template< typename T, typename U, bool = has_iterator_category< std::iterator_traits< T > >::value >
