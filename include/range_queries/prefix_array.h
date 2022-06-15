@@ -23,7 +23,7 @@ namespace rq
 
 
 template< bool >
-class _prefix_array_base_common
+class NPL_TEMPLATE_VIS _prefix_array_base_common
 {
 protected:
 	NPL_INLINE_VISIBILITY _prefix_array_base_common () {}
@@ -51,7 +51,7 @@ void _prefix_array_base_common< B >::_throw_out_of_range () const
 #endif
 }
 
-extern template class NPL_EXTERN_TEMPLATE_VIS _prefix_array_base_common< true >;
+extern template class NPL_EXTERN_TEMPLATE_TYPE_VIS _prefix_array_base_common< true >;
 
 template< typename T, typename Allocator = std::allocator< T > >
 class _prefix_array_base;
