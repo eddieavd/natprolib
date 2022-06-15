@@ -8,8 +8,11 @@
 
 #pragma once
 
-#include <cassert>
-
-#ifndef _NPL_RELEASE
-#	define _NPL_ASSERT(exp, msg) assert(((void)msg, exp))
+#ifndef NPL_RELEASE
+#	include <cassert>
+#	define NPL_ASSERT(exp, msg) assert(((void)msg, exp))
+#else
+#	define NPL_ASSERT(exp,msg) assert(((void)msg, 0))
 #endif
+
+#define NPL_RQ_DEFAULT_CAPACITY 8

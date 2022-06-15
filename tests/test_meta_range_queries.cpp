@@ -8,7 +8,7 @@
 
 #include "test_meta_range_queries.hpp"
 
-using namespace natprolib::meta_range_queries;
+using namespace npl::meta_rq;
 
 
 namespace test_meta_range_queries

@@ -17,10 +17,10 @@
 #define DEFAULT_SIZE 16
 
 
-namespace natprolib
+namespace npl
 {
 
-namespace meta_range_queries
+namespace meta_rq
 {
 
 
@@ -581,6 +581,6 @@ constexpr auto make_ftree ( T value )
 }
 
 
-} // namespace meta_range_queries
+} // namespace meta_rq
 
-} // namespace natprolib
+} // namespace npl

@@ -8,5 +8,10 @@
 
 #pragma once
 
+#include "../util.h"
 
-#include "range_queries/range_queries.h"
+#include "prefix_array.h"
+#include "fenwick_tree_basic.h"
+#include "segment_tree_basic.h"
+
+#include "meta_range_queries.h"

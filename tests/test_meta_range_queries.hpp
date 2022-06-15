@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "../include/meta_range_queries.h"
+#include "../include/range_queries/meta_range_queries.h"
 
 #define DEFAULT_CAPACITY 16
 

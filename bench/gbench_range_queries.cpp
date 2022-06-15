@@ -12,11 +12,11 @@
 namespace npl_benchmark
 {
 
-namespace range_queries
+namespace rq
 {
 
 
-using namespace natprolib::range_queries;
+using namespace npl::rq;
 
 
 BENCHMARK( bm_push_back< long long, std::vector < long long > > )->RangeMultiplier( 8 )->Range( 1024, 1024 << 8 )->Unit( benchmark::kMicrosecond );

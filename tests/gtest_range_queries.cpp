@@ -8,10 +8,10 @@
 
 #include "gtest_range_queries.hpp"
 
-#define DEFAULT_CAPACITY 16
+#define DEFAULT_CAPACITY 8
 #define CUSTOM_CAPACITY 8
 
-using namespace natprolib::range_queries;
+using namespace npl::rq;
 
 
 TEST( PrefixTest, PrefixDefaultConstruct )
