@@ -26,8 +26,7 @@ template< bool >
 class _prefix_array_base_common
 {
 protected:
-	__attribute__((__visibility__("hidden"))) __attribute__((internal_linkage))
-	_prefix_array_base_common () {}
+	NPL_INLINE_VISIBILITY _prefix_array_base_common () {}
 
 	[[ noreturn ]] void _throw_length_error () const;
 	[[ noreturn ]] void _throw_out_of_range () const;
@@ -36,15 +35,23 @@ protected:
 template< bool B >
 void _prefix_array_base_common< B >::_throw_length_error () const
 {
-	std::__throw_length_error( "prefix_array" );
+#ifndef NPL_NO_EXCEPTIONS
+	throw std::length_error( "prefix_array" );
+#else
+	std::abort();
+#endif
 }
 template< bool B >
 void _prefix_array_base_common< B >::_throw_out_of_range () const
 {
-	std::__throw_out_of_range( "prefix_array" );
+#ifndef NPL_NO_EXCEPTIONS
+	throw std::out_of_range( "prefix_array" );
+#else
+	std::abort();
+#endif
 }
 
-extern template class _prefix_array_base_common< true >;
+extern template class NPL_EXTERN_TEMPLATE_VIS _prefix_array_base_common< true >;
 
 
 template< typename T, typename Allocator = std::allocator< T > >
@@ -107,8 +114,7 @@ protected:
 	[[ noreturn ]] void _throw_length_error () const
 	{
 #ifndef _NPL_NO_EXCEPTIONS
-//		_prefix_array_base_common< true >::_throw_length_error();
-		throw std::length_error( "_prefix_array_base" );
+		_prefix_array_base_common< true >::_throw_length_error();
 #else
 		std::abort();
 #endif
@@ -117,8 +123,7 @@ protected:
 	[[ noreturn ]] void _throw_out_of_range () const
 	{
 #ifndef _NPL_NO_EXCEPTIONS
-//		_prefix_array_base_common< true >::_throw_out_of_range();
-		throw std::out_of_range( "_prefix_array_base" );
+		_prefix_array_base_common< true >::_throw_out_of_range();
 #else
 		std::abort();
 #endif

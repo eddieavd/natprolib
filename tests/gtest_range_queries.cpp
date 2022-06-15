@@ -157,7 +157,7 @@ TEST( PrefixTest, Prefix2D )
 	EXPECT_EQ( prefix_2d.range< int >( 1, 1, 2, 2 ),  4 );
 	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 3 ),  6 );
 
-	EXPECT_EQ( prefix_2d.at( 0 ), prefix );
+	EXPECT_EQ( prefix_2d.at( 0 ), prefix          );
 	EXPECT_EQ( prefix_2d.at( 1 ), prefix + prefix );
 
 	EXPECT_EQ( prefix_2d.element_at( 0 ), prefix );

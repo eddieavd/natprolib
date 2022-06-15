@@ -18,6 +18,9 @@
 #	define NPL_ASSERT(exp,msg) assert(((void)msg, 0))
 #endif
 
+#define NPL_INLINE_VISIBILITY   __attribute__((__visibility__("hidden"))) __attribute__((internal_linkage))
+#define NPL_EXTERN_TEMPLATE_VIS __attribute__((__visibility__("default")))
+
 #define NPL_RQ_DEFAULT_CAPACITY 8
 
 
