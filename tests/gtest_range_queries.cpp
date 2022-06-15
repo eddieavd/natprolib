@@ -19,7 +19,7 @@ TEST( PrefixTest, PrefixDefaultConstruct )
 	prefix_array< int > prefix;
 
 	EXPECT_EQ( prefix.size(), 0 );
-	EXPECT_EQ( prefix.capacity(), DEFAULT_CAPACITY);
+	EXPECT_EQ( prefix.capacity(), 0 );
 }
 TEST( PrefixTest, PrefixReserveConstruct )
 {
@@ -27,16 +27,6 @@ TEST( PrefixTest, PrefixReserveConstruct )
 
 	EXPECT_EQ( prefix.size(), 0 );
 	EXPECT_EQ( prefix.capacity(), CUSTOM_CAPACITY );
-}
-TEST( PrefixTest, PrefixPointerConstruct )
-{
-	int array[] = { 1, 1, 1, 1, 1 };
-	int * ptr = array;
-
-	prefix_array< int > prefix( &ptr, 5 );
-
-	EXPECT_EQ( prefix.size(), 5 );
-	EXPECT_EQ( prefix.capacity(), 5 );
 }
 TEST( PrefixTest, PrefixFillConstruct )
 {
@@ -119,9 +109,10 @@ TEST( PrefixTest, PrefixEmplaceBack )
 	prefix.emplace_back( 1 );
 
 	EXPECT_EQ( prefix.size(), 6 );
+	EXPECT_EQ( prefix.range( 0, 4 ), 5 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
 }
-TEST( PrefixTest, PrefixPushArray )
+TEST( PrefixTest, PrefixPushMultiple )
 {
 	prefix_array< int > prefix( { 1, 1, 1 } );
 
@@ -138,7 +129,7 @@ TEST( PrefixTest, PrefixReserve )
 	prefix_array< int > prefix;
 
 	EXPECT_EQ( prefix.size(), 0 );
-	EXPECT_EQ( prefix.capacity(), DEFAULT_CAPACITY );
+	EXPECT_EQ( prefix.capacity(), 0 );
 
 	prefix.push_back( 1, 1, 1, 1, 1 );
 
@@ -156,7 +147,10 @@ TEST( PrefixTest, Prefix2D )
 //	or simply
 //	prefix_array prefix_2d( 4, prefix );
 
-	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 3, 3 ), 16 );
+	EXPECT_EQ( prefix_2d[ 3 ][ 3 ]                  , 16 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 3, 3 ) , 16 );
+	EXPECT_EQ( prefix_2d.range( 0, 3 ).range( 0, 3 ), 16 );
+
 	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 1, 1 ),  4 );
 	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 2 ),  4 );
 	EXPECT_EQ( prefix_2d.range< int >( 1, 0, 2, 1 ),  4 );
@@ -177,6 +171,7 @@ TEST( PrefixTest, Prefix3D )
 {
 	prefix_array< int > prefix( 4, 1 );
 	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
+
 	prefix_array< prefix_array< prefix_array< int > > > prefix_3d( 4, prefix_2d );
 //	again simply
 //	prefix_array prefix_3d( 4, prefix_2d );
@@ -188,9 +183,10 @@ TEST( PrefixTest, Prefix3D )
 TEST( PrefixTest, Prefix4D )  //  just to flex
 {
 	prefix_array< int > prefix( 4, 1 );
-	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
-	prefix_array< prefix_array< prefix_array< int > > > prefix_3d( 4, prefix_2d );
-	prefix_array< prefix_array< prefix_array< prefix_array< int > > > > prefix_4d( 4, prefix_3d );
+	prefix_array prefix_2d( 4, prefix );
+	prefix_array prefix_3d( 4, prefix_2d );
+
+	prefix_array prefix_4d( 4, prefix_3d );
 
 	EXPECT_EQ( prefix_4d.range( 0, 3 ).range< int >( 0, 0, 0, 3, 3, 3 ), 256 );
 	EXPECT_EQ( prefix_4d.element_at( 3 ).element_at< int >( 3, 3, 3 )  ,   1 );
