@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "../util.h"
+#include "../util/util.h"
 
 #include "prefix_array.h"
 #include "fenwick_tree_basic.h"

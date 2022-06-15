@@ -12,7 +12,7 @@
 #include <iterator>
 #include <stdexcept>
 
-#include "../util.h"
+#include "../util/util.h"
 
 #ifdef _WIN32
 #	include <windows.h>

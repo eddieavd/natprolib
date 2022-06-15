@@ -10,7 +10,9 @@
 
 #include <__split_buffer>
 
-#include "../util.h"
+#include "../util/util.h"
+#include "../util/traits.h"
+#include "../util/mem.h"
 
 
 namespace npl
@@ -152,7 +154,7 @@ void _prefix_array_base< T, Allocator >::_destruct_at_end ( pointer _new_last_ )
 	pointer soon_to_be_end = end_;
 	while( _new_last_ != soon_to_be_end )
 	{
-		_alloc_traits::destroy( _alloc(), _VSTD::__to_address( --soon_to_be_end ) );
+		_alloc_traits::destroy( _alloc(), std::to_address( --soon_to_be_end ) );
 	}
 	end_ = _new_last_;
 }
@@ -273,7 +275,7 @@ public:
 #endif
 	}
 
-	explicit prefix_array ( size_type _n_ );
+	explicit prefix_array ( size_type _n_                             );
 	explicit prefix_array ( size_type _n_, allocator_type const & _a_ );
 
 	prefix_array ( size_type _n_, value_type const & _x_                             );
@@ -281,7 +283,7 @@ public:
 
 	template< typename InputIterator >
 	prefix_array ( InputIterator _first_,
-			typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+			typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 			                          !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 						   std::is_constructible_v<
 							value_type,
@@ -291,7 +293,7 @@ public:
 
 	template< typename InputIterator >
 	prefix_array ( InputIterator _first_, InputIterator _last_, allocator_type const & _a_,
-			typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+			typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 			                          !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 						   std::is_constructible_v<
 						 	value_type,
@@ -321,7 +323,7 @@ public:
 #endif
 	}
 
-	prefix_array ( prefix_array const & _x_ );
+	prefix_array ( prefix_array const & _x_                                                );
 	prefix_array ( prefix_array const & _x_, std::__identity< allocator_type > const & _a_ );
 
 	prefix_array & operator= ( prefix_array const & _x_ );
@@ -341,7 +343,7 @@ public:
 	template< typename InputIterator >
 		typename std::enable_if_t
 		<
-			 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+			 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 			!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 			 std::is_constructible_v<
 			 	value_type,
@@ -511,10 +513,10 @@ public:
 	}
 
 	value_type * data () noexcept
-	{ return _VSTD::__to_address( this->begin_ ); }
+	{ return std::to_address( this->begin_ ); }
 
 	value_type const * data () const noexcept
-	{ return _VSTD::__to_address( this->begin_ ); }
+	{ return std::to_address( this->begin_ ); }
 
 	template< typename Arg >
 	void _emplace_back ( Arg&& _arg_ )
@@ -556,7 +558,7 @@ private:
 	template< typename InputIterator >
 		typename std::enable_if_t
 		<
-			 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+			 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 			!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 			 std::is_constructible_v<
 			 	value_type,
@@ -731,14 +733,14 @@ private:
 
 		if( this->begin_ == this->end_ )
 		{
-			_alloc_traits::construct( this->_alloc(), _VSTD::__to_address( tx.pos_ ), std::forward< Args >( _args_ )... );
+			_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), std::forward< Args >( _args_ )... );
 		}
 		else
 		{
 			value_type val( _args_... );
 			val += *( tx.pos_ - 1 );
 
-			_alloc_traits::construct( this->_alloc(), _VSTD::__to_address( tx.pos_ ), val );
+			_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), val );
 		}
 		++tx.pos_;
 	}
@@ -764,7 +766,7 @@ prefix_array< T, Allocator >::_swap_out_circular_buffer ( std::__split_buffer< v
 {
 	_annotate_delete();
 
-	_VSTD::__construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, this->end_, _b_.__begin_ );
+	mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, this->end_, _b_.__begin_ );
 
 	std::swap( this->begin_    , _b_.__begin_ );
 	std::swap( this->end_      , _b_.__end_   );
@@ -783,8 +785,8 @@ prefix_array< T, Allocator >::_swap_out_circular_buffer( std::__split_buffer< va
 
 	pointer r = _b_.__begin_;
 
-	_VSTD::__construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, _p_, _b_.__begin_ );
-	_VSTD::__construct_forward_with_exception_guarantees( this->_alloc(), _p_, this->end_, _b_.__end_ );
+	mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, _p_, _b_.__begin_ );
+	mem::_construct_forward_with_exception_guarantees( this->_alloc(), _p_, this->end_, _b_.__end_ );
 
 	std::swap( this->begin_    , _b_.begin_ );
 	std::swap( this->end_      , _b_.end_   );
@@ -873,7 +875,7 @@ prefix_array< T, Allocator >::_construct_at_end ( size_type _n_ )
 
 	for( pointer pos = tx.pos_; pos != new_end; ++pos, tx.pos_ = pos )
 	{
-		_alloc_traits::construct( this->_alloc(), _VSTD::__to_address( pos ) );
+		_alloc_traits::construct( this->_alloc(), std::to_address( pos ) );
 	}
 }
 
@@ -1007,7 +1009,7 @@ prefix_array< T, Allocator >::prefix_array ( size_type _n_, value_type const & _
 template< typename T, typename Allocator >
 template< typename InputIterator >
 prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
-		typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+		typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 					  !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 					   std::is_constructible_v<
 					   	value_type,
@@ -1026,7 +1028,7 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
 template< typename T, typename Allocator >
 template< typename InputIterator >
 prefix_array< T, Allocator >::prefix_array ( InputIterator _first_, InputIterator _last_, allocator_type const & _a_,
-		typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+		typename std::enable_if_t< std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 			                  !std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 					   std::is_constructible_v<
 						 	value_type,
@@ -1242,7 +1244,7 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 typename std::enable_if_t
 <
-	 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+	 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 	!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 	 std::is_constructible_v<
 	 	T,
@@ -1616,14 +1618,14 @@ prefix_array< T, Allocator >::_push_back_slow_path ( U && _x_ )
 
 	if( this->begin_ == this->end_ )
 	{
-		_alloc_traits::construct( a, _VSTD::__to_address( b.__end_ ), std::forward< U >( _x_ ) );
+		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< U >( _x_ ) );
 	}
 	else
 	{
 		auto val = _x_;
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, _VSTD::__to_address( b.__end_ ), std::forward< U >( val ) );
+		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< U >( val ) );
 	}
 
 	b.__end_++;
@@ -1671,14 +1673,14 @@ prefix_array< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 
 	if( this->begin_ == this->end_ )
 	{
-		_alloc_traits::construct( a, _VSTD::__to_address( b.__end_ ), std::forward< Args >( _args_ )... );
+		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< Args >( _args_ )... );
 	}
 	else
 	{
 		auto val = value_type( _args_... );
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, _VSTD::__to_address( b.__end_ ), std::forward< Args >( val )... );
+		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< Args >( val )... );
 	}
 
 	b.__end_++;
@@ -1764,7 +1766,7 @@ prefix_array< T, Allocator >::_move_range ( pointer _from_s_, pointer _from_e_, 
 		for( pointer pos = tx.pos_; i < _from_e_;
 				++i, ++pos, tx.pos_ = pos )
 		{
-			_alloc_traits::construct( this->_alloc(), _VSTD::__to_address( pos ), std::move( *i ) );
+			_alloc_traits::construct( this->_alloc(), std::to_address( pos ), std::move( *i ) );
 		}
 	}
 	std::move_backward( _from_s_, _from_s_ + n, old_last );
@@ -1924,7 +1926,7 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 typename std::enable_if_t
 <
-	 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag >::value &&
+	 std::__has_iterator_category_convertible_to< InputIterator, std::input_iterator_tag   >::value &&
 	!std::__has_iterator_category_convertible_to< InputIterator, std::forward_iterator_tag >::value &&
 	 std::is_constructible_v<
 	 	T,

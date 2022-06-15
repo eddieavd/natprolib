@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <type_traits>
+
+
 #ifndef NPL_RELEASE
 #	include <cassert>
 #	define NPL_ASSERT(exp, msg) assert(((void)msg, exp))
@@ -16,3 +19,11 @@
 #endif
 
 #define NPL_RQ_DEFAULT_CAPACITY 8
+
+
+namespace npl
+{
+
+
+
+} // namespace npl
