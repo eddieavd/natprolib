@@ -75,6 +75,13 @@ struct is_cpp17_forward_iterator : public has_iterator_category_convertible_to< 
 template< typename T >
 inline constexpr bool is_cpp17_forward_iterator_v = is_cpp17_forward_iterator< T >::value;
 
+template< typename Alloc, typename Traits = std::allocator_traits< Alloc > >
+struct noexcept_move_assign_container : public std::integral_constant< bool,
+					Traits::propagate_on_container_move_assignment::value ||
+					Traits::is_always_equal::value > {};
+template< typename Alloc, typename Traits = std::allocator_traits< Alloc > >
+inline constexpr bool noexcept_move_assign_container_v = noexcept_move_assign_container< Alloc, Traits >::value;
+
 template< typename T, typename U >
 struct is_2d_container : std::is_same< typename T::value_type, U > {};
 template< typename T, typename U >

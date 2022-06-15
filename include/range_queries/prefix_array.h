@@ -243,6 +243,18 @@ _prefix_array_base< T, Allocator >::~_prefix_array_base ()
 	}
 }
 
+template< typename T, typename U >
+struct enable_if_2d_prefix : std::enable_if< std::is_same_v< T, prefix_array< U > > > {};
+
+template< typename T, typename U >
+using enable_if_2d_prefix_t = typename enable_if_2d_prefix< T, U >::type;
+
+template< typename T, typename U >
+struct enable_if_3d_prefix : std::enable_if< std::is_same_v< T, prefix_array< prefix_array< U > > > > {};
+
+template< typename T, typename U >
+using enable_if_3d_prefix_t = typename enable_if_3d_prefix< T, U >::type;
+
 template< typename T, typename Allocator >
 class prefix_array
 	: private _prefix_array_base< T, Allocator >
@@ -305,6 +317,7 @@ public:
 						 	value_type,
 							typename std::iterator_traits< InputIterator >::reference
 						> > * = 0 );
+
 	template< typename ForwardIterator, typename = std::enable_if_t< !std::is_same_v< typename std::iterator_traits< ForwardIterator >::value_type, void > > >
 	prefix_array ( ForwardIterator _first_,
 			typename std::enable_if_t< is_cpp17_forward_iterator_v< ForwardIterator > &&
@@ -329,7 +342,7 @@ public:
 #endif
 	}
 
-	prefix_array ( prefix_array const & _x_                                                );
+	prefix_array ( prefix_array const & _x_                                          );
 	prefix_array ( prefix_array const & _x_, _identity< allocator_type > const & _a_ );
 
 	prefix_array & operator= ( prefix_array const & _x_ );
@@ -337,11 +350,11 @@ public:
 	prefix_array ( std::initializer_list< value_type > _list_                             );
 	prefix_array ( std::initializer_list< value_type > _list_, allocator_type const & _a_ );
 
-	prefix_array ( prefix_array && _x_                                                ) noexcept;
+	prefix_array ( prefix_array && _x_                                          ) noexcept;
 	prefix_array ( prefix_array && _x_, _identity< allocator_type > const & _a_ );
 
 	prefix_array & operator= ( prefix_array && _x_ )
-		noexcept(( std::__noexcept_move_assign_container< Allocator, _alloc_traits >::value ));
+		noexcept(( noexcept_move_assign_container_v< Allocator, _alloc_traits > ));
 
 	prefix_array & operator= ( std::initializer_list< value_type > _list_ )
 	{ assign( _list_.begin(), _list_.end() ); return *this; }
@@ -427,9 +440,9 @@ public:
 	const_reference operator[] ( size_type _n_ ) const noexcept;
 
 	bool   operator== ( prefix_array< T, Allocator > const & _rhs_ ) const noexcept;
-	auto   operator+  ( prefix_array< T, Allocator > const & _rhs_ ) const;
+	auto   operator+  ( prefix_array< T, Allocator > const & _rhs_ ) const         ;
 	auto & operator+= ( prefix_array< T, Allocator > const & _rhs_ )       noexcept;
-	auto   operator-  ( prefix_array< T, Allocator > const & _rhs_ ) const;
+	auto   operator-  ( prefix_array< T, Allocator > const & _rhs_ ) const         ;
 	auto & operator-= ( prefix_array< T, Allocator > const & _rhs_ )       noexcept;
 
 	      reference at ( size_type _n_ );
@@ -441,50 +454,50 @@ public:
 	value_type range ( size_type _x_, size_type _y_ ) const;
 
 	// 2D overloads
-	template< typename U, typename = std::enable_if_t< is_2d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
 	U & at ( size_type _x_, size_type _y_ )
 	{
 		return at( _x_ ).at( _y_ );
 	}
 
-	template< typename U, typename = std::enable_if_t< is_2d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
 	U const & at ( size_type _x_, size_type _y_ ) const
 	{
 		return at( _x_ ).at( _y_ );
 	}
 
-	template< typename U, typename = std::enable_if_t< is_2d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
 	U element_at ( size_type _x_, size_type _y_ ) const
 	{
 		return element_at( _x_ ).element_at( _y_ );
 	}
 
-	template< typename U, typename = std::enable_if_t< is_2d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
 	U range ( size_type _x1_, size_type _y1_, size_type _x2_, size_type _y2 ) const
 	{
 		return range( _x1_, _x2_ ).range( _y1_, _y2 );
 	}
 
 	// 3D overloads
-	template< typename U, typename = std::enable_if_t< is_3d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
 	U & at ( size_type _x_, size_type _y_, size_type _z_ )
 	{
 		return at( _x_ ).at( _y_ ).at( _z_ );
 	}
 
-	template< typename U, typename = std::enable_if_t< is_3d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
 	U const & at ( size_type _x_, size_type _y_, size_type _z_ ) const
 	{
 		return at( _x_ ).at( _y_ ).at( _z_ );
 	}
 
-	template< typename U, typename = std::enable_if_t< is_3d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
 	U element_at ( size_type _x_, size_type _y_, size_type _z_ ) const
 	{
 		return element_at( _x_ ).element_at( _y_ ).element_at( _z_ );
 	}
 
-	template< typename U, typename = std::enable_if_t< is_3d_container_v< value_type, U > > >
+	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
 	U range ( size_type _x1_, size_type _y1_, size_type _z1_, size_type _x2_, size_type _y2_, size_type _z2_ ) const
 	{
 		return range( _x1_, _x2_ ).range( _y1_, _y2_ ).range( _z1_, _z2_ );
@@ -1195,7 +1208,7 @@ template< typename T, typename Allocator >
 inline
 prefix_array< T, Allocator > &
 prefix_array< T, Allocator >::operator= ( prefix_array && _x_ )
-	noexcept(( std::__noexcept_move_assign_container< Allocator, _alloc_traits >::value ))
+	noexcept(( noexcept_move_assign_container_v< Allocator, _alloc_traits > ))
 {
 	_move_assign( _x_, std::integral_constant< bool,
 			_alloc_traits::propagate_on_container_move_assignment::value >() );
@@ -2176,6 +2189,7 @@ prefix_array< T, Allocator >::_invalidate_iterators_past ( pointer _new_last_ )
 	( ( void ) _new_last_ );
 #endif
 }
+
 
 
 } // namespace rq
