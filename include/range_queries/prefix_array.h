@@ -9,6 +9,7 @@
 #pragma once
 
 #include <__split_buffer>
+#include <memory>
 
 #include "../util.h"
 
@@ -189,7 +190,52 @@ _prefix_array_base< T, Allocator >::~_prefix_array_base ()
 	}
 }
 
+
 template< typename T, typename Allocator = std::allocator< T > >
+class prefix_array;
+
+
+template< typename T, bool C, typename Allocator = std::allocator< T > >
+class prefix_array_iterator
+{
+	friend class prefix_array< T, Allocator >;
+	friend class prefix_array_iterator< T, !C, Allocator >;
+
+public:
+	using value_type        = T;
+	using _alloc_traits     = typename std::allocator_traits< Allocator >;
+	using difference_type   = typename _alloc_traits::difference_type;
+	using pointer           = typename _alloc_traits::pointer;
+	using const_pointer     = typename _alloc_traits::const_pointer;
+	using reference         = value_type &;
+	using const_reference   = value_type const &;
+	using iterator_category = std::random_access_iterator_tag;
+
+	reference   operator* (     ) const { return *ptr_; }
+	auto      & operator++(     )       { ptr_++; return *this; }
+	auto      & operator--(     )       { ptr_--; return *this; }
+	auto        operator++( int )       { auto it = *this; ++*this; return it; }
+	auto        operator--( int )       { auto it = *this; --*this; return it; }
+
+	template< bool R >
+	bool operator== ( prefix_array_iterator< T, R, Allocator > const & rhs ) const noexcept
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	bool operator!= ( prefix_array_iterator< T, R, Allocator > const & rhs ) const noexcept
+	{ return ptr_ != rhs.ptr_; }
+
+	operator prefix_array_iterator< T, true > () const
+	{ return prefix_array_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
+};
+
+
+template< typename T, typename Allocator >
 class prefix_array
 	: private _prefix_array_base< T, Allocator >
 {
@@ -208,8 +254,8 @@ public:
 	using       pointer            = typename _base::pointer;
 	using const_pointer            = typename _base::const_pointer;
 
-	using               iterator = std::__wrap_iter<        pointer >;
-	using         const_iterator = std::__wrap_iter<  const_pointer >;
+	using               iterator = prefix_array_iterator< T, false, Allocator >;
+	using         const_iterator = prefix_array_iterator< T,  true, Allocator >;
 	using       reverse_iterator = std::reverse_iterator<       iterator >;
 	using const_reverse_iterator = std::reverse_iterator< const_iterator >;
 
