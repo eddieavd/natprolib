@@ -243,6 +243,7 @@ _prefix_array_base< T, Allocator >::~_prefix_array_base ()
 	}
 }
 
+
 template< typename T, typename U >
 struct enable_if_2d_prefix : std::enable_if< std::is_same_v< T, prefix_array< U > > > {};
 
@@ -254,6 +255,7 @@ struct enable_if_3d_prefix : std::enable_if< std::is_same_v< T, prefix_array< pr
 
 template< typename T, typename U >
 using enable_if_3d_prefix_t = typename enable_if_3d_prefix< T, U >::type;
+
 
 template< typename T, typename Allocator >
 class prefix_array
