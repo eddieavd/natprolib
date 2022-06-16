@@ -13,6 +13,7 @@
 #include "../util/util.h"
 #include "../util/traits.h"
 #include "../util/mem.h"
+#include "../util/compressed_pair.h"
 
 
 namespace npl
@@ -76,6 +77,9 @@ public:
 	using   const_reference = value_type const &;
 	using iterator_category = std::random_access_iterator_tag;
 
+	using   is_2d_container = void;
+	using   is_3d_container = void;
+
 	reference   operator* (     ) const { return *ptr_; }
 	auto      & operator++(     )       { ptr_++; return *this; }
 	auto      & operator--(     )       { ptr_--; return *this; }
@@ -121,7 +125,7 @@ protected:
 
 	pointer begin_;
 	pointer end_;
-	std::__compressed_pair< pointer, allocator_type > end_cap_;
+	compressed_pair< pointer, allocator_type > end_cap_;
 
 	allocator_type       & _alloc ()       noexcept { return end_cap_.second(); }
 	allocator_type const & _alloc () const noexcept { return end_cap_.second(); }
@@ -217,7 +221,7 @@ _prefix_array_base< T, Allocator >::_prefix_array_base ()
 	noexcept( std::is_nothrow_default_constructible_v< allocator_type > )
 	: begin_  ( nullptr ),
 	  end_    ( nullptr ),
-	  end_cap_( nullptr, std::__default_init_tag() ) {}
+	  end_cap_( nullptr, _default_init_tag() ) {}
 
 template< typename T, typename Allocator >
 inline

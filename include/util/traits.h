@@ -9,7 +9,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 
 namespace npl
@@ -18,6 +17,15 @@ namespace npl
 
 template< typename T >
 struct _identity { using type = T; };
+
+template< typename T, bool >
+struct _dependent_type : public T {};
+
+template< typename T >
+struct npl_is_final : public std::integral_constant< bool, __is_final( T ) > {};
+
+template< typename T >
+inline constexpr bool npl_is_final_v = npl_is_final< T >::value;
 
 template< typename T >
 struct is_default_allocator : std::false_type {};
@@ -34,6 +42,18 @@ static std::false_type test_has_construct( ... );
 
 template< typename Alloc, typename... Args >
 struct has_construct : decltype( test_has_construct< Alloc, Args... >( 0 ) ) {};
+
+template< typename T, typename R = void >
+struct enable_if_type
+{
+	using type = R;
+};
+
+template< typename T, typename Enable = void >
+struct has_value_type : std::false_type {};
+
+template< typename T >
+struct has_value_type< T, typename enable_if_type< typename T::value_type >::type > : std::true_type {};
 
 template< typename Alloc, typename... Args >
 inline constexpr bool has_construct_v = has_construct< Alloc, Args... >::value;
