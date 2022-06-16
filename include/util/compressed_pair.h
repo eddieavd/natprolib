@@ -155,36 +155,3 @@ inline void swap ( compressed_pair< T1, T2 > & _x_, compressed_pair< T1, T2 > & 
 
 
 } // namespace npl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
