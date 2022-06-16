@@ -87,11 +87,6 @@ class compressed_pair : private _compressed_pair_elem< T1, 0 >,
 			private _compressed_pair_elem< T2, 1 >
 {
 public:
-//	static_assert( ( !std::is_same_v< T1, T2 > ),
-//		"__compressed_pair cannot be instantiated when T1 and T2 are the same type; "
-//		"The current implementation is NOT ABI-compatible with the previous "
-//		"implementation for this configuration" );
-
 	using _base1 = _compressed_pair_elem< T1, 0 >;
 	using _base2 = _compressed_pair_elem< T2, 1 >;
 
