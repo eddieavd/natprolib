@@ -8,11 +8,7 @@
 
 #pragma once
 
-#include <initializer_list>
-#include <iterator>
-#include <type_traits>
-#include <stdexcept>
-#include <utility>
+#include "../util/traits.h"
 
 #define DEFAULT_SIZE 16
 

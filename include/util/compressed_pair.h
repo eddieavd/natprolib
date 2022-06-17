@@ -130,8 +130,8 @@ public:
 	{ return static_Cast< _base2* >( _pair_ ); }
 
 	void swap ( compressed_pair & _x_ )
-		noexcept ( std::__is_nothrow_swappable< T1 >::value &&
-			   std::__is_nothrow_swappable< T2 >::value )
+		noexcept ( std::is_nothrow_swappable_v< T1 > &&
+			   std::is_nothrow_swappable_v< T2 > )
 	{
 		using std::swap;
 
@@ -142,8 +142,8 @@ public:
 
 template< typename T1, typename T2 >
 inline void swap ( compressed_pair< T1, T2 > & _x_, compressed_pair< T1, T2 > & _y_ )
-	noexcept( std::__is_nothrow_swappable< T1 >::value &&
-		  std::__is_nothrow_swappable< T2 >::value )
+	noexcept( std::is_nothrow_swappable_v< T1 > &&
+		  std::is_nothrow_swappable_v< T2 > )
 {
 	_x_.swap( _y_ );
 }

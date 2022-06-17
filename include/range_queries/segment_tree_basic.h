@@ -9,10 +9,8 @@
 #pragma once
 
 #include <concepts>
-#include <type_traits>
-#include <iterator>
-#include <stdexcept>
 
+#include "../util/traits.h"
 #include "../util/util.h"
 
 #ifdef _WIN32

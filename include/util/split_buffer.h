@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include "mem.h"
 #include "traits.h"
 #include "compressed_pair.h"
 
