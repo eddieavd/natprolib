@@ -42,7 +42,7 @@ struct _compressed_pair_elem
 	template< typename... Args, std::size_t... Indices >
 	constexpr
 	_compressed_pair_elem ( std::piecewise_construct_t, std::tuple< Args... > _args_,
-				std::__tuple_indices< Indices... > )
+				_tuple_indices< Indices... > )
 		: value_ ( std::forward< Args >( std::get< Indices >( _args_ ) )... ) {}
 
 	      reference _get ()       noexcept { return value_; }
@@ -75,7 +75,7 @@ struct _compressed_pair_elem< T, Idx, true > : private T
 	template< typename... Args, std::size_t... Indices >
 	constexpr
 	_compressed_pair_elem ( std::piecewise_construct_t, std::tuple< Args... > _args_,
-				std::__tuple_indices< Indices... > )
+				_tuple_indices< Indices... > )
 		: value_type( std::forward< Args >( std::get< Indices >( _args_ ) )... ) {}
 
 	      reference _get ()       noexcept { return *this; }
@@ -106,8 +106,8 @@ public:
 	template< typename... Args1, typename... Args2 >
 	constexpr
 	compressed_pair ( std::piecewise_construct_t _pc_, std::tuple< Args1... > _first_args_, std::tuple< Args2... > _second_args_ )
-		: _base1( _pc_, std::move(  _first_args_ ), typename std::__make_tuple_indices< sizeof...( Args1 ) >::type() ),
-		  _base2( _pc_, std::move( _second_args_ ), typename std::__make_tuple_indices< sizeof...( Args2 ) >::type() ) {}
+		: _base1( _pc_, std::move(  _first_args_ ), typename _make_tuple_indices< sizeof...( Args1 ) >::type() ),
+		  _base2( _pc_, std::move( _second_args_ ), typename _make_tuple_indices< sizeof...( Args2 ) >::type() ) {}
 
 	typename _base1::reference first () noexcept
 	{ return static_cast< _base1& >( *this )._get(); }

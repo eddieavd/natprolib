@@ -2031,7 +2031,7 @@ prefix_array< T, Allocator >::swap ( prefix_array & _x_ )
 	std::swap( this->end_      , _x_.end_   );
 	std::swap( this->_end_cap(), _x_._end_cap() );
 
-	std::__swap_allocator( this->_alloc(), _x_._alloc(),
+	_swap_allocator( this->_alloc(), _x_._alloc(),
 			std::integral_constant< bool, _alloc_traits::propagate_on_container_swap::value >() );
 #if NPL_DEBUG_LEVEL == 2
 #endif

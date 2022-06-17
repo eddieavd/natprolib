@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include "traits.h"
 
 
@@ -38,6 +40,24 @@ struct _temp_value
 
 	~_temp_value () { _alloc_traits::destroy( _a, _addr() ); }
 };
+
+template< typename Alloc >
+void _swap_allocator ( Alloc & _a1_, Alloc & _a2_, std::true_type ) noexcept
+{
+        using std::swap;
+        swap( _a1_, _a2_ );
+}
+
+template< typename Alloc >
+inline
+void _swap_allocator ( Alloc &, Alloc &, std::false_type ) noexcept {}
+
+template< typename Alloc >
+inline
+void _swap_allocator ( Alloc & _a1_, Alloc & _a2_ ) noexcept
+{
+        _swap_allocator( _a1_, _a2_, std::integral_constant< bool, std::allocator_traits< Alloc >::propagate_on_container_swap::value >() );
+}
 
 template< typename Alloc, typename Ptr >
 void _construct_forward_with_exception_guarantees ( Alloc & _a_, Ptr _begin1_, Ptr _end1_, Ptr & _begin2_ )
@@ -71,7 +91,7 @@ void _construct_forward_with_exception_guarantees ( Alloc &, T* _begin1_, T* _en
 
         if( n > 0 )
         {
-                std::memcpy( _begin2_, _begin1_, n * sizeof( T ) );
+		memcpy( _begin2_, _begin1_, n * sizeof( T ) );
                 _begin2_ += n;
         }
 }
@@ -110,7 +130,7 @@ void _construct_backward_with_exception_guarantees ( Alloc &, T* _begin1_, T* _e
 
         if( n > 0 )
         {
-                std::memcpy( static_cast< void* >( _end2_ ), static_cast< void const* >( _begin1_ ), n * sizeof( T ) );
+		memcpy( static_cast< void* >( _end2_ ), static_cast< void const* >( _begin1_ ), n * sizeof( T ) );
         }
 }
 

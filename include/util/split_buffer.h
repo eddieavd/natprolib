@@ -439,7 +439,7 @@ split_buffer< T, Allocator >::swap ( split_buffer & _x_ )
 	std::swap( end_      , _x_.end_       );
 	std::swap( _end_cap(), _x_._end_cap() );
 
-	std::__swap_allocator( _alloc(), _x_._alloc() );
+	mem::_swap_allocator( _alloc(), _x_._alloc() );
 }
 
 template< typename T, typename Allocator >
