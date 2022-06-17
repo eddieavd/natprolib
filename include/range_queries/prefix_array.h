@@ -8,12 +8,11 @@
 
 #pragma once
 
-#include <__split_buffer>
-
 #include "../util/util.h"
 #include "../util/traits.h"
 #include "../util/mem.h"
 #include "../util/compressed_pair.h"
+#include "../util/split_buffer.h"
 
 
 namespace npl
@@ -622,8 +621,8 @@ private:
 	      iterator _make_iter ( pointer _p_ )       noexcept;
 	const_iterator _make_iter ( pointer _p_ ) const noexcept;
 
-	void    _swap_out_circular_buffer ( std::__split_buffer< value_type, allocator_type & > & _b_              );
-	pointer _swap_out_circular_buffer ( std::__split_buffer< value_type, allocator_type & > & _b_, pointer _p_ );
+	void    _swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _b_              );
+	pointer _swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _b_, pointer _p_ );
 
 	void _move_range ( pointer _from_s_, pointer _from_e_, pointer _to_ );
 
@@ -645,14 +644,14 @@ private:
 	inline void _emplace_back_slow_path ( Args&&... _args_ );
 
 	//  AddressSanitizer stuff
-#ifndef _LIBCPP_HAS_NO_ASAN
+#ifdef NPL_HAS_ASAN
 	void _annotate_contiguous_container ( void const * _beg_, void const * _end_,
 					      void const * _old_mid_,
 					      void const * _new_mid_ ) const
 	{
 		if( _beg_ && std::is_same_v< allocator_type, _default_allocator_type > )
 		{
-			__sanitizer_annotate_contiguous_container( _beg_, _end_, _old_mid_, _new_mid_ );
+			std::__sanitizer_annotate_contiguous_container( _beg_, _end_, _old_mid_, _new_mid_ );
 		}
 	}
 #else
@@ -688,7 +687,7 @@ private:
 		explicit _construct_transaction ( prefix_array & _p_, size_type _n_ )
 			: p_( _p_ ), pos_( _p_.end_ ), new_end_( _p_.end_ + _n_ )
 		{
-#ifndef _LIBCPP_HAS_NO_ASAN
+#ifdef NPL_HAS_ASAN
 			p_._annotate_increate( _n_ );
 #endif
 		}
@@ -696,7 +695,7 @@ private:
 		~_construct_transaction ()
 		{
 			p_.end_ = pos_;
-#ifndef _LIBCPP_HAS_NO_ASAN
+#ifdef NPL_HAS_ASAN
 			if( pos_ != new_end_ )
 			{
 				p_._annotate_shrink( new_end_ - p_.begin_ );
@@ -734,52 +733,52 @@ private:
 };
 
 template< typename InputIterator,
-	  typename Alloc = std::allocator< std::__iter_value_type< InputIterator > >,
-	  typename = std::enable_if< std::__is_allocator< Alloc >::value >
+	  typename Alloc = std::allocator< _iter_value_type< InputIterator > >,
+	  typename = std::enable_if< _is_allocator< Alloc >::value >
 	  >
 prefix_array ( InputIterator, InputIterator )
-	-> prefix_array< std::__iter_value_type< InputIterator >, Alloc >;
+	-> prefix_array< _iter_value_type< InputIterator >, Alloc >;
 
 template< typename InputIterator,
 	  typename Alloc,
-	  typename = std::enable_if< std::__is_allocator< Alloc >::value >
+	  typename = std::enable_if< _is_allocator< Alloc >::value >
 	  >
 prefix_array ( InputIterator, InputIterator, Alloc )
-	-> prefix_array< std::__iter_value_type< InputIterator >, Alloc >;
+	-> prefix_array< _iter_value_type< InputIterator >, Alloc >;
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_swap_out_circular_buffer ( std::__split_buffer< value_type, allocator_type & > & _b_ )
+prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _b_ )
 {
 	_annotate_delete();
 
-	mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, this->end_, _b_.__begin_ );
+	mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, this->end_, _b_.begin_ );
 
-	std::swap( this->begin_    , _b_.__begin_ );
-	std::swap( this->end_      , _b_.__end_   );
-	std::swap( this->_end_cap(), _b_.__end_cap() );
+	std::swap( this->begin_    , _b_.begin_ );
+	std::swap( this->end_      , _b_.end_   );
+	std::swap( this->_end_cap(), _b_._end_cap() );
 
-	_b_.__first_ = _b_.__begin_;
+	_b_.first_ = _b_.begin_;
 	_annotate_new( size() );
 	_invalidate_all_iterators();
 }
 
 template< typename T, typename Allocator >
 typename prefix_array< T, Allocator >::pointer
-prefix_array< T, Allocator >::_swap_out_circular_buffer( std::__split_buffer< value_type, allocator_type & > & _b_, pointer _p_ )
+prefix_array< T, Allocator >::_swap_out_circular_buffer( split_buffer< value_type, allocator_type & > & _b_, pointer _p_ )
 {
 	_annotate_delete();
 
-	pointer r = _b_.__begin_;
+	pointer r = _b_.begin_;
 
-	mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, _p_, _b_.__begin_ );
-	mem::_construct_forward_with_exception_guarantees( this->_alloc(), _p_, this->end_, _b_.__end_ );
+	mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, _p_, _b_.begin_ );
+	mem::_construct_forward_with_exception_guarantees( this->_alloc(), _p_, this->end_, _b_.end_ );
 
 	std::swap( this->begin_    , _b_.begin_ );
 	std::swap( this->end_      , _b_.end_   );
 	std::swap( this->_end_cap(), _b_._end_cap() );
 
-	_b_._first_ = _b_.__begin_;
+	_b_._first_ = _b_.begin_;
 	_annotate_new( size() );
 	_invalidate_all_iterators();
 
@@ -920,7 +919,7 @@ prefix_array< T, Allocator >::_append ( size_type _n_ )
 	else
 	{
 		allocator_type & a = this->_alloc();
-		std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + _n_ ), size(), a );
+		split_buffer< value_type, allocator_type & > b( _recommend( size() + _n_ ), size(), a );
 		b._construct_at_end( _n_ );
 		_swap_out_circular_buffer( b );
 	}
@@ -937,7 +936,7 @@ prefix_array< T, Allocator >::_append ( size_type _n_, const_reference _x_ )
 	else
 	{
 		allocator_type & a = this->_alloc();
-		std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + _n_ ), size(), a );
+		split_buffer< value_type, allocator_type & > b( _recommend( size() + _n_ ), size(), a );
 		b._construct_at_end( _n_, _x_ );
 		_swap_out_circular_buffer( b );
 	}
@@ -1530,7 +1529,7 @@ prefix_array< T, Allocator >::reserve ( size_type _n_ )
 	if( _n_ > capacity() )
 	{
 		allocator_type & a = this->_alloc();
-		std::__split_buffer< value_type, allocator_type & > _b_( _n_, size(), a );
+		split_buffer< value_type, allocator_type & > _b_( _n_, size(), a );
 		_swap_out_circular_buffer( _b_ );
 	}
 }
@@ -1546,7 +1545,7 @@ prefix_array< T, Allocator >::shrink_to_fit () noexcept
 		{
 #endif
 			allocator_type & a = this->_alloc();
-			std::__split_buffer< value_type, allocator_type & > b( size(), size(), a );
+			split_buffer< value_type, allocator_type & > b( size(), size(), a );
 			_swap_out_circular_buffer( b );
 #ifndef NPL_NO_EXCEPTIONS
 		}
@@ -1564,21 +1563,21 @@ prefix_array< T, Allocator >::_push_back_slow_path ( U && _x_ )
 {
 	allocator_type & a = this->_alloc();
 
-	std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
+	split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
 
 	if( this->begin_ == this->end_ )
 	{
-		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< U >( _x_ ) );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( _x_ ) );
 	}
 	else
 	{
 		auto val = _x_;
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< U >( val ) );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( val ) );
 	}
 
-	b.__end_++;
+	b.end_++;
 	_swap_out_circular_buffer( b );
 }
 
@@ -1619,21 +1618,21 @@ prefix_array< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 {
 	allocator_type & a = this->_alloc();
 
-	std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
+	split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
 
 	if( this->begin_ == this->end_ )
 	{
-		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< Args >( _args_ )... );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( _args_ )... );
 	}
 	else
 	{
 		auto val = value_type( _args_... );
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, std::to_address( b.__end_ ), std::forward< Args >( val )... );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( val )... );
 	}
 
-	b.__end_++;
+	b.end_++;
 	_swap_out_circular_buffer( b );
 }
 
@@ -1751,7 +1750,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, const_referenc
 	else
 	{
 		allocator_type & a = this->_alloc();
-		std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
+		split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
 
 		b.push_back( _x_ );
 		p = _swap_out_circular_buffer( b, p );
@@ -1784,7 +1783,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, value_type && 
 	{
 		allocator_type & a = this->_alloc();
 
-		std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
+		split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
 		b.push_back( std::move( _x_ ) );
 		p = _swap_out_circular_buffer( b, p );
 	}
@@ -1809,7 +1808,7 @@ prefix_array< T, Allocator >::emplace ( const_iterator _position_, Args&&... _ar
 		}
 		else
 		{
-			std::__temp_value< value_type, Allocator > tmp( this->_alloc(), std::forward< Args >( _args_ )... );
+			mem::_temp_value< value_type, Allocator > tmp( this->_alloc(), std::forward< Args >( _args_ )... );
 			_move_range( p, this->end_, p + 1 );
 			*p = std::move( tmp.get() );
 		}
@@ -1818,7 +1817,7 @@ prefix_array< T, Allocator >::emplace ( const_iterator _position_, Args&&... _ar
 	{
 		allocator_type & a = this->_alloc();
 
-		std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
+		split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
 		b.emplace_back( std::forward< Args >( _args_ )... );
 		p = _swap_out_circular_buffer( b, p );
 	}
@@ -1863,7 +1862,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, size_type _n_,
 		{
 			allocator_type & a = this->_alloc();
 
-			std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + _n_ ), p - this->begin_, a );
+			split_buffer< value_type, allocator_type & > b( _recommend( size() + _n_ ), p - this->begin_, a );
 			b._construct_at_end( _n_, _x_ );
 			p = _swap_out_circular_buffer( b, p );
 		}
@@ -1898,7 +1897,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, InputIterator 
 		_construct_one_at_end( *_first_ );
 	}
 
-	std::__split_buffer< value_type, allocator_type & > b( a );
+	split_buffer< value_type, allocator_type & > b( a );
 
 	if( _first_ != _last_ )
 	{
@@ -1978,7 +1977,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, ForwardIterato
 		{
 			allocator_type & a = this->_alloc();
 
-			std::__split_buffer< value_type, allocator_type & > b( _recommend( size() + n ), p - this->begin_, a );
+			split_buffer< value_type, allocator_type & > b( _recommend( size() + n ), p - this->begin_, a );
 			b._construct_at_end( _first_, _last_ );
 			p = _swap_out_circular_buffer( b, p );
 		}

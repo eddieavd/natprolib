@@ -15,6 +15,9 @@ namespace npl
 {
 
 
+template< typename >
+struct _void_t { using type = void; };
+
 template< typename T >
 struct _identity { using type = T; };
 
@@ -26,6 +29,16 @@ struct npl_is_final : public std::integral_constant< bool, __is_final( T ) > {};
 
 template< typename T >
 inline constexpr bool npl_is_final_v = npl_is_final< T >::value;
+
+template< typename Alloc, typename = void, typename = void >
+struct _is_allocator : std::false_type {};
+
+template< typename Alloc >
+struct _is_allocator< Alloc,
+	typename _void_t< typename Alloc::value_type >::type,
+	typename _void_t< decltype( declval< Alloc& >().allocate( std::size_t( 0 ) ) ) >::type
+	>
+	: std::true_type {};
 
 template< typename T >
 struct is_default_allocator : std::false_type {};
@@ -43,18 +56,6 @@ static std::false_type test_has_construct( ... );
 template< typename Alloc, typename... Args >
 struct has_construct : decltype( test_has_construct< Alloc, Args... >( 0 ) ) {};
 
-template< typename T, typename R = void >
-struct enable_if_type
-{
-	using type = R;
-};
-
-template< typename T, typename Enable = void >
-struct has_value_type : std::false_type {};
-
-template< typename T >
-struct has_value_type< T, typename enable_if_type< typename T::value_type >::type > : std::true_type {};
-
 template< typename Alloc, typename... Args >
 inline constexpr bool has_construct_v = has_construct< Alloc, Args... >::value;
 
@@ -69,6 +70,9 @@ struct is_cpp17_move_insertable< Alloc, false > : std::is_move_constructible< ty
 
 template< typename Alloc >
 inline constexpr bool is_cpp17_move_insertable_v = is_cpp17_move_insertable< Alloc >::value;
+
+template< typename InputIterator >
+using _iter_value_type = typename std::iterator_traits< InputIterator >::value_type;
 
 template< typename T >
 struct has_iterator_category

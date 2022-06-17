@@ -18,12 +18,26 @@ namespace mem
 {
 
 
-//  TODO: implement
-template< typename T1, typename T2 >
-class compressed_pair;
+template< typename T, typename Alloc >
+struct _temp_value
+{
+	using _alloc_traits = std::allocator_traits< Alloc >;
+	using _v_t = typename std::aligned_storage< sizeof( T ), alignof( T )>::type;
 
-struct _default_init_tag {};
-struct _value_init_tag   {};
+	_v_t _v;
+	Alloc & _a;
+
+	T * _addr () { return reinterpret_cast< T * >( addressof( _v ) ); }
+	T &   get () { return *_addr(); }
+
+	template< typename... Args >
+	_temp_value ( Alloc & _alloc_, Args&&... _args_ ) : _a( _alloc_ )
+	{
+		_alloc_traits::construct( _a, reinterpret_cast< T * >( addressof( _v ) ), std::forward< Args >( _args_ )... );
+	}
+
+	~_temp_value () { _alloc_traits::destroy( _a, _addr() ); }
+};
 
 template< typename Alloc, typename Ptr >
 void _construct_forward_with_exception_guarantees ( Alloc & _a_, Ptr _begin1_, Ptr _end1_, Ptr & _begin2_ )
