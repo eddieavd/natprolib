@@ -54,54 +54,6 @@ void _prefix_array_base_common< B >::_throw_out_of_range () const
 
 extern template class NPL_EXTERN_TEMPLATE_TYPE_VIS _prefix_array_base_common< true >;
 
-template< typename T, typename Allocator = std::allocator< T > >
-class _prefix_array_base;
-
-template< typename T, typename Allocator = std::allocator< T > >
-class prefix_array;
-
-template< typename T, bool C, typename Allocator = std::allocator< T > >
-class _prefix_array_base_iterator
-{
-	friend class prefix_array< T, Allocator >;
-	friend class _prefix_array_base< T, Allocator >;
-	friend class _prefix_array_base_iterator< T, !C, Allocator >;
-
-public:
-	using        value_type = T;
-	using     _alloc_traits = typename std::allocator_traits< Allocator >;
-	using   difference_type = typename _alloc_traits::difference_type;
-	using           pointer = typename _alloc_traits::pointer;
-	using     const_pointer = typename _alloc_traits::const_pointer;
-	using         reference = value_type &;
-	using   const_reference = value_type const &;
-	using iterator_category = std::random_access_iterator_tag;
-
-	using   is_2d_container = void;
-	using   is_3d_container = void;
-
-	reference   operator* (     ) const { return *ptr_; }
-	auto      & operator++(     )       { ptr_++; return *this; }
-	auto      & operator--(     )       { ptr_--; return *this; }
-	auto        operator++( int )       { auto it = *this; ++*this; return it; }
-	auto        operator--( int )       { auto it = *this; --*this; return it; }
-
-	template< bool R >
-	bool operator== ( _prefix_array_base_iterator< T, R, Allocator > const & rhs ) const noexcept
-	{ return ptr_ == rhs.ptr_; }
-
-	template< bool R >
-	bool operator!= ( _prefix_array_base_iterator< T, R, Allocator > const & rhs ) const noexcept
-	{ return ptr_ != rhs.ptr_; }
-
-	operator _prefix_array_base_iterator< T, true > () const
-	{ return _prefix_array_base_iterator< T, true >{ ptr_ }; }
-
-private:
-	pointer ptr_;
-
-	explicit _prefix_array_base_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
-};
 
 template< typename T, typename Allocator >
 class _prefix_array_base
@@ -118,10 +70,10 @@ protected:
 	using const_reference = value_type const &;
 	using         pointer = typename _alloc_traits::pointer;
 	using   const_pointer = typename _alloc_traits::const_pointer;
-//	using        iterator = pointer;
-//	using  const_iterator = const_pointer;
-	using        iterator = _prefix_array_base_iterator< T, false, Allocator >;
-	using  const_iterator = _prefix_array_base_iterator< T,  true, Allocator >;
+	using        iterator = pointer;
+	using  const_iterator = const_pointer;
+//	using        iterator = _prefix_array_base_iterator< T, false, Allocator >;
+//	using  const_iterator = _prefix_array_base_iterator< T,  true, Allocator >;
 
 	pointer begin_;
 	pointer end_;
@@ -247,19 +199,58 @@ _prefix_array_base< T, Allocator >::~_prefix_array_base ()
 	}
 }
 
+template< typename T, typename Allocator = std::allocator< T > >
+class prefix_array;
+
+template< typename T, bool C, typename Allocator = std::allocator< T > >
+class prefix_array_iterator
+{
+	friend class prefix_array< T, Allocator >;
+	friend class prefix_array_iterator< T, !C, Allocator >;
+
+public:
+	using        value_type = T;
+	using     _alloc_traits = typename std::allocator_traits< Allocator >;
+	using   difference_type = typename _alloc_traits::difference_type;
+	using           pointer = typename _alloc_traits::pointer;
+	using     const_pointer = typename _alloc_traits::const_pointer;
+	using         reference = value_type &;
+	using   const_reference = value_type const &;
+	using iterator_category = std::random_access_iterator_tag;
+
+	reference   operator* (     ) const { return *ptr_; }
+	auto      & operator++(     )       { ptr_++; return *this; }
+	auto      & operator--(     )       { ptr_--; return *this; }
+	auto        operator++( int )       { auto it = *this; ++*this; return it; }
+	auto        operator--( int )       { auto it = *this; --*this; return it; }
+
+	template< bool R >
+	bool operator== ( prefix_array_iterator< T, R, Allocator > const & rhs ) const noexcept
+	{ return ptr_ == rhs.ptr_; }
+
+	template< bool R >
+	bool operator!= ( prefix_array_iterator< T, R, Allocator > const & rhs ) const noexcept
+	{ return ptr_ != rhs.ptr_; }
+
+	operator prefix_array_iterator< T, true > () const
+	{ return prefix_array_iterator< T, true >{ ptr_ }; }
+
+private:
+	pointer ptr_;
+
+	explicit prefix_array_iterator ( pointer _ptr_ ) : ptr_ { _ptr_ } {}
+};
+
 
 template< typename T, typename U >
 struct enable_if_2d_prefix : std::enable_if< std::is_same_v< T, prefix_array< U > > > {};
-
 template< typename T, typename U >
 using enable_if_2d_prefix_t = typename enable_if_2d_prefix< T, U >::type;
 
 template< typename T, typename U >
 struct enable_if_3d_prefix : std::enable_if< std::is_same_v< T, prefix_array< prefix_array< U > > > > {};
-
 template< typename T, typename U >
 using enable_if_3d_prefix_t = typename enable_if_3d_prefix< T, U >::type;
-
 
 template< typename T, typename Allocator >
 class prefix_array
@@ -279,8 +270,11 @@ public:
 	using         difference_type = typename _base::difference_type;
 	using                 pointer = typename _base::pointer;
 	using           const_pointer = typename _base::const_pointer;
-	using                iterator = typename _base::iterator;
-	using          const_iterator = typename _base::const_iterator;
+
+//	using                iterator = typename _base::iterator;
+//	using          const_iterator = typename _base::const_iterator;
+	using                iterator = prefix_array_iterator< value_type, false, allocator_type >;
+	using          const_iterator = prefix_array_iterator< value_type,  true, allocator_type >;
 	using        reverse_iterator = std::reverse_iterator<       iterator >;
 	using  const_reverse_iterator = std::reverse_iterator< const_iterator >;
 
@@ -398,19 +392,11 @@ public:
 	allocator_type get_allocator () const noexcept
 	{ return this->_alloc(); }
 
-	      iterator begin ()       noexcept;
 	const_iterator begin () const noexcept;
-	      iterator   end ()       noexcept;
 	const_iterator   end () const noexcept;
-
-	reverse_iterator rbegin () noexcept
-	{ return reverse_iterator( end() ); }
 
 	const_reverse_iterator rbegin () const noexcept
 	{ return const_reverse_iterator( end() ); }
-
-	reverse_iterator rend () noexcept
-	{ return reverse_iterator( begin() ); }
 
 	const_reverse_iterator rend () const noexcept
 	{ return const_reverse_iterator( begin() ); }
@@ -442,7 +428,6 @@ public:
 	void reserve ( size_type _n_ );
 	void shrink_to_fit () noexcept;
 
-	      reference operator[] ( size_type _n_ )       noexcept;
 	const_reference operator[] ( size_type _n_ ) const noexcept;
 
 	bool   operator== ( prefix_array< T, Allocator > const & _rhs_ ) const noexcept;
@@ -451,7 +436,6 @@ public:
 	auto   operator-  ( prefix_array< T, Allocator > const & _rhs_ ) const         ;
 	auto & operator-= ( prefix_array< T, Allocator > const & _rhs_ )       noexcept;
 
-	      reference at ( size_type _n_ );
 	const_reference at ( size_type _n_ ) const;
 
 	value_type element_at ( size_type _n_ ) const;
@@ -460,12 +444,6 @@ public:
 	value_type range ( size_type _x_, size_type _y_ ) const;
 
 	// 2D overloads
-	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
-	U & at ( size_type _x_, size_type _y_ )
-	{
-		return at( _x_ ).at( _y_ );
-	}
-
 	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
 	U const & at ( size_type _x_, size_type _y_ ) const
 	{
@@ -486,12 +464,6 @@ public:
 
 	// 3D overloads
 	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
-	U & at ( size_type _x_, size_type _y_, size_type _z_ )
-	{
-		return at( _x_ ).at( _y_ ).at( _z_ );
-	}
-
-	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
 	U const & at ( size_type _x_, size_type _y_, size_type _z_ ) const
 	{
 		return at( _x_ ).at( _y_ ).at( _z_ );
@@ -507,13 +479,6 @@ public:
 	U range ( size_type _x1_, size_type _y1_, size_type _z1_, size_type _x2_, size_type _y2_, size_type _z2_ ) const
 	{
 		return range( _x1_, _x2_ ).range( _y1_, _y2_ ).range( _z1_, _z2_ );
-	}
-
-	reference front () noexcept
-	{
-		NPL_ASSERT( !empty(), "prefix_array::front called on empty prefix_array" );
-
-		return *this->begin_;
 	}
 
 	const_reference front () const noexcept
@@ -536,9 +501,6 @@ public:
 
 		return *( this->end_ - 1 );
 	}
-
-	value_type * data () noexcept
-	{ return std::to_address( this->begin_ ); }
 
 	value_type const * data () const noexcept
 	{ return std::to_address( this->begin_ ); }
@@ -1390,14 +1352,6 @@ prefix_array< T, Allocator >::_make_iter ( pointer _p_ ) const noexcept
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::iterator
-prefix_array< T, Allocator >::begin () noexcept
-{
-	return _make_iter( this->begin_ );
-}
-
-template< typename T, typename Allocator >
-inline
 typename prefix_array< T, Allocator >::const_iterator
 prefix_array< T, Allocator >::begin () const noexcept
 {
@@ -1406,27 +1360,10 @@ prefix_array< T, Allocator >::begin () const noexcept
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::iterator
-prefix_array< T, Allocator >::end () noexcept
-{
-	return _make_iter( this->end_ );
-}
-
-template< typename T, typename Allocator >
-inline
 typename prefix_array< T, Allocator >::const_iterator
 prefix_array< T, Allocator >::end () const noexcept
 {
 	return _make_iter( this->end_ );
-}
-
-template< typename T, typename Allocator >
-inline
-typename prefix_array< T, Allocator >::reference
-prefix_array< T, Allocator >::operator[] ( size_type _n_ ) noexcept
-{
-	NPL_ASSERT( _n_ < size(), "prefix_array[] index out of bounds" );
-	return this->begin_[ _n_ ];
 }
 
 template< typename T, typename Allocator >
@@ -1537,18 +1474,6 @@ prefix_array< T, Allocator >::operator-= ( prefix_array< T, Allocator > const & 
 	}
 
 	return *this;
-}
-
-template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::reference
-prefix_array< T, Allocator >::at ( size_type _n_ )
-{
-	if( empty() || _n_ >= size() )
-	{
-//		this->_throw_out_of_range();
-		throw std::out_of_range( "prefix_array::at: index out of bounds" );
-	}
-	return this->begin_[ _n_ ];
 }
 
 template< typename T, typename Allocator >
