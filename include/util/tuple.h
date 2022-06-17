@@ -46,8 +46,8 @@ template< typename T, T... N, std::size_t... Extra > struct _repeat< _integer_se
                                         Extra... >;
 };
 
-template< typename N > struct _parity;
-template< typename N > struct _make : _parity< N % 8 >::template _pmake< N > {};
+template< std::size_t N > struct _parity;
+template< std::size_t N > struct _make : _parity< N % 8 >::template _pmake< N > {};
 
 template<> struct _make< 0 > { using type = _integer_sequence< std::size_t                      >; };
 template<> struct _make< 1 > { using type = _integer_sequence< std::size_t, 0                   >; };
