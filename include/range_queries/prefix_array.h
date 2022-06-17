@@ -1629,7 +1629,7 @@ prefix_array< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 		auto val = value_type( _args_... );
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( val )... );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< value_type >( val ) );
 	}
 
 	b.end_++;
