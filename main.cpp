@@ -6,20 +6,51 @@
 //  Distributed under the terms of the GNU General Public License
 //
 
-#include "include/range_queries/meta_range_queries.h"
+#include <iostream>
 
+#include "include/range_queries/fenwick_tree.h"
+
+
+using namespace npl::rq;
 
 int main ()
 {
-	constexpr auto prefix = npl::meta_rq::make_prefix< int, 4 >( 1 );
-	constexpr auto ftree  = npl::meta_rq::make_ftree < int, 4 >( 1 );
+	/*
+	{
+		fenwick_tree< int > ftree( 10, 1 );
 
-	static_assert( prefix.range( 0, 3 ) == 4 );
-	static_assert( ftree.range ( 0, 3 ) == 4 );
+		for( std::size_t i = 0; i < 10; ++i )
+		{
+			std::cout << ftree[ i ] << " ";
+		}
+		std::cout << std::endl;
+	}
+	*/
 
-	constexpr auto prefix_2d = npl::meta_rq::make_prefix_2d< int, 4, 4 >( 1 );
+	{
+		fenwick_tree< int > ftree;
 
-	static_assert( prefix_2d.range( 0, 0, 3, 3 ) == 16 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+		ftree.push_back( 1 );
+
+		for( std::size_t i = 0; i < ftree.size(); ++i )
+		{
+			std::cout << ftree[ i ] << " " << ftree.range( 0, i ) << std::endl;
+		}
+
+		std::cout << "-------------------\n";
+	}
+
+
+
 
 
 

@@ -765,7 +765,7 @@ prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_ty
 
 template< typename T, typename Allocator >
 typename prefix_array< T, Allocator >::pointer
-prefix_array< T, Allocator >::_swap_out_circular_buffer( split_buffer< value_type, allocator_type & > & _b_, pointer _p_ )
+prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _b_, pointer _p_ )
 {
 	_annotate_delete();
 
@@ -778,7 +778,7 @@ prefix_array< T, Allocator >::_swap_out_circular_buffer( split_buffer< value_typ
 	std::swap( this->end_      , _b_.end_   );
 	std::swap( this->_end_cap(), _b_._end_cap() );
 
-	_b_._first_ = _b_.begin_;
+	_b_.first_ = _b_.begin_;
 	_annotate_new( size() );
 	_invalidate_all_iterators();
 
@@ -1343,7 +1343,7 @@ typename prefix_array< T, Allocator >::const_iterator
 prefix_array< T, Allocator >::_make_iter ( pointer _p_ ) const noexcept
 {
 #if NPL_DEBUG_LEVEL == 2
-	return iterator( this, _p_ );
+	return iterator( this, _p_ ); // should be const_iterator?
 #else
 	return iterator( _p_ );
 #endif
