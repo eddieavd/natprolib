@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <iostream>
 
 #include "../util/util.h"
 #include "../util/traits.h"
@@ -225,12 +224,12 @@ public:
 	using	         pointer = typename _base::pointer;
 	using	   const_pointer = typename _base::const_pointer;
 
-	using	        iterator = pointer;
-	using	  const_iterator = const_pointer;
+	using               iterator = pointer;
+	using         const_iterator = const_pointer;
 //	using	        iterator = fenwick_tree_iterator< value_type, false, allocator_type >;
 //	using	  const_iterator = fenwick_tree_iterator< value_type,  true, allocator_type >;
-	using	reverse_iterator = std::reverse_iterator<       iterator >;
-	using  const_reverse_iterator = std::reverse_iterator< const_iterator >;
+	using       reverse_iterator = std::reverse_iterator<       iterator >;
+	using const_reverse_iterator = std::reverse_iterator< const_iterator >;
 
 	static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
 			"Allocator::value_type != value_type" );
@@ -586,50 +585,12 @@ private:
 		_construct_transaction & operator= ( _construct_transaction const & ) = delete;
 	};
 
-	void _update_impl ( size_type _n_, size_type _size_, _construct_transaction & tx, value_type const &  _x_ )
-	{
-		NPL_ASSERT( !empty() || _n_ >= _size_, "fenwick_tree::_update: bad args" );
-
-		value_type current = _element_at( _n_++ );
-
-		while( _n_ <= _size_ )
-		{
-			tx.pos_[ _n_ - 1 ] += _x_ - current;
-			_n_ += _p( _n_ );
-		}
-	}
-
-	void _update_impl ( size_type _n_, size_type _size_, split_buffer< value_type, allocator_type & > & _b_, value_type const & _x_ )
-	{
-		NPL_ASSERT( !empty() || _n_ >= _size_, "fenwick_tree::_update: bad args" );
-
-		value_type current = _element_at( _n_++ );
-
-		while( _n_ <= _size_ )
-		{
-			_b_.begin_[ _n_ - 1 ] += _x_ - current;
-			_n_ += _p( _n_ );
-		}
-	}
-
 	template< typename... Args >
 	void _construct_one_at_end ( Args... _args_ )
 	{
-		// oh boi
-		std::cout << "_construct_one_at_end( ... )\n";
-
 		_construct_transaction tx( *this, 1 );
 
-		if( this->begin_ == this->end_ )
-		{
-			_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), std::forward< Args >( _args_ )... );
-		}
-		else
-		{
-			_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ) );
-
-			_update( size() - 1, size(), std::forward< Args >( _args_ )... );
-		}
+		_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), std::forward< Args >( _args_ )... );
 		++tx.pos_;
 	}
 };
@@ -885,6 +846,7 @@ fenwick_tree< T, Allocator >::_construct_at_end ( size_type _n_, const_reference
 	for( size_type i = 0; i < _n_; ++i )
 	{
 		_construct_one_at_end( _x_ );
+		_update( size() - 1, size(), _x_ );
 	}
 }
 
@@ -907,6 +869,8 @@ fenwick_tree< T, Allocator >::_construct_at_end ( ForwardIterator _first_, Forwa
 		{
 			_push_back_slow_path( *_first_ );
 		}
+
+		_update( size() - 1, size(), *_first_ );
 	}
 }
 
@@ -1069,6 +1033,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree const & _x_ )
 		for( size_type i = 0; i < _x_.size(); ++i )
 		{
 			_construct_one_at_end( _x_.element_at( i ) );
+			_update( size() - 1, size(), _x_.element_at( i ) );
 		}
 	}
 }
@@ -1086,6 +1051,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree const & _x_, _identity
 		for( size_type i = 0; i < _x_.size(); ++i )
 		{
 			_construct_one_at_end( _x_.element_at( i ) );
+			_update( size() - 1, size(), _x_.element_at( i ) );
 		}
 	}
 }
@@ -1454,24 +1420,11 @@ template< typename U >
 void
 fenwick_tree< T, Allocator >::_push_back_slow_path ( U && _x_ )
 {
-	// oh boi
-
-	std::cout << "_push_back_slow_path( U&& )\n";
-
 	allocator_type & a = this->_alloc();
 
 	split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
 
-	if( this->begin_ == this->end_ )
-	{
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( _x_ ) );
-	}
-	else
-	{
-		_alloc_traits::construct( a, std::to_address( b.end_ ) );
-
-		_update( size() - 1, size(), std::forward< U >( _x_ ) );
-	}
+	_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( _x_ ) );
 
 	b.end_++;
 	_swap_out_circular_buffer( b );
@@ -1500,22 +1453,13 @@ template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::update ( size_type _n_, value_type const & _x_ )
 {
-	// oh boi
 	if( empty() || _n_ > size() )
 	{
 //		this->_throw_out_of_range();
 		throw std::out_of_range( "fenwick_tree::update: index out of bounds" );
 	}
 
-	value_type current = element_at( _n_ );
-
-	int pos = static_cast< int >( _n_ + 1 );
-
-	while( pos <= static_cast< int >( size() + 1 ) )
-	{
-		this->begin_[ pos - 1 ] += _x_ - current;
-		pos += _p( pos );
-	}
+	_update( _n_, size(), _x_ );
 }
 
 template< typename T, typename Allocator >
@@ -1528,15 +1472,7 @@ fenwick_tree< T, Allocator >::update ( size_type _n_, value_type && _x_ )
 		throw std::out_of_range( "fenwick_tree::update: index out of bounds" );
 	}
 
-	value_type current = element_at( _n_ );
-
-	int pos = static_cast< int >( _n_ + 1 );
-
-	while( pos <= static_cast< int >( size() + 1 ) )
-	{
-		this->begin_[ pos - 1 ] += _x_ - current;
-		pos += _p( pos );
-	}
+	_update( _n_, size(), std::move( _x_ ) );
 }
 
 template< typename T, typename Allocator >
@@ -1553,6 +1489,8 @@ fenwick_tree< T, Allocator >::push_back ( const_reference _x_ )
 		_push_back_slow_path( _x_ );
 	}
 
+	_update( size() - 1, size(), _x_ );
+
 	_verify_tree();
 }
 
@@ -1563,12 +1501,14 @@ fenwick_tree< T, Allocator >::push_back ( value_type && _x_ )
 {
 	if( this->end_ < this->_end_cap() )
 	{
-		_construct_one_at_end( std::move( _x_ ) );
+		_construct_one_at_end( _x_ );
 	}
 	else
 	{
-		_push_back_slow_path( std::move( _x_ ) );
+		_push_back_slow_path( _x_ );
 	}
+
+	_update( size() - 1, size(), std::move( _x_ ) );
 
 	_verify_tree();
 }
@@ -1578,24 +1518,11 @@ template< typename... Args >
 void
 fenwick_tree< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 {
-	// oh boi
-
-	std::cout << "_emplace_back_slow_path\n";
-
 	allocator_type & a = this->_alloc();
 
 	split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
 
-	if( this->begin_ == this->end_ )
-	{
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( _args_ )... );
-	}
-	else
-	{
-		_alloc_traits::construct( a, std::to_address( b.end_ ) );
-
-		_update( size() - 1, size(), std::forward< Args >( _args_ )... );
-	}
+	_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( _args_ )... );
 
 	b.end_++;
 	_swap_out_circular_buffer( b );
@@ -1615,6 +1542,8 @@ fenwick_tree< T, Allocator >::emplace_back ( Args&&... _args_ )
 	{
 		_emplace_back_slow_path( std::forward< Args >( _args_ )... );
 	}
+
+	_update( size() - 1, size(), std::forward< Args >( _args_ )... );
 
 	return this->back();
 }

@@ -200,7 +200,7 @@ TEST( FenwickTest, FenwickDefaultConstruct )
 	fenwick_tree< int > ftree;
 
 	EXPECT_EQ( ftree.size(), 0 );
-	EXPECT_EQ( ftree.capacity(), DEFAULT_CAPACITY );
+	EXPECT_EQ( ftree.capacity(), 0 );
 }
 TEST( FenwickTest, FenwickReserveConstruct )
 {
@@ -208,15 +208,6 @@ TEST( FenwickTest, FenwickReserveConstruct )
 
 	EXPECT_EQ( ftree.size(), 0 );
 	EXPECT_EQ( ftree.capacity(), CUSTOM_CAPACITY );
-}
-TEST( FenwickTest, FenwickPointerConstruct )
-{
-	int array[] = { 1, 1, 1, 1, 1 };
-	int * ptr = array;
-
-	fenwick_tree< int > ftree( &ptr, 5 );
-
-	EXPECT_EQ( ftree.size(), 5 );
 }
 TEST( FenwickTest, FenwickFillConstruct )
 {
@@ -265,8 +256,8 @@ TEST( FenwickTest, FenwickUpdate )
 
 	ftree.update( 3, 2 );
 
-	EXPECT_EQ( ftree.at( 2 ), 3 );
-	EXPECT_EQ( ftree.range( 0, 4 ), 7 );
+	EXPECT_EQ( ftree.element_at( 3 ), 2 );
+	EXPECT_EQ( ftree.range( 0, 4 ), 6 );
 }
 TEST( FenwickTest, FenwickAdd )
 {
@@ -315,18 +306,6 @@ TEST( FenwickTest, FenwickPushArray )
 
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
-}
-TEST( FenwickTest, FenwickReserve )
-{
-	fenwick_tree< int > ftree;
-
-	EXPECT_EQ( ftree.size(), 0 );
-	EXPECT_EQ( ftree.capacity(), DEFAULT_CAPACITY );
-
-	ftree.reserve( 2 * DEFAULT_CAPACITY );
-
-	EXPECT_EQ( ftree.size(), 0 );
-	EXPECT_EQ( ftree.capacity(), 2 * DEFAULT_CAPACITY );
 }
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
