@@ -25,7 +25,7 @@ template< typename T, bool >
 struct _dependent_type : public T {};
 
 template< typename T >
-struct npl_is_final : public std::integral_constant< bool, __is_final( T ) > {};
+struct npl_is_final : public std::integral_constant< bool, std::is_final_v< T > > {};
 
 template< typename T >
 inline constexpr bool npl_is_final_v = npl_is_final< T >::value;
