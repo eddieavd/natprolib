@@ -69,9 +69,9 @@ protected:
 	using difference_type = typename _alloc_traits::difference_type;
 	using       reference = value_type &;
 	using const_reference = value_type const &;
-	using         pointer = typename _alloc_traits::pointer;
+	using	 pointer = typename _alloc_traits::pointer;
 	using   const_pointer = typename _alloc_traits::const_pointer;
-	using        iterator = pointer;
+	using	iterator = pointer;
 	using  const_iterator = const_pointer;
 
 	pointer begin_;
@@ -84,7 +84,7 @@ protected:
 	pointer       & _end_cap ()       noexcept { return end_cap_.first(); }
 	pointer const & _end_cap () const noexcept { return end_cap_.first(); }
 
-	_fenwick_tree_base (                             ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > );
+	_fenwick_tree_base (	                     ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > );
 	_fenwick_tree_base ( allocator_type const &  _a_ );
 	_fenwick_tree_base ( allocator_type       && _a_ ) noexcept;
 
@@ -211,25 +211,25 @@ class fenwick_tree
 	: private _fenwick_tree_base< T, Allocator >
 {
 private:
-	using                   _base = _fenwick_tree_base< T, Allocator >;
+	using	           _base = _fenwick_tree_base< T, Allocator >;
 	using _default_allocator_type = std::allocator< T >;
 public:
-	using                   _self = fenwick_tree;
-	using              value_type = T;
-	using          allocator_type = Allocator;
-	using           _alloc_traits = typename _base::_alloc_traits;
-	using               reference = typename _base::reference;
-	using         const_reference = typename _base::const_reference;
-	using               size_type = typename _base::size_type;
-	using         difference_type = typename _base::difference_type;
-	using                 pointer = typename _base::pointer;
-	using           const_pointer = typename _base::const_pointer;
+	using	           _self = fenwick_tree;
+	using	      value_type = T;
+	using	  allocator_type = Allocator;
+	using	   _alloc_traits = typename _base::_alloc_traits;
+	using	       reference = typename _base::reference;
+	using	 const_reference = typename _base::const_reference;
+	using	       size_type = typename _base::size_type;
+	using	 difference_type = typename _base::difference_type;
+	using	         pointer = typename _base::pointer;
+	using	   const_pointer = typename _base::const_pointer;
 
-	using                iterator = pointer;
-	using          const_iterator = const_pointer;
-//	using                iterator = fenwick_tree_iterator< value_type, false, allocator_type >;
-//	using          const_iterator = fenwick_tree_iterator< value_type,  true, allocator_type >;
-	using        reverse_iterator = std::reverse_iterator<       iterator >;
+	using	        iterator = pointer;
+	using	  const_iterator = const_pointer;
+//	using	        iterator = fenwick_tree_iterator< value_type, false, allocator_type >;
+//	using	  const_iterator = fenwick_tree_iterator< value_type,  true, allocator_type >;
+	using	reverse_iterator = std::reverse_iterator<       iterator >;
 	using  const_reverse_iterator = std::reverse_iterator< const_iterator >;
 
 	static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
@@ -342,37 +342,37 @@ public:
 	const_iterator   end () const noexcept;
 
 	const_reverse_iterator rbegin () const noexcept
-        { return const_reverse_iterator( end() ); }
+	{ return const_reverse_iterator( end() ); }
 
-        const_reverse_iterator rend () const noexcept
-        { return const_reverse_iterator( begin() ); }
+	const_reverse_iterator rend () const noexcept
+	{ return const_reverse_iterator( begin() ); }
 
-        const_iterator cbegin () const noexcept
-        { return begin(); }
+	const_iterator cbegin () const noexcept
+	{ return begin(); }
 
-        const_iterator cend () const noexcept
-        { return end(); }
+	const_iterator cend () const noexcept
+	{ return end(); }
 
-        const_reverse_iterator crbegin () const noexcept
-        { return rbegin(); }
+	const_reverse_iterator crbegin () const noexcept
+	{ return rbegin(); }
 
-        const_reverse_iterator crend () const noexcept
-        { return rend(); }
+	const_reverse_iterator crend () const noexcept
+	{ return rend(); }
 
-        size_type size () const noexcept
-        { return static_cast< size_type >( this->end_ - this->begin_ ); }
+	size_type size () const noexcept
+	{ return static_cast< size_type >( this->end_ - this->begin_ ); }
 
-        size_type capacity () const noexcept
-        { return _base::capacity(); }
+	size_type capacity () const noexcept
+	{ return _base::capacity(); }
 
-        [[ nodiscard ]]
-        bool empty () const noexcept
-        { return this->begin_ == this->end_; }
+	[[ nodiscard ]]
+	bool empty () const noexcept
+	{ return this->begin_ == this->end_; }
 
-        size_type max_size () const noexcept;
+	size_type max_size () const noexcept;
 
-        void reserve ( size_type _n_ );
-        void shrink_to_fit () noexcept;
+	void reserve ( size_type _n_ );
+	void shrink_to_fit () noexcept;
 
 	const_reference operator[] ( size_type _n_ ) const noexcept;
 
@@ -384,87 +384,85 @@ public:
 	value_type range ( size_type _x_, size_type _y_ ) const;
 
 	const_reference front () const noexcept
-        {
-                NPL_ASSERT( !empty(), "fenwick_tree::front called on empty prefix_array" );
+	{
+	        NPL_ASSERT( !empty(), "fenwick_tree::front called on empty prefix_array" );
 
-                return *this->begin_;
-        }
+	        return *this->begin_;
+	}
 
-        reference back () noexcept
-        {
-                NPL_ASSERT( !empty(), "fenwick_tree::back called on empty prefix_array" );
+	reference back () noexcept
+	{
+	        NPL_ASSERT( !empty(), "fenwick_tree::back called on empty prefix_array" );
 
-                return *( this->end_ - 1 );
-        }
+	        return *( this->end_ - 1 );
+	}
 
-        const_reference back () const noexcept
-        {
-                NPL_ASSERT( !empty(), "fenwick_tree::back called on empty prefix_array" );
+	const_reference back () const noexcept
+	{
+	        NPL_ASSERT( !empty(), "fenwick_tree::back called on empty prefix_array" );
 
-                return *( this->end_ - 1 );
-        }
+	        return *( this->end_ - 1 );
+	}
 
-        value_type const * data () const noexcept
-        { return std::to_address( this->begin_ ); }
+	value_type const * data () const noexcept
+	{ return std::to_address( this->begin_ ); }
 
 	template< typename Arg >
-        void _emplace_back ( Arg&& _arg_ )
-        {
-                emplace_back( std::forward< Arg >( _arg_ ) );
-        }
+	void _emplace_back ( Arg&& _arg_ )
+	{
+	        emplace_back( std::forward< Arg >( _arg_ ) );
+	}
 
 	void add    ( size_type _n_, value_type const &  _x_ );
 	void update ( size_type _n_, value_type const &  _x_ );
 	void update ( size_type _n_, value_type       && _x_ );
 
-        void push_back ( const_reference _x_ );
+	void push_back ( const_reference _x_ );
 
-        template< typename... Args >
-        void push_back ( const_reference _x_, Args... _args_ )
-        {
-                push_back( _x_ );
-                push_back( _args_... );
-        }
+	template< typename... Args >
+	void push_back ( const_reference _x_, Args... _args_ )
+	{
+	        push_back( _x_ );
+	        push_back( _args_... );
+	}
 
-        void push_back ( value_type && _x_ );
+	void push_back ( value_type && _x_ );
 
-        template< typename... Args >
-        void push_back ( value_type && _x_, Args... _args_ )
-        {
-                push_back( _x_ );
-                push_back( _args_... );
-        }
+	template< typename... Args >
+	void push_back ( value_type && _x_, Args... _args_ )
+	{
+	        push_back( _x_ );
+	        push_back( _args_... );
+	}
 
-        template< typename... Args >
-        reference emplace_back ( Args&&... _args_ );
+	template< typename... Args >
+	reference emplace_back ( Args&&... _args_ );
 
-        void pop_back ();
+	void pop_back ();
 
 	void clear () noexcept
-        {
-                size_type old_size = size();
-                _base::clear();
-                _annotate_shrink( old_size );
-                _invalidate_all_iterators();
-        }
+	{
+	        size_type old_size = size();
+	        _base::clear();
+	        _annotate_shrink( old_size );
+	        _invalidate_all_iterators();
+	}
 
-        bool _invariants () const;
+	bool _invariants () const;
 
 #if NPL_DEBUG_LEVEL == 2
-        bool _dereferenceable ( const_iterator const * _i_                     ) const;
-        bool _decrementable   ( const_iterator const * _i_                     ) const;
-        bool _addable         ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
-        bool _subscriptable   ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
+	bool _dereferenceable ( const_iterator const * _i_                     ) const;
+	bool _decrementable   ( const_iterator const * _i_                     ) const;
+	bool _addable         ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
+	bool _subscriptable   ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
 #endif
 
 private:
 	size_type _p ( size_type _k_ ) const noexcept { return _k_ & -_k_; }
 
-	value_type _sum_to_index ( size_type _n_ ) const noexcept;
-
-	value_type _element_at ( size_type _n_ ) const;
-
-	value_type _range ( size_type _x_, size_type _y_ ) const;
+	value_type _sum_to_index ( size_type _n_                ) const noexcept;
+	value_type _element_at   ( size_type _n_                ) const;
+	value_type _range        ( size_type _x_, size_type _y_ ) const;
 
 	void _add    ( size_type _n_, size_type _size_, value_type       && _x_ );
 	void _add    ( size_type _n_, size_type _size_, value_type const &  _x_ );
@@ -541,49 +539,49 @@ private:
 	}
 
 	void _annotate_delete () const noexcept
-        {
-                _annotate_contiguous_container( data(), data() + capacity(),
-                                                data() + size(), data() + capacity() );
-        }
+	{
+	        _annotate_contiguous_container( data(), data() + capacity(),
+	                                        data() + size(), data() + capacity() );
+	}
 
-        void _annotate_increase ( size_type _n_ ) const noexcept
-        {
-                _annotate_contiguous_container( data(), data() + capacity(),
-                                                data() + size(), data() + size() + _n_ );
-        }
+	void _annotate_increase ( size_type _n_ ) const noexcept
+	{
+	        _annotate_contiguous_container( data(), data() + capacity(),
+	                                        data() + size(), data() + size() + _n_ );
+	}
 
-        void _annotate_shrink ( size_type _old_size_ ) const noexcept
-        {
-                _annotate_contiguous_container( data(), data() + capacity(),
-                                                data() + _old_size_, data() + size() );
-        }
+	void _annotate_shrink ( size_type _old_size_ ) const noexcept
+	{
+	        _annotate_contiguous_container( data(), data() + capacity(),
+	                                        data() + _old_size_, data() + size() );
+	}
 
-        struct _construct_transaction
-        {
-                explicit _construct_transaction ( fenwick_tree & _p_, size_type _n_ )
-                        : p_( _p_ ), pos_( _p_.end_ ), new_end_( _p_.end_ + _n_ )
-                {
+	struct _construct_transaction
+	{
+	        explicit _construct_transaction ( fenwick_tree & _p_, size_type _n_ )
+	                : p_( _p_ ), pos_( _p_.end_ ), new_end_( _p_.end_ + _n_ )
+	        {
 #ifdef NPL_HAS_ASAN
-                        p_._annotate_increate( _n_ );
+	                p_._annotate_increate( _n_ );
 #endif
-                }
+	        }
 
-                ~_construct_transaction ()
-                {
-                        p_.end_ = pos_;
+	        ~_construct_transaction ()
+	        {
+	                p_.end_ = pos_;
 #ifdef NPL_HAS_ASAN
-                        if( pos_ != new_end_ )
-                        {
-                                p_._annotate_shrink( new_end_ - p_.begin_ );
-                        }
+	                if( pos_ != new_end_ )
+	                {
+	                        p_._annotate_shrink( new_end_ - p_.begin_ );
+	                }
 #endif
-                }
+	        }
 
-                fenwick_tree  &     p_;
-                pointer             pos_;
-                const_pointer const new_end_;
+	        fenwick_tree  &     p_;
+	        pointer             pos_;
+	        const_pointer const new_end_;
 
-        private:
+	private:
 		_construct_transaction             ( _construct_transaction const & ) = delete;
 		_construct_transaction & operator= ( _construct_transaction const & ) = delete;
 	};

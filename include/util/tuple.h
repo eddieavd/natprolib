@@ -27,8 +27,10 @@ struct _integer_sequence
         using _to_tuple_indices = _tuple_indices< ( Values + S )... >;
 };
 
+
 namespace _detail
 {
+
 
 template< typename T, std::size_t... Extra > struct _repeat;
 
@@ -67,7 +69,9 @@ template<> struct _parity< 5 > { template< std::size_t N > struct _pmake : _repe
 template<> struct _parity< 6 > { template< std::size_t N > struct _pmake : _repeat< typename _make< N / 8 >::type,        N - 6, N - 5, N - 4, N - 3, N - 2, N - 1 > {}; };
 template<> struct _parity< 7 > { template< std::size_t N > struct _pmake : _repeat< typename _make< N / 8 >::type, N - 7, N - 6, N - 5, N - 4, N - 3, N - 2, N - 1 > {}; };
 
+
 } // namespace _detail
+
 
 #if __has_builtin(__make_integer_seq)
 template< std::size_t E, std::size_t S >
