@@ -6,50 +6,22 @@
 //  Distributed under the terms of the GNU General Public License
 //
 
-#include <iostream>
-
-#include "include/range_queries/fenwick_tree.h"
+#include "include/natprolib.h"
 
 
-using namespace npl::rq;
+using namespace npl::meta_rq;
 
 int main ()
 {
-	/*
-	{
-		fenwick_tree< int > ftree( 10, 1 );
+	constexpr auto prefix = make_prefix< int, 4 >( 1 );
+	constexpr auto ftree  = make_ftree < int, 4 >( 1 );
 
-		for( std::size_t i = 0; i < 10; ++i )
-		{
-			std::cout << ftree[ i ] << " ";
-		}
-		std::cout << std::endl;
-	}
-	*/
+	static_assert( prefix.range( 0, 3 ) == 4 );
+	static_assert(  ftree.range( 0, 3 ) == 4 );
 
-	{
-		fenwick_tree< int > ftree;
+	constexpr auto prefix2d = make_prefix_2d< int, 4, 4 >( 1 );
 
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-		ftree.push_back( 1 );
-
-		for( std::size_t i = 0; i < ftree.size(); ++i )
-		{
-			std::cout << ftree[ i ] << " " << ftree.range( 0, i ) << std::endl;
-		}
-
-		std::cout << "-------------------\n";
-	}
-
-
+	static_assert( prefix2d.range( 0, 0, 3, 3 ) == 16 );
 
 
 
