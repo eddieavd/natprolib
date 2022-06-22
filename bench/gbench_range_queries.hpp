@@ -12,13 +12,13 @@
 #include <set>
 #include <benchmark/benchmark.h>
 
-#include "../include/range_queries.h"
+#include "../include/range_queries/range_queries.h"
 
 
 namespace npl_benchmark
 {
 
-namespace range_queries
+namespace rq
 {
 
 

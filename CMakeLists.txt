@@ -13,6 +13,10 @@ set( CMAKE_CXX_STANDARD_REQUIRED True )
 add_compile_options( -Wall -Wextra -pedantic -Werror -O3 )
 #add_link_options( -fsanitize=address -fsanitize=undefined )
 
+if( NPL_DEBUG )
+	add_compile_options( -DNPL_DEBUG )
+endif()
+
 add_subdirectory( include )
 add_subdirectory( tests   )
 add_subdirectory( bench   )

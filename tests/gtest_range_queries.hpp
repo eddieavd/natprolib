@@ -11,7 +11,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 
-#include "../include/range_queries.h"
+#include "../include/range_queries/range_queries.h"
 
 
 auto pb1

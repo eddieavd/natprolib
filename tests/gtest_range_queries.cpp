@@ -8,10 +8,10 @@
 
 #include "gtest_range_queries.hpp"
 
-#define DEFAULT_CAPACITY 16
+#define DEFAULT_CAPACITY 8
 #define CUSTOM_CAPACITY 8
 
-using namespace natprolib::range_queries;
+using namespace npl::rq;
 
 
 TEST( PrefixTest, PrefixDefaultConstruct )
@@ -19,7 +19,7 @@ TEST( PrefixTest, PrefixDefaultConstruct )
 	prefix_array< int > prefix;
 
 	EXPECT_EQ( prefix.size(), 0 );
-	EXPECT_EQ( prefix.capacity(), DEFAULT_CAPACITY);
+	EXPECT_EQ( prefix.capacity(), 0 );
 }
 TEST( PrefixTest, PrefixReserveConstruct )
 {
@@ -27,16 +27,6 @@ TEST( PrefixTest, PrefixReserveConstruct )
 
 	EXPECT_EQ( prefix.size(), 0 );
 	EXPECT_EQ( prefix.capacity(), CUSTOM_CAPACITY );
-}
-TEST( PrefixTest, PrefixPointerConstruct )
-{
-	int array[] = { 1, 1, 1, 1, 1 };
-	int * ptr = array;
-
-	prefix_array< int > prefix( &ptr, 5 );
-
-	EXPECT_EQ( prefix.size(), 5 );
-	EXPECT_EQ( prefix.capacity(), 5 );
 }
 TEST( PrefixTest, PrefixFillConstruct )
 {
@@ -119,16 +109,17 @@ TEST( PrefixTest, PrefixEmplaceBack )
 	prefix.emplace_back( 1 );
 
 	EXPECT_EQ( prefix.size(), 6 );
+	EXPECT_EQ( prefix.range( 0, 4 ), 5 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
 }
-TEST( PrefixTest, PrefixPushArray )
+TEST( PrefixTest, PrefixPushMultiple )
 {
 	prefix_array< int > prefix( { 1, 1, 1 } );
 
 	EXPECT_EQ( prefix.size(), 3 );
 	EXPECT_EQ( prefix.range( 0, 2 ), 3 );
 
-	prefix.push_array( 1, 1, 1 );
+	prefix.push_back( 1, 1, 1 );
 
 	EXPECT_EQ( prefix.size(), 6 );
 	EXPECT_EQ( prefix.range( 0, 5 ), 6 );
@@ -138,15 +129,68 @@ TEST( PrefixTest, PrefixReserve )
 	prefix_array< int > prefix;
 
 	EXPECT_EQ( prefix.size(), 0 );
-	EXPECT_EQ( prefix.capacity(), DEFAULT_CAPACITY );
+	EXPECT_EQ( prefix.capacity(), 0 );
 
-	prefix.push_array( 1, 1, 1, 1, 1 );
+	prefix.push_back( 1, 1, 1, 1, 1 );
 
 	prefix.reserve( 2 * DEFAULT_CAPACITY );
 
 	EXPECT_EQ( prefix.size(), 5 );
 	EXPECT_EQ( prefix.range( 0, 4 ), 5 );
 	EXPECT_EQ( prefix.capacity(), 2 * DEFAULT_CAPACITY );
+}
+TEST( PrefixTest, Prefix2D )
+{
+	prefix_array< int > prefix( 4, 1 );
+
+	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
+//	or simply
+//	prefix_array prefix_2d( 4, prefix );
+
+	EXPECT_EQ( prefix_2d[ 3 ][ 3 ]                  , 16 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 3, 3 ) , 16 );
+	EXPECT_EQ( prefix_2d.range( 0, 3 ).range( 0, 3 ), 16 );
+
+	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 1, 1 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 2 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 1, 0, 2, 1 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 1, 1, 2, 2 ),  4 );
+	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 3 ),  6 );
+
+	EXPECT_EQ( prefix_2d.at( 0 ), prefix          );
+	EXPECT_EQ( prefix_2d.at( 1 ), prefix + prefix );
+
+	EXPECT_EQ( prefix_2d.element_at( 0 ), prefix );
+	EXPECT_EQ( prefix_2d.element_at( 2 ), prefix );
+
+	prefix_array< prefix_array< int > > prefix_2d_1( { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 } } );
+
+	EXPECT_EQ( prefix_2d, prefix_2d_1 );
+}
+TEST( PrefixTest, Prefix3D )
+{
+	prefix_array< int > prefix( 4, 1 );
+	prefix_array< prefix_array< int > > prefix_2d( 4, prefix );
+
+	prefix_array< prefix_array< prefix_array< int > > > prefix_3d( 4, prefix_2d );
+//	again simply
+//	prefix_array prefix_3d( 4, prefix_2d );
+
+	EXPECT_EQ( prefix_3d.range< int >( 0, 0, 0, 3, 3, 3 ), 64 );
+	EXPECT_EQ( prefix_3d.element_at< int >( 2, 2, 2 )    ,  1 );
+	EXPECT_EQ( prefix_3d.at< int >( 3, 3, 3 )            , 64 );
+}
+TEST( PrefixTest, Prefix4D )  //  just to flex
+{
+	prefix_array< int > prefix( 4, 1 );
+	prefix_array prefix_2d( 4, prefix );
+	prefix_array prefix_3d( 4, prefix_2d );
+
+	prefix_array prefix_4d( 4, prefix_3d );
+
+	EXPECT_EQ( prefix_4d.range( 0, 3 ).range< int >( 0, 0, 0, 3, 3, 3 ), 256 );
+	EXPECT_EQ( prefix_4d.element_at( 3 ).element_at< int >( 3, 3, 3 )  ,   1 );
+	EXPECT_EQ( prefix_4d.at( 3 ).at< int >( 3, 3, 3 )                  , 256 );
 }
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
@@ -156,7 +200,7 @@ TEST( FenwickTest, FenwickDefaultConstruct )
 	fenwick_tree< int > ftree;
 
 	EXPECT_EQ( ftree.size(), 0 );
-	EXPECT_EQ( ftree.capacity(), DEFAULT_CAPACITY );
+	EXPECT_EQ( ftree.capacity(), 0 );
 }
 TEST( FenwickTest, FenwickReserveConstruct )
 {
@@ -164,15 +208,6 @@ TEST( FenwickTest, FenwickReserveConstruct )
 
 	EXPECT_EQ( ftree.size(), 0 );
 	EXPECT_EQ( ftree.capacity(), CUSTOM_CAPACITY );
-}
-TEST( FenwickTest, FenwickPointerConstruct )
-{
-	int array[] = { 1, 1, 1, 1, 1 };
-	int * ptr = array;
-
-	fenwick_tree< int > ftree( &ptr, 5 );
-
-	EXPECT_EQ( ftree.size(), 5 );
 }
 TEST( FenwickTest, FenwickFillConstruct )
 {
@@ -221,8 +256,8 @@ TEST( FenwickTest, FenwickUpdate )
 
 	ftree.update( 3, 2 );
 
-	EXPECT_EQ( ftree.at( 2 ), 3 );
-	EXPECT_EQ( ftree.range( 0, 4 ), 7 );
+	EXPECT_EQ( ftree.element_at( 3 ), 2 );
+	EXPECT_EQ( ftree.range( 0, 4 ), 6 );
 }
 TEST( FenwickTest, FenwickAdd )
 {
@@ -267,22 +302,10 @@ TEST( FenwickTest, FenwickPushArray )
 	EXPECT_EQ( ftree.size(), 3 );
 	EXPECT_EQ( ftree.range( 0, 2 ), 3 );
 
-	ftree.push_array( 1, 1, 1 );
+	ftree.push_back( 1, 1, 1 );
 
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
-}
-TEST( FenwickTest, FenwickReserve )
-{
-	fenwick_tree< int > ftree;
-
-	EXPECT_EQ( ftree.size(), 0 );
-	EXPECT_EQ( ftree.capacity(), DEFAULT_CAPACITY );
-
-	ftree.reserve( 2 * DEFAULT_CAPACITY );
-
-	EXPECT_EQ( ftree.size(), 0 );
-	EXPECT_EQ( ftree.capacity(), 2 * DEFAULT_CAPACITY );
 }
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////

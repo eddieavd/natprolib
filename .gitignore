@@ -1,9 +1,10 @@
-build
-cmake-build*
-gtest-build
 .cache
+*build*
 *.sh
 *.in
 *.swp
+*.swo
 *.json
+Dox*
+dox
 .DS_Store

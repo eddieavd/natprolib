@@ -6,20 +6,23 @@
 //  Distributed under the terms of the GNU General Public License
 //
 
-#include <iostream>
-
 #include "include/natprolib.h"
 
 
+using namespace npl::meta_rq;
+
 int main ()
 {
-	constexpr auto prefix = natprolib::meta_range_queries::make_prefix( { 1, 1, 1 } );
+	constexpr auto prefix = make_prefix< int, 4 >( 1 );
+	constexpr auto ftree  = make_ftree < int, 4 >( 1 );
 
-	static_assert( prefix.range( 0, 2 ) == 3 );
+	static_assert( prefix.range( 0, 3 ) == 4 );
+	static_assert(  ftree.range( 0, 3 ) == 4 );
 
-	constexpr auto ftree = natprolib::meta_range_queries::make_ftree( { 1, 1, 1 } );
+	constexpr auto prefix2d = make_prefix_2d< int, 4, 4 >( 1 );
 
-	static_assert( ftree.range( 0, 2 ) == 3 );
+	static_assert( prefix2d.range( 0, 0, 3, 3 ) == 16 );
+
 
 
 

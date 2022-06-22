@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "../include/meta_range_queries.h"
+#include "../include/range_queries/meta_range_queries.h"
 
 #define DEFAULT_CAPACITY 16
 
@@ -21,6 +21,12 @@ void prefix_range ();
 void prefix_at ();
 void prefix_element_at ();
 void prefix_iterator ();
+
+void prefix_2d_make_prefix_2d ();
+void prefix_2d_range ();
+void prefix_2d_at ();
+void prefix_2d_element_at ();
+void prefix_2d_iterator ();
 
 void ftree_make_ftree ();
 void ftree_range ();
