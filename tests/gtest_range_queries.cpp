@@ -19,7 +19,7 @@ TEST( PrefixTest, PrefixDefaultConstruct )
 	prefix_array< int > prefix;
 
 	EXPECT_EQ( prefix.size(), 0 );
-	EXPECT_EQ( prefix.capacity(), 0 );
+	EXPECT_EQ( prefix.capacity(), 1 );
 }
 TEST( PrefixTest, PrefixReserveConstruct )
 {
