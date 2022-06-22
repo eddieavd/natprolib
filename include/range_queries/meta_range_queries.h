@@ -229,7 +229,7 @@ class prefix_2d
 	using const_iterator = prefix_2d_iterator< T,  true, Size_x, Size_y >;
 
 private:
-	T           data_[ Size_x ][ Size_y ]      ;
+	T           data_[ Size_x ][ Size_y ] {   };
 	std::size_t size_x_                   { 0 };
 	std::size_t size_y_                   { 0 };
 	std::size_t capacity_x_          { Size_x };
