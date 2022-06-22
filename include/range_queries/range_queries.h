@@ -12,7 +12,6 @@
 
 #include "prefix_array.h"
 #include "fenwick_tree.h"
-//#include "fenwick_tree_basic.h"
 #include "segment_tree_basic.h"
 
 #include "meta_range_queries.h"
