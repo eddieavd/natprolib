@@ -1,0 +1,16 @@
+name: googletest ubuntu clang
+
+on: push
+
+jobs:
+  googletest_ubuntu_clang:
+
+    runs_on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: get cmake
+        uses: lukka/get-cmake@latest
+
+      - name: build and run tests
+        run: export CXX=$(which clang++) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DMETATEST=ON -DGTEST=ON -DNPL_RELEASE=ON && cmake --build . && ./tests/gtest_rq

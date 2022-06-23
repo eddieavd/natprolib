@@ -1,0 +1,19 @@
+name: googletest ubuntu gcc
+
+on: push
+
+jobs:
+  googletest_ubuntu_gcc:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: get cmake
+        uses: lukka/get-cmake@latest
+
+      - name: update g++
+        run: sudo apt install g++-10
+
+      - name: build and run tests
+        run: export CXX=$(which g++-10) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DMETATEST=ON -DGTEST=ON -DNPL_RELEASE=ON && cmake --build . && ./tests/gtest_rq
