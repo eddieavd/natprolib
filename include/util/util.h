@@ -10,6 +10,10 @@
 
 #include <cassert>
 
+#ifndef __clang__
+#	define NPL_DISABLE_VISIBILITY_ANNOTATIONS
+#endif
+
 
 #ifndef NPL_RELEASE
 #	define NPL_ASSERT(exp, msg) assert(((void)msg, exp))

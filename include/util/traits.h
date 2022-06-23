@@ -36,7 +36,7 @@ struct _is_allocator : std::false_type {};
 template< typename Alloc >
 struct _is_allocator< Alloc,
 	typename _void_t< typename Alloc::value_type >::type,
-	typename _void_t< decltype( declval< Alloc& >().allocate( std::size_t( 0 ) ) ) >::type
+	typename _void_t< decltype( std::declval< Alloc& >().allocate( std::size_t( 0 ) ) ) >::type
 	>
 	: std::true_type {};
 
