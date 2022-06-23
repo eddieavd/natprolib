@@ -5,7 +5,7 @@ on: push
 jobs:
   googletest_ubuntu_clang:
 
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
