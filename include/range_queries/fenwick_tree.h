@@ -718,7 +718,7 @@ template< typename T, typename Allocator >
 typename fenwick_tree< T, Allocator >::value_type
 fenwick_tree< T, Allocator >::_element_at ( size_type _n_ ) const
 {
-	NPL_ASSERT( !empty() || _n_ >= size(), "fenwick_tree::_element_at: bad args" );
+	NPL_ASSERT( !empty() && _n_ < size(), "fenwick_tree::_element_at: bad args" );
 
 	if( _n_ == 0 )
 	{
@@ -734,7 +734,7 @@ template< typename T, typename Allocator >
 typename fenwick_tree< T, Allocator >::value_type
 fenwick_tree< T, Allocator >::_range ( size_type _x_, size_type _y_ ) const
 {
-	NPL_ASSERT( !empty() || _x_ >= size() || _y_ >= size(),
+	NPL_ASSERT( !empty() && _x_ < size() && _y_ < size(),
 			"fenwick_tree::_range: bad args" );
 
 	if( _x_ == 0 )
@@ -751,7 +751,7 @@ template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::_add ( size_type _n_, size_type _size_, value_type && _x_ )
 {
-	NPL_ASSERT( !empty() || _n_ >= _size_, "frenwick_tree:_add: bad args" );
+	NPL_ASSERT( !empty() && _n_ < _size_, "frenwick_tree:_add: bad args" );
 
 	_n_++;
 
@@ -766,7 +766,7 @@ template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::_add ( size_type _n_, size_type _size_, value_type const & _x_ )
 {
-	NPL_ASSERT( !empty() || _n_ >= _size_, "frenwick_tree:_add: bad args" );
+	NPL_ASSERT( !empty() && _n_ < _size_, "frenwick_tree:_add: bad args" );
 
 	_n_++;
 
@@ -781,7 +781,7 @@ template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::_update ( size_type _n_, size_type _size_, value_type && _x_ )
 {
-	NPL_ASSERT( !empty() || _n_ >= _size_, "frenwick_tree:_update: bad args" );
+	NPL_ASSERT( !empty() && _n_ < _size_, "frenwick_tree:_update: bad args" );
 
 	value_type current = _element_at( _n_++ );
 
@@ -796,7 +796,7 @@ template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::_update ( size_type _n_, size_type _size_, value_type const & _x_ )
 {
-	NPL_ASSERT( !empty() || _n_ >= _size_, "frenwick_tree:_update: bad args" );
+	NPL_ASSERT( !empty() && _n_ < _size_, "frenwick_tree:_update: bad args" );
 
 	value_type current = _element_at( _n_++ );
 
@@ -1171,69 +1171,6 @@ fenwick_tree< T, Allocator >::operator= ( fenwick_tree && _x_ )
 }
 
 template< typename T, typename Allocator >
-auto
-fenwick_tree< T, Allocator >::operator+ ( fenwick_tree< T, Allocator > const & _rhs_ ) const
-{
-        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator+: size() != rhs.size()" );
-
-        _self res( size() );
-
-        for( size_type i = 0; i < size(); ++i )
-        {
-                res.push_back( element_at( i ) + _rhs_.element_at( i ) );
-        }
-
-        return res;
-}
-
-template< typename T, typename Allocator >
-auto &
-fenwick_tree< T, Allocator >::operator+= ( fenwick_tree< T, Allocator > const & _rhs_ ) noexcept
-{
-        for( size_type i = 0; i < size(); ++i )
-        {
-                this->begin_[ i ] += _rhs_.begin_[ i ];
-        }
-        for( size_type i = size(); i < _rhs_.size(); ++i )
-        {
-                push_back( _rhs_.element_at( i ) );
-        }
-
-        return *this;
-}
-
-template< typename T, typename Allocator >
-auto
-fenwick_tree< T, Allocator >::operator- ( fenwick_tree< T, Allocator > const & _rhs_ ) const
-{
-        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator+: size() != rhs.size()" );
-
-        _self res( size() );
-
-        for( size_type i = 0; i < size(); ++i )
-        {
-                res.push_back( element_at( i ) - _rhs_.element_at( i ) );
-        }
-
-        return res;
-
-}
-
-template< typename T, typename Allocator >
-auto &
-fenwick_tree< T, Allocator >::operator-= ( fenwick_tree< T, Allocator > const & _rhs_ ) noexcept
-{
-        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator-=: size() != rhs.size()" );
-
-        for( size_type i = 0; i < size(); ++i )
-        {
-                this->begin_[ i ] -= _rhs_.begin_[ i ];
-        }
-
-        return *this;
-}
-
-template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _x_, std::false_type )
 	noexcept( _alloc_traits::is_always_equal::value )
@@ -1448,6 +1385,68 @@ fenwick_tree< T, Allocator >::operator== ( fenwick_tree< T, Allocator > const & 
 	}
 
 	return true;
+}
+
+template< typename T, typename Allocator >
+auto
+fenwick_tree< T, Allocator >::operator+ ( fenwick_tree< T, Allocator > const & _rhs_ ) const
+{
+        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator+: size() != rhs.size()" );
+
+        _self res( size() );
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                res.push_back( element_at( i ) + _rhs_.element_at( i ) );
+        }
+
+        return res;
+}
+
+template< typename T, typename Allocator >
+auto &
+fenwick_tree< T, Allocator >::operator+= ( fenwick_tree< T, Allocator > const & _rhs_ ) noexcept
+{
+        for( size_type i = 0; i < size(); ++i )
+        {
+                this->begin_[ i ] += _rhs_.begin_[ i ];
+        }
+        for( size_type i = size(); i < _rhs_.size(); ++i )
+        {
+                push_back( _rhs_.element_at( i ) );
+        }
+
+        return *this;
+}
+
+template< typename T, typename Allocator >
+auto
+fenwick_tree< T, Allocator >::operator- ( fenwick_tree< T, Allocator > const & _rhs_ ) const
+{
+        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator+: size() != rhs.size()" );
+
+        _self res( size() );
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                res.push_back( element_at( i ) - _rhs_.element_at( i ) );
+        }
+
+        return res;
+}
+
+template< typename T, typename Allocator >
+auto &
+fenwick_tree< T, Allocator >::operator-= ( fenwick_tree< T, Allocator > const & _rhs_ ) noexcept
+{
+        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator-=: size() != rhs.size()" );
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                this->begin_[ i ] -= _rhs_.begin_[ i ];
+        }
+
+        return *this;
 }
 
 template< typename T, typename Allocator >
