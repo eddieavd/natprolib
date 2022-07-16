@@ -331,7 +331,7 @@ public:
 
 		_index_ += capacity_ / 2;
 
-		head_[ _index_ ] = std::move( _value_ );
+		head_[ _index_ ] = NPL_MOVE( _value_ );
 
 		for( _index_ /= 2; _index_ >= 1; _index_ /= 2 )
 		{
@@ -347,7 +347,7 @@ public:
 		{
 			resize();
 
-			head_[ capacity_ / 2 + size_ ] = std::move( _value_ );
+			head_[ capacity_ / 2 + size_ ] = NPL_MOVE( _value_ );
 			size_++;
 
 			construct_tree();
@@ -366,7 +366,7 @@ public:
 			resize();
 		}
 
-		head_[ capacity_ / 2 + size_ ] = std::move( T ( args... ) );
+		head_[ capacity_ / 2 + size_ ] = NPL_MOVE( T ( args... ) );
 		size_++;
 		construct_tree();
 	}

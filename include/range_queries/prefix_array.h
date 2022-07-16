@@ -148,7 +148,7 @@ private:
 	void _move_assign_alloc ( _prefix_array_base & _c_, std::true_type )
 		noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
 	{
-		_alloc() = std::move( _c_._alloc() );
+		_alloc() = NPL_MOVE( _c_._alloc() );
 	}
 
 	void _move_assign_alloc ( _prefix_array_base &, std::false_type ) noexcept {}
@@ -186,7 +186,7 @@ inline
 _prefix_array_base< T, Allocator >::_prefix_array_base ( allocator_type && _a_ ) noexcept
 	: begin_  ( nullptr ),
 	  end_    ( nullptr ),
-	  end_cap_( nullptr, std::move( _a_ ) ) {}
+	  end_cap_( nullptr, NPL_MOVE( _a_ ) ) {}
 
 template< typename T, typename Allocator >
 _prefix_array_base< T, Allocator >::~_prefix_array_base ()
@@ -505,7 +505,7 @@ public:
 	template< typename Arg >
 	void _emplace_back ( Arg&& _arg_ )
 	{
-		emplace_back( std::forward< Arg >( _arg_ ) );
+		emplace_back( NPL_FWD( _arg_ ) );
 	}
 
 	void push_back ( const_reference _x_ );
@@ -717,7 +717,7 @@ private:
 
 		if( this->begin_ == this->end_ )
 		{
-			_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), std::forward< Args >( _args_ )... );
+			_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), NPL_FWD( _args_ )... );
 		}
 		else
 		{
@@ -1111,7 +1111,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array const & _x_, _identity
 template< typename T, typename Allocator >
 inline
 prefix_array< T, Allocator >::prefix_array ( prefix_array && _x_ ) noexcept
-	: _base( std::move( _x_._alloc() ) )
+	: _base( NPL_MOVE( _x_._alloc() ) )
 {
 #if NPL_DEBUG_LEVEL == 2
 #endif
@@ -1565,14 +1565,14 @@ prefix_array< T, Allocator >::_push_back_slow_path ( U && _x_ )
 
 	if( this->begin_ == this->end_ )
 	{
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( _x_ ) );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), NPL_FWD( _x_ ) );
 	}
 	else
 	{
 		auto val = _x_;
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( val ) );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), NPL_FWD( val ) );
 	}
 
 	b.end_++;
@@ -1601,11 +1601,11 @@ prefix_array< T, Allocator >::push_back ( value_type && _x_ )
 {
 	if( this->end_ < this->_end_cap() )
 	{
-		_construct_one_at_end( std::move( _x_ ) );
+		_construct_one_at_end( NPL_MOVE( _x_ ) );
 	}
 	else
 	{
-		_push_back_slow_path( std::move( _x_ ) );
+		_push_back_slow_path( NPL_MOVE( _x_ ) );
 	}
 }
 
@@ -1620,14 +1620,14 @@ prefix_array< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 
 	if( this->begin_ == this->end_ )
 	{
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( _args_ )... );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), NPL_FWD( _args_ )... );
 	}
 	else
 	{
 		auto val = value_type( _args_... );
 		val += *( this->end_ - 1 );
 
-		_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< value_type >( val ) );
+		_alloc_traits::construct( a, std::to_address( b.end_ ), NPL_FWD( val ) );
 	}
 
 	b.end_++;
@@ -1642,11 +1642,11 @@ prefix_array< T, Allocator >::emplace_back ( Args&&... _args_ )
 {
 	if( this->end_ < this->_end_cap() )
 	{
-		_construct_one_at_end( std::forward< Args >( _args_ )... );
+		_construct_one_at_end( NPL_FWD( _args_ )... );
 	}
 	else
 	{
-		_emplace_back_slow_path( std::forward< Args >( _args_ )... );
+		_emplace_back_slow_path( NPL_FWD( _args_ )... );
 	}
 	return this->back();
 }
@@ -1673,7 +1673,7 @@ prefix_array< T, Allocator >::erase ( const_iterator _position_ )
 	difference_type pos = _position_ - cbegin();
 	pointer p = this->begin_ + pos;
 
-	this->_destruct_at_end( std::move( p + 1, this->end_, p ) );
+	this->_destruct_at_end( NPL_MOVE( p + 1, this->end_, p ) );
 	this->_invalidate_iterators_past( p - 1 );
 
 	iterator r = _make_iter( p );
@@ -1692,7 +1692,7 @@ prefix_array< T, Allocator >::erase ( const_iterator _first_, const_iterator _la
 
 	if( _first_ != _last_ )
 	{
-		this->_destruct_at_end( std::move( p + ( _last_ - _first_ ), this->end_, p ) );
+		this->_destruct_at_end( NPL_MOVE( p + ( _last_ - _first_ ), this->end_, p ) );
 		this->_invalidate_iterators_past( p - 1 );
 	}
 
@@ -1713,7 +1713,7 @@ prefix_array< T, Allocator >::_move_range ( pointer _from_s_, pointer _from_e_, 
 		for( pointer pos = tx.pos_; i < _from_e_;
 				++i, ++pos, tx.pos_ = pos )
 		{
-			_alloc_traits::construct( this->_alloc(), std::to_address( pos ), std::move( *i ) );
+			_alloc_traits::construct( this->_alloc(), std::to_address( pos ), NPL_MOVE( *i ) );
 		}
 	}
 	std::move_backward( _from_s_, _from_s_ + n, old_last );
@@ -1769,12 +1769,12 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, value_type && 
 	{
 		if( p == this->end_ )
 		{
-			_construct_one_at_end( std::move( _x_ ) );
+			_construct_one_at_end( NPL_MOVE( _x_ ) );
 		}
 		else
 		{
 			_move_range( p, this->end_, p + 1 );
-			*p = std::move( _x_ );
+			*p = NPL_MOVE( _x_ );
 		}
 	}
 	else
@@ -1782,7 +1782,7 @@ prefix_array< T, Allocator >::insert ( const_iterator _position_, value_type && 
 		allocator_type & a = this->_alloc();
 
 		split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
-		b.push_back( std::move( _x_ ) );
+		b.push_back( NPL_MOVE( _x_ ) );
 		p = _swap_out_circular_buffer( b, p );
 	}
 
@@ -1802,13 +1802,13 @@ prefix_array< T, Allocator >::emplace ( const_iterator _position_, Args&&... _ar
 	{
 		if( p == this->end_ )
 		{
-			_construct_one_at_end( std::forward< Args >( _args_ )... );
+			_construct_one_at_end( NPL_FWD( _args_ )... );
 		}
 		else
 		{
-			mem::_temp_value< value_type, Allocator > tmp( this->_alloc(), std::forward< Args >( _args_ )... );
+			mem::_temp_value< value_type, Allocator > tmp( this->_alloc(), NPL_FWD( _args_ )... );
 			_move_range( p, this->end_, p + 1 );
-			*p = std::move( tmp.get() );
+			*p = NPL_MOVE( tmp.get() );
 		}
 	}
 	else
@@ -1816,7 +1816,7 @@ prefix_array< T, Allocator >::emplace ( const_iterator _position_, Args&&... _ar
 		allocator_type & a = this->_alloc();
 
 		split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), p - this->begin_, a );
-		b.emplace_back( std::forward< Args >( _args_ )... );
+		b.emplace_back( NPL_FWD( _args_ )... );
 		p = _swap_out_circular_buffer( b, p );
 	}
 

@@ -153,7 +153,7 @@ private:
 	void _move_assign_alloc ( split_buffer & _x_, std::true_type )
 		noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
 	{
-		_alloc() = std::move( _x_._alloc() );
+		_alloc() = NPL_MOVE( _x_._alloc() );
 	}
 	void _move_assign_alloc ( split_buffer &, std::false_type ) noexcept {}
 
@@ -260,7 +260,7 @@ split_buffer< T, Allocator >::_construct_at_end ( InputIterator _first_, InputIt
 			for( pointer p = begin_; p != end_; ++p, ++buf.end_ )
 			{
 				_alloc_traits::construct( buf._alloc(),
-						std::to_address( buf.end_ ), std::move( *p ) );
+						std::to_address( buf.end_ ), NPL_MOVE( *p ) );
 			}
 			swap( buf );
 		}
@@ -368,10 +368,10 @@ split_buffer< T, Allocator >::~split_buffer ()
 template< typename T, typename Allocator >
 split_buffer< T, Allocator >::split_buffer ( split_buffer && _x_ )
 	noexcept( std::is_nothrow_move_constructible_v< allocator_type > )
-	: first_  ( std::move( _x_.first_ ) ),
-	  begin_  ( std::move( _x_.begin_ ) ),
-	  end_    ( std::move( _x_.end_   ) ),
-	  end_cap_( std::move( _x_.end_cap_ ) )
+	: first_  ( NPL_MOVE( _x_.first_ ) ),
+	  begin_  ( NPL_MOVE( _x_.begin_ ) ),
+	  end_    ( NPL_MOVE( _x_.end_   ) ),
+	  end_cap_( NPL_MOVE( _x_.end_cap_ ) )
 {
 	_x_.first_     = nullptr;
 	_x_.begin_     = nullptr;
@@ -552,7 +552,7 @@ split_buffer< T, Allocator >::push_front( value_type && _x_ )
 			std::swap( _end_cap(), t._end_cap() );
 		}
 	}
-	_alloc_traits::construct( _alloc(), std::to_address( begin_ - 1 ), std::move( _x_ ) );
+	_alloc_traits::construct( _alloc(), std::to_address( begin_ - 1 ), NPL_MOVE( _x_ ) );
 	--begin_;
 }
 
@@ -568,7 +568,7 @@ split_buffer< T, Allocator >::push_back ( const_reference _x_ )
 			difference_type d = begin_ - first_;
 
 			d = ( d + 1 ) / 2;
-			end_ = std::move( begin_, end_, begin_ - d );
+			end_ = NPL_MOVE( begin_, end_, begin_ - d );
 			begin_ -= d;
 		}
 		else
@@ -601,7 +601,7 @@ split_buffer< T, Allocator >::push_back ( value_type && _x_ )
 			difference_type d = begin_ - first_;
 
 			d = ( d + 1 ) / 2;
-			end_ = std::move( begin_, end_, begin_ - d );
+			end_ = NPL_MOVE( begin_, end_, begin_ - d );
 			begin_ -= d;
 		}
 		else
@@ -619,7 +619,7 @@ split_buffer< T, Allocator >::push_back ( value_type && _x_ )
 			std::swap( _end_cap(), t._end_cap() );
 		}
 	}
-	_alloc_traits::construct( _alloc(), std::to_address( end_ ), std::move( _x_ ) );
+	_alloc_traits::construct( _alloc(), std::to_address( end_ ), NPL_MOVE( _x_ ) );
 	++end_;
 }
 
@@ -635,7 +635,7 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
 			difference_type d = begin_ - first_;
 
 			d = ( d + 1 ) / 2;
-			end_ = std::move( begin_, end_, begin_ - d );
+			end_ = NPL_MOVE( begin_, end_, begin_ - d );
 			begin_ -= d;
 		}
 		else
@@ -653,7 +653,7 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
 			std::swap( _end_cap(), t._end_cap() );
 		}
 	}
-	_alloc_traits::construct( _alloc(), std::to_address( end_ ), std::forward< Args >( _args_ )... );
+	_alloc_traits::construct( _alloc(), std::to_address( end_ ), NPL_FWD( _args_ )... );
 	++end_;
 }
 

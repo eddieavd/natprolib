@@ -147,7 +147,7 @@ private:
 	void _move_assign_alloc ( _fenwick_tree_base & _x_, std::true_type )
 		noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
 	{
-		_alloc() = std::move( _x_._alloc() );
+		_alloc() = NPL_MOVE( _x_._alloc() );
 	}
 
 	void _move_assign_alloc ( _fenwick_tree_base &, std::false_type ) noexcept {}
@@ -185,7 +185,7 @@ inline
 _fenwick_tree_base< T, Allocator >::_fenwick_tree_base ( allocator_type && _a_ ) noexcept
 	: begin_  ( nullptr ),
 	  end_    ( nullptr ),
-	  end_cap_( nullptr, std::move( _a_ ) ) {}
+	  end_cap_( nullptr, NPL_MOVE( _a_ ) ) {}
 
 template< typename T, typename Allocator >
 _fenwick_tree_base< T, Allocator >::~_fenwick_tree_base ()
@@ -459,7 +459,7 @@ public:
 	template< typename Arg >
 	void _emplace_back ( Arg&& _arg_ )
 	{
-	        emplace_back( std::forward< Arg >( _arg_ ) );
+	        emplace_back( NPL_FWD( _arg_ ) );
 	}
 
 	void add    ( size_type _n_, value_type const &  _x_ );
@@ -640,7 +640,7 @@ private:
 	{
 		_construct_transaction tx( *this, 1 );
 
-		_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), std::forward< Args >( _args_ )... );
+		_alloc_traits::construct( this->_alloc(), std::to_address( tx.pos_ ), NPL_FWD( _args_ )... );
 		++tx.pos_;
 	}
 };
@@ -1109,7 +1109,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree const & _x_, _identity
 template< typename T, typename Allocator >
 inline
 fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree && _x_ ) noexcept
-	: _base( std::move( _x_._alloc() ) )
+	: _base( NPL_MOVE( _x_._alloc() ) )
 {
 	this->begin_     = _x_.begin_;
 	this->end_       = _x_.end_;
@@ -1536,7 +1536,7 @@ fenwick_tree< T, Allocator >::_push_back_slow_path ( U && _x_ )
 
 	split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
 
-	_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< U >( _x_ ) );
+	_alloc_traits::construct( a, std::to_address( b.end_ ), NPL_FWD( _x_ ) );
 
 	b.end_++;
 	_swap_out_circular_buffer( b );
@@ -1584,7 +1584,7 @@ fenwick_tree< T, Allocator >::update ( size_type _n_, value_type && _x_ )
 		throw std::out_of_range( "fenwick_tree::update: index out of bounds" );
 	}
 
-	_update( _n_, size(), std::move( _x_ ) );
+	_update( _n_, size(), NPL_MOVE( _x_ ) );
 }
 
 template< typename T, typename Allocator >
@@ -1618,7 +1618,7 @@ fenwick_tree< T, Allocator >::push_back ( value_type && _x_ )
 		_push_back_slow_path( _x_ );
 	}
 
-	_update( size() - 1, size(), std::move( _x_ ) );
+	_update( size() - 1, size(), NPL_MOVE( _x_ ) );
 }
 
 template< typename T, typename Allocator >
@@ -1630,7 +1630,7 @@ fenwick_tree< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 
 	split_buffer< value_type, allocator_type & > b( _recommend( size() + 1 ), size(), a );
 
-	_alloc_traits::construct( a, std::to_address( b.end_ ), std::forward< Args >( _args_ )... );
+	_alloc_traits::construct( a, std::to_address( b.end_ ), NPL_FWD( _args_ )... );
 
 	b.end_++;
 	_swap_out_circular_buffer( b );
@@ -1644,14 +1644,14 @@ fenwick_tree< T, Allocator >::emplace_back ( Args&&... _args_ )
 {
 	if( this->end_ < this->_end_cap() )
 	{
-		_construct_one_at_end( std::forward< Args >( _args_ )... );
+		_construct_one_at_end( NPL_FWD( _args_ )... );
 	}
 	else
 	{
-		_emplace_back_slow_path( std::forward< Args >( _args_ )... );
+		_emplace_back_slow_path( NPL_FWD( _args_ )... );
 	}
 
-	_update( size() - 1, size(), std::forward< Args >( _args_ )... );
+	_update( size() - 1, size(), NPL_FWD( _args_ )... );
 
 	return this->back();
 }
@@ -1679,7 +1679,7 @@ fenwick_tree< T, Allocator >::_move_range ( pointer _from_s_, pointer _from_e_, 
 		for( pointer pos = tx.pos_; i < _from_e_;
 				++i, ++pos, tx.pos_ = pos )
 		{
-			_alloc_traits::construct( this->_alloc(), std::to_address( pos ), std::move( *i ) );
+			_alloc_traits::construct( this->_alloc(), std::to_address( pos ), NPL_MOVE( *i ) );
 		}
 	}
 
