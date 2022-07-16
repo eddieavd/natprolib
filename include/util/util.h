@@ -8,17 +8,34 @@
 
 #pragma once
 
-#include <cassert>
 
 #ifndef __clang__
 #	define NPL_DISABLE_VISIBILITY_ANNOTATIONS
 #endif
 
+#define NPL_MOVE(...) \
+        static_cast< std::remove_reference_t< decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
 
-#ifndef NPL_RELEASE
-#	define NPL_ASSERT(exp, msg) assert(((void)msg, exp))
+#define NPL_FWD(...) \
+        static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
+
+#ifdef NPL_RELEASE
+#       define NPL_ASSERT(cond, ...) ((void)0)
 #else
-#	define NPL_ASSERT(exp,msg) assert(((void)msg, 0))
+#       include <cstdlib>
+#       include <iostream>
+
+#       define NPL_ASSERT(cond, ...)                                             \
+                do                                                                \
+                {                                                                  \
+                        if( !( cond ) )                                             \
+                        {                                                            \
+                                std::cerr << "natprolib: '" << #cond << "' faild in " \
+                                          << __FILE__ << ":" << __LINE__               \
+                                          << " - " << __VA_ARGS__ << std::endl;         \
+                                std::abort();                                            \
+                        }                                                                 \
+                } while( 0 )
 #endif
 
 #ifndef NPL_INLINE_VISIBILITY
