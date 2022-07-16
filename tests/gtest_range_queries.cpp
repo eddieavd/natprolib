@@ -148,14 +148,14 @@ TEST( PrefixTest, Prefix2D )
 //	prefix_array prefix_2d( 4, prefix );
 
 	EXPECT_EQ( prefix_2d[ 3 ][ 3 ]                  , 16 );
-	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 3, 3 ) , 16 );
+	EXPECT_EQ( prefix_2d.range( 0, 0, 3, 3 ) , 16 );
 	EXPECT_EQ( prefix_2d.range( 0, 3 ).range( 0, 3 ), 16 );
 
-	EXPECT_EQ( prefix_2d.range< int >( 0, 0, 1, 1 ),  4 );
-	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 2 ),  4 );
-	EXPECT_EQ( prefix_2d.range< int >( 1, 0, 2, 1 ),  4 );
-	EXPECT_EQ( prefix_2d.range< int >( 1, 1, 2, 2 ),  4 );
-	EXPECT_EQ( prefix_2d.range< int >( 0, 1, 1, 3 ),  6 );
+	EXPECT_EQ( prefix_2d.range( 0, 0, 1, 1 ),  4 );
+	EXPECT_EQ( prefix_2d.range( 0, 1, 1, 2 ),  4 );
+	EXPECT_EQ( prefix_2d.range( 1, 0, 2, 1 ),  4 );
+	EXPECT_EQ( prefix_2d.range( 1, 1, 2, 2 ),  4 );
+	EXPECT_EQ( prefix_2d.range( 0, 1, 1, 3 ),  6 );
 
 	EXPECT_EQ( prefix_2d.at( 0 ), prefix          );
 	EXPECT_EQ( prefix_2d.at( 1 ), prefix + prefix );
@@ -176,9 +176,9 @@ TEST( PrefixTest, Prefix3D )
 //	again simply
 //	prefix_array prefix_3d( 4, prefix_2d );
 
-	EXPECT_EQ( prefix_3d.range< int >( 0, 0, 0, 3, 3, 3 ), 64 );
-	EXPECT_EQ( prefix_3d.element_at< int >( 2, 2, 2 )    ,  1 );
-	EXPECT_EQ( prefix_3d.at< int >( 3, 3, 3 )            , 64 );
+	EXPECT_EQ( prefix_3d.range( 0, 0, 0, 3, 3, 3 ), 64 );
+	EXPECT_EQ( prefix_3d.element_at( 2, 2, 2 )    ,  1 );
+	EXPECT_EQ( prefix_3d.at( 3, 3, 3 )            , 64 );
 }
 TEST( PrefixTest, Prefix4D )  //  just to flex
 {
@@ -188,9 +188,9 @@ TEST( PrefixTest, Prefix4D )  //  just to flex
 
 	prefix_array prefix_4d( 4, prefix_3d );
 
-	EXPECT_EQ( prefix_4d.range( 0, 3 ).range< int >( 0, 0, 0, 3, 3, 3 ), 256 );
-	EXPECT_EQ( prefix_4d.element_at( 3 ).element_at< int >( 3, 3, 3 )  ,   1 );
-	EXPECT_EQ( prefix_4d.at( 3 ).at< int >( 3, 3, 3 )                  , 256 );
+	EXPECT_EQ( prefix_4d.range( 0, 3 ).range( 0, 0, 0, 3, 3, 3 ), 256 );
+	EXPECT_EQ( prefix_4d.element_at( 3 ).element_at( 3, 3, 3 )  ,   1 );
+	EXPECT_EQ( prefix_4d.at( 3 ).at( 3, 3, 3 )                  , 256 );
 }
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////

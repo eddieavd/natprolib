@@ -241,16 +241,6 @@ private:
 };
 
 
-template< typename T, typename U >
-struct enable_if_2d_prefix : std::enable_if< std::is_same_v< T, prefix_array< U > > > {};
-template< typename T, typename U >
-using enable_if_2d_prefix_t = typename enable_if_2d_prefix< T, U >::type;
-
-template< typename T, typename U >
-struct enable_if_3d_prefix : std::enable_if< std::is_same_v< T, prefix_array< prefix_array< U > > > > {};
-template< typename T, typename U >
-using enable_if_3d_prefix_t = typename enable_if_3d_prefix< T, U >::type;
-
 template< typename T, typename Allocator >
 class prefix_array
 	: private _prefix_array_base< T, Allocator >
@@ -443,42 +433,50 @@ public:
 	value_type range ( size_type _x_, size_type _y_ ) const;
 
 	// 2D overloads
-	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
-	U const & at ( size_type _x_, size_type _y_ ) const
-	{
-		return at( _x_ ).at( _y_ );
-	}
+        template< typename U = _self >
+        enable_2d_container_base_t< U >
+        at ( size_type _x_, size_type _y_ ) const
+        {
+                return at( _x_ ).at( _y_ );
+        }
 
-	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
-	U element_at ( size_type _x_, size_type _y_ ) const
-	{
-		return element_at( _x_ ).element_at( _y_ );
-	}
+        template< typename U = _self >
+        enable_2d_range_container_base_t< U >
+        element_at ( size_type _x_, size_type _y_ ) const
+        {
+                return element_at( _x_ ).element_at( _y_ );
+        }
 
-	template< typename U, typename = enable_if_2d_prefix_t< value_type, U > >
-	U range ( size_type _x1_, size_type _y1_, size_type _x2_, size_type _y2 ) const
-	{
-		return range( _x1_, _x2_ ).range( _y1_, _y2 );
-	}
+        template< typename U = _self >
+        enable_2d_range_container_base_t< U >
+        range ( size_type _x1_, size_type _y1_, size_type _x2_, size_type _y2_ ) const
+        {
+                return range( _x1_, _x2_ ).range( _y1_, _y2_ );
+        }
+        //
 
 	// 3D overloads
-	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
-	U const & at ( size_type _x_, size_type _y_, size_type _z_ ) const
-	{
-		return at( _x_ ).at( _y_ ).at( _z_ );
-	}
+        template< typename U = _self >
+        enable_3d_container_base_t< U >
+        at ( size_type _x_, size_type _y_, size_type _z_ ) const
+        {
+                return at( _x_ ).at( _y_ ).at( _z_ );
+        }
 
-	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
-	U element_at ( size_type _x_, size_type _y_, size_type _z_ ) const
-	{
-		return element_at( _x_ ).element_at( _y_ ).element_at( _z_ );
-	}
+        template< typename U = _self >
+        enable_3d_range_container_base_t< U >
+        element_at ( size_type _x_, size_type _y_, size_type _z_ ) const
+        {
+                return element_at( _x_ ).element_at( _y_ ).element_at( _z_ );
+        }
 
-	template< typename U, typename = enable_if_3d_prefix_t< value_type, U > >
-	U range ( size_type _x1_, size_type _y1_, size_type _z1_, size_type _x2_, size_type _y2_, size_type _z2_ ) const
+        template< typename U = _self >
+        enable_3d_range_container_base_t< U >
+        range ( size_type _x1_, size_type _y1_, size_type _z1_, size_type _x2_, size_type _y2_, size_type _z2_ ) const
 	{
 		return range( _x1_, _x2_ ).range( _y1_, _y2_ ).range( _z1_, _z2_ );
 	}
+        //
 
 	const_reference front () const noexcept
 	{

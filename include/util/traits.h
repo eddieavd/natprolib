@@ -106,15 +106,79 @@ struct noexcept_move_assign_container : public std::integral_constant< bool,
 template< typename Alloc, typename Traits = std::allocator_traits< Alloc > >
 inline constexpr bool noexcept_move_assign_container_v = noexcept_move_assign_container< Alloc, Traits >::value;
 
-template< typename T, typename U >
-struct is_2d_container : std::is_same< typename T::value_type, U > {};
-template< typename T, typename U >
-inline constexpr bool is_2d_container_v = is_2d_container< T, U >::value;
+template< typename T, typename = void, typename = void >
+struct _is_container : std::false_type {};
 
-template< typename T, typename U >
-struct is_3d_container : std::is_same< typename T::value_type::value_type, U > {};
-template< typename T, typename U >
-inline constexpr bool is_3d_container_v = is_3d_container< T, U >::value;
+template< typename T >
+struct _is_container< T,
+                         typename _void_t< typename T::value_type >::type,
+                         typename _void_t< decltype( std::declval< T& >().at( std::size_t( 0 ) ) ) >::type
+                        >
+                        : std::true_type {};
+
+template< typename Container >
+struct is_2d_container : _is_container< typename Container::value_type > {};
+
+template< typename Container >
+struct is_3d_container : std::conjunction< is_2d_container< Container >, is_2d_container< typename Container::value_type > > {};
+
+template< typename Container >
+inline constexpr bool is_2d_container_v = is_2d_container< Container >::value;
+
+template< typename Container >
+inline constexpr bool is_3d_container_v = is_3d_container< Container >::value;
+
+template< typename Container >
+using _2d_container_base_t = typename Container::value_type::value_type;
+
+template< typename Container >
+using _3d_container_base_t = typename Container::value_type::value_type::value_type;
+
+template< typename Container, typename = void, typename = void >
+struct _is_npl_range_container : std::false_type {};
+
+template< typename Container >
+struct _is_npl_range_container< Container,
+                                typename _void_t< typename Container::value_type >::type,
+                                typename _void_t< decltype( std::declval< Container& >().range() ) >::type
+                                >
+                                : std::true_type {};
+
+template< typename Container >
+struct is_npl_range_container : _is_npl_range_container< Container > {};
+
+template< typename Container >
+struct is_2d_npl_range_container : std::conjunction< _is_npl_range_container< Container >, _is_npl_range_container< typename Container::value_type > > {};
+
+template< typename Container >
+using is_npl_range_container_v = typename is_npl_range_container< Container >::value;
+
+template< typename Container >
+using is_2d_npl_range_container_v = typename is_2d_npl_range_container< Container >::value;
+
+template< typename T >
+struct enable_2d_container_base : std::enable_if< is_2d_container_v< T >, _2d_container_base_t< T > > {};
+
+template< typename T >
+using enable_2d_container_base_t = typename enable_2d_container_base< T >::type;
+
+template< typename T >
+struct enable_2d_range_container_base : std::enable_if< std::conjunction_v< is_2d_container< T >, is_npl_range_container< typename T::value_type > >, _2d_container_base_t< T > > {};
+
+template< typename T >
+using enable_2d_range_container_base_t = typename enable_2d_range_container_base< T >::type;
+
+template< typename T >
+struct enable_3d_container_base : std::enable_if< is_3d_container_v< T >, _3d_container_base_t< T > > {};
+
+template< typename T >
+using enable_3d_container_base_t = typename enable_3d_container_base< T >::type;
+
+template< typename T >
+struct enable_3d_range_container_base : std::enable_if< std::conjunction_v< is_3d_container< T >, is_2d_npl_range_container< typename T::value_type > >, _3d_container_base_t< T > > {};
+
+template< typename T >
+using enable_3d_range_container_base_t = typename enable_3d_range_container_base< T >::type;
 
 
 } // namespace npl
