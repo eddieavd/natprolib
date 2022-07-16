@@ -307,6 +307,23 @@ TEST( FenwickTest, FenwickPushArray )
 	EXPECT_EQ( ftree.size(), 6 );
 	EXPECT_EQ( ftree.range( 0, 5 ), 6 );
 }
+TEST( FenwickTest, Fenwick2D )
+{
+        fenwick_tree< int > ftree( 4, 1 );
+
+        fenwick_tree< fenwick_tree< int > > ftree2d( 4, ftree );
+
+        EXPECT_EQ( ftree2d.range( 0, 0, 3, 3 ), 16 );
+}
+TEST( FenwickTest, Fenwick3D )
+{
+        fenwick_tree< int > ftree( 4, 1 );
+
+        fenwick_tree ftree2d( 4, ftree );
+        fenwick_tree ftree3d( 4, ftree2d );
+
+        EXPECT_EQ( ftree3d.range( 0, 0, 0, 3, 3, 3 ), 64 );
+}
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////

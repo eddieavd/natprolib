@@ -335,7 +335,11 @@ public:
 	allocator_type get_allocator () const noexcept
 	{ return this->_alloc(); }
 
-	bool operator== ( fenwick_tree< T, Allocator > const & _rhs_ ) const noexcept;
+	bool   operator== ( fenwick_tree< T, Allocator > const & _rhs_ ) const noexcept;
+        auto   operator+  ( fenwick_tree< T, Allocator > const & _rhs_ ) const         ;
+        auto & operator+= ( fenwick_tree< T, Allocator > const & _rhs_ )       noexcept;
+        auto   operator-  ( fenwick_tree< T, Allocator > const & _rhs_ ) const         ;
+        auto & operator-= ( fenwick_tree< T, Allocator > const & _rhs_ )       noexcept;
 
 	const_iterator begin () const noexcept;
 	const_iterator   end () const noexcept;
@@ -381,6 +385,52 @@ public:
 
 	value_type range (                              ) const;
 	value_type range ( size_type _x_, size_type _y_ ) const;
+
+        // 2D overloads
+        template< typename U = _self >
+        enable_2d_container_base_t< U >
+        at ( size_type _x_, size_type _y_ ) const
+        {
+                return at( _x_ ).at( _y_ );
+        }
+
+        template< typename U = _self >
+        enable_2d_range_container_base_t< U >
+        element_at ( size_type _x_, size_type _y_ ) const
+        {
+                return element_at( _x_ ).element_at( _y_ );
+        }
+
+        template< typename U = _self >
+        enable_2d_range_container_base_t< U >
+        range ( size_type _x1_, size_type _y1_, size_type _x2_, size_type _y2_ ) const
+        {
+                return range( _x1_, _x2_ ).range( _y1_, _y2_ );
+        }
+        //
+
+        // 3D overloads
+        template< typename U = _self >
+        enable_3d_container_base_t< U >
+        at ( size_type _x_, size_type _y_, size_type _z_ ) const
+        {
+                return at( _x_ ).at( _y_ ).at( _z_ );
+        }
+
+        template< typename U = _self >
+        enable_3d_range_container_base_t< U >
+        element_at ( size_type _x_, size_type _y_, size_type _z_ ) const
+        {
+                return element_at( _x_ ).element_at( _y_ ).element_at( _z_ );
+        }
+
+        template< typename U = _self >
+        enable_3d_range_container_base_t< U >
+        range ( size_type _x1_, size_type _y1_, size_type _z1_, size_type _x2_, size_type _y2_, size_type _z2_ ) const
+        {
+                return range( _x1_, _x2_ ).range( _y1_, _y2_ ).range( _z1_, _z2_ );
+        }
+        //
 
 	const_reference front () const noexcept
 	{
@@ -1121,6 +1171,69 @@ fenwick_tree< T, Allocator >::operator= ( fenwick_tree && _x_ )
 }
 
 template< typename T, typename Allocator >
+auto
+fenwick_tree< T, Allocator >::operator+ ( fenwick_tree< T, Allocator > const & _rhs_ ) const
+{
+        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator+: size() != rhs.size()" );
+
+        _self res( size() );
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                res.push_back( element_at( i ) + _rhs_.element_at( i ) );
+        }
+
+        return res;
+}
+
+template< typename T, typename Allocator >
+auto &
+fenwick_tree< T, Allocator >::operator+= ( fenwick_tree< T, Allocator > const & _rhs_ ) noexcept
+{
+        for( size_type i = 0; i < size(); ++i )
+        {
+                this->begin_[ i ] += _rhs_.begin_[ i ];
+        }
+        for( size_type i = size(); i < _rhs_.size(); ++i )
+        {
+                push_back( _rhs_.element_at( i ) );
+        }
+
+        return *this;
+}
+
+template< typename T, typename Allocator >
+auto
+fenwick_tree< T, Allocator >::operator- ( fenwick_tree< T, Allocator > const & _rhs_ ) const
+{
+        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator+: size() != rhs.size()" );
+
+        _self res( size() );
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                res.push_back( element_at( i ) - _rhs_.element_at( i ) );
+        }
+
+        return res;
+
+}
+
+template< typename T, typename Allocator >
+auto &
+fenwick_tree< T, Allocator >::operator-= ( fenwick_tree< T, Allocator > const & _rhs_ ) noexcept
+{
+        NPL_ASSERT( size() == _rhs_.size(), "fenwick_tree::operator-=: size() != rhs.size()" );
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                this->begin_[ i ] -= _rhs_.begin_[ i ];
+        }
+
+        return *this;
+}
+
+template< typename T, typename Allocator >
 void
 fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _x_, std::false_type )
 	noexcept( _alloc_traits::is_always_equal::value )
@@ -1490,8 +1603,6 @@ fenwick_tree< T, Allocator >::push_back ( const_reference _x_ )
 	}
 
 	_update( size() - 1, size(), _x_ );
-
-	_verify_tree();
 }
 
 template< typename T, typename Allocator >
@@ -1509,8 +1620,6 @@ fenwick_tree< T, Allocator >::push_back ( value_type && _x_ )
 	}
 
 	_update( size() - 1, size(), std::move( _x_ ) );
-
-	_verify_tree();
 }
 
 template< typename T, typename Allocator >
