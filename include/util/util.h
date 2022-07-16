@@ -10,7 +10,9 @@
 
 
 #ifndef __clang__
+#       ifndef NPL_DISABLE_VISIBILITY_ANNOTATIONS
 #	define NPL_DISABLE_VISIBILITY_ANNOTATIONS
+#       endif
 #endif
 
 #define NPL_MOVE(...) \
