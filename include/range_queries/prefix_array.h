@@ -444,14 +444,21 @@ public:
         enable_2d_range_container_base_t< U >
         element_at ( size_type _x_, size_type _y_ ) const
         {
-                return element_at( _x_ ).element_at( _y_ );
+                return range( _x_, _y_, _x_, _y_ );
         }
 
         template< typename U = _self >
         enable_2d_range_container_base_t< U >
         range ( size_type _x1_, size_type _y1_, size_type _x2_, size_type _y2_ ) const
         {
-                return range( _x1_, _x2_ ).range( _y1_, _y2_ );
+                if( _x1_ == 0 )
+                {
+                        return at( _x2_ ).range( _y1_, _y2_ );
+                }
+                else
+                {
+                        return at( _x2_ ).range( _y1_, _y2_ ) - at( _x1_ - 1 ).range( _y1_, _y2_ );
+                }
         }
         //
 
@@ -467,14 +474,21 @@ public:
         enable_3d_range_container_base_t< U >
         element_at ( size_type _x_, size_type _y_, size_type _z_ ) const
         {
-                return element_at( _x_ ).element_at( _y_ ).element_at( _z_ );
+                return range( _x_, _y_, _z_, _x_, _y_, _z_ );
         }
 
         template< typename U = _self >
         enable_3d_range_container_base_t< U >
         range ( size_type _x1_, size_type _y1_, size_type _z1_, size_type _x2_, size_type _y2_, size_type _z2_ ) const
 	{
-		return range( _x1_, _x2_ ).range( _y1_, _y2_ ).range( _z1_, _z2_ );
+                if( _x1_ == 0 )
+                {
+                        return at( _x2_ ).range( _y1_, _z1_, _y2_, _z2_ );
+                }
+                else
+                {
+                        return at( _x2_ ).range( _y1_, _z1_, _y2_, _z2_ ) - at( _x1_ - 1 ).range( _y1_, _z1_, _y2_, _z2_ );
+                }
 	}
         //
 
