@@ -1,27 +1,29 @@
-if( METATEST )
-	add_library( test_meta_range_queries test_meta_range_queries.cpp )
-endif()
+include( FetchContent )
 
-if( GTEST )
-	include( FetchContent )
-	FetchContent_Declare(
-		googletest
-		URL https://github.com/google/googletest/archive/16f637fbf4ffc3f7a01fa4eceb7906634565242f.zip
-	)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/16f637fbf4ffc3f7a01fa4eceb7906634565242f.zip
+)
 
-	FetchContent_MakeAvailable( googletest )
+FetchContent_MakeAvailable( googletest )
 
-	enable_testing()
+enable_testing()
 
-	add_executable(
-		gtest_rq
-		gtest_range_queries.cpp
-	)
-	target_link_libraries(
-		gtest_rq
-		gtest_main
-	)
+file( GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-	include( GoogleTest )
-	gtest_discover_tests( gtest_rq )
-endif()
+add_executable(
+        gtest_nplib
+        ${sources}
+)
+target_link_libraries(
+        gtest_nplib
+        gtest_main
+)
+target_include_directories(
+        gtest_nplib
+        PUBLIC
+        ${CMAKE_HOME_DIRECTORY}/include
+)
+
+include( GoogleTest )
+gtest_discover_tests( gtest_nplib )

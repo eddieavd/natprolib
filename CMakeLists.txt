@@ -1,39 +1,34 @@
-cmake_minimum_required( VERSION 3.22 )
+cmake_minimum_required( VERSION 3.21 )
 
-project( natprolib_test VERSION 1.0 )
+project( natprolib VERSION 2.0.0 )
 
-option( METATEST "Test meta_rq"       OFF )
-option( GTEST    "Build gtest suite"  OFF )
-option( GBENCH   "Build benchmarks"   OFF )
-option( CMAKE_EXPORT_COMPILE_COMMANDS ON  )
+option( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-set( CMAKE_CXX_STANDARD          20   )
+set( CMAKE_CXX_STANDARD          17   )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
 
-add_compile_options( -Wall -Wextra -pedantic -Werror -O3 )
-#add_link_options( -fsanitize=address -fsanitize=undefined )
+add_compile_options( -Wall -Wextra -pedantic -Werror )
 
 if( NPL_DEBUG )
-	add_compile_options( -DNPL_DEBUG )
+        add_compile_options( -O0 )
+        add_compile_definitions( NPL_DEBUG )
+        add_link_options( -fsanitize=address -fsanitize=undefined )
+elseif( NPL_RELEASE )
+        add_compile_options( -O3 )
+        add_compile_definitions( NPL_RELEASE )
 endif()
 
-add_subdirectory( include )
-add_subdirectory( tests   )
-add_subdirectory( bench   )
-
-if( METATEST )
-	list( APPEND EXTRA_LIBS test_meta_range_queries )
-	list( APPEND EXTRA_INCLUDES "$(PROJECT_SOURCE_DIR)/tests" )
+if( NPL_HAS_ASAN )
+        add_compile_definitions( NPL_HAS_ASAN )
 endif()
 
-list( APPEND EXTRA_LIBS natprolib )
-list( APPEND EXTRA_INCLUDES "$(PROJECT_SOURCE_DIR)/include" )
+if( GTEST )
+        add_subdirectory( tests )
+endif()
+if( GBENCH )
+        add_subdirectory( bench )
+endif()
 
-add_executable( natprolib_test main.cpp )
+add_executable( nplib main.cpp )
 
-target_link_libraries( natprolib_test PUBLIC ${EXTRA_LIBS} )
-
-target_include_directories( natprolib_test PUBLIC
-	"$(PROJECT_BINARY_DIR)"
-	${EXTRA_INCLUDES}
-)
+target_include_directories( nplib PUBLIC include )
