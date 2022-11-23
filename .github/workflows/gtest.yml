@@ -13,7 +13,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: build and run tests
-        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DMETATEST=ON -DGTEST=ON -DNPL_RELEASE=ON && cmake --build . && ./tests/gtest_rq
+        run:  mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_ASAN=ON && cmake --build . && ./tests/gtest_nplib
 
   googletest_ubuntu_clang:
 
@@ -25,7 +25,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: build and run tests
-        run: export CXX=$(which clang++) && mkdir build && cd build && cmake .. -DMAKE_BUILD_TYPE=Release -DMETATEST=ON -DGTEST=ON -DNPM_RELEASE=ON && cmake --build . && ./tests/gtest_rq
+        run:  export CXX=$(which clang++) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_ASAN=ON && cmake --build . && ./tests/gtest_nplib
 
   googletest_ubuntu_gcc:
 
@@ -37,7 +37,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: update g++
-        run: sudo apt install g++-10
+        run:  sudo apt install g++-10
 
       - name: build and run tests
-        run: export CXX=$(which g++-10) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DMETATEST=ON -DGTEST=ON -DNPL_RELEASE=ON && cmake --build . && ./tests/gtest_rq
+        run:  export CXX=$(which g++-10) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON && cmake --build . && ./tests/gtest_nplib
