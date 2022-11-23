@@ -50,7 +50,7 @@ public:
         using                 _base = iterator< T, C, Allocator >;
         using npl_iterator_category = prefix_array_iterator_tag;
 private:
-        explicit _prefix_array_iterator ( typename _base::pointer       _ptr_ ) : _base( _ptr_ ) {}
+        explicit _prefix_array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
 };
 
 
@@ -65,7 +65,7 @@ protected:
         using allocator_type = typename _base::allocator_type;
 
         _prefix_array_base (                                 ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
-        _prefix_array_base ( allocator_type const &  _alloc_ ) :          _base(           _alloc_   ) {}
+        _prefix_array_base ( allocator_type const &  _alloc_ )          : _base(           _alloc_   ) {}
         _prefix_array_base ( allocator_type       && _alloc_ ) noexcept : _base( NPL_MOVE( _alloc_ ) ) {}
 };
 
@@ -90,8 +90,8 @@ public:
 
         using               iterator = typename _base::iterator;
         using         const_iterator = typename _base::const_iterator;
-        using const_reverse_iterator = reverse_iter< const_iterator >;
         using       reverse_iterator = reverse_iter<       iterator >;
+        using const_reverse_iterator = reverse_iter< const_iterator >;
 
         static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
                         "allocator_type::value_type != prefix_array::value_type" );
@@ -1530,6 +1530,10 @@ prefix_array< T, Allocator >::operator+= ( prefix_array< T, Allocator > const & 
         }
         else
         {
+                for( size_type i = size() - 1; i >= common; --i )
+                {
+                        this->begin_[ i ] = element_at( i );
+                }
                 for( size_type i = common; i < size(); ++i )
                 {
                         _update_element( i );
@@ -1572,6 +1576,10 @@ prefix_array< T, Allocator >::operator-= ( prefix_array< T, Allocator > const & 
         }
         else
         {
+                for( size_type i = size() - 1; i >= common; --i )
+                {
+                        this->begin_[ i ] = element_at( i );
+                }
                 for( size_type i = common; i < size(); ++i )
                 {
                         _update_element( i );
