@@ -53,8 +53,14 @@
 #endif
 
 #ifdef NPL_USE_ATTRIBUTES
-#       ifndef NPL_ALWAYS_INLINE
-#       define NPL_ALWAYS_INLINE __attribute__(( always_inline ))
+#       ifdef __clang__
+#               ifndef NPL_ALWAYS_INLINE
+#               define NPL_ALWAYS_INLINE __attribute__(( always_inline ))
+#               endif
+#       else
+#               ifndef NPL_ALWAYS_INLINE
+#               define NPL_ALWAYS_INLINE
+#               endif
 #       endif
 #       ifndef NPL_FLATTEN
 #       define NPL_FLATTEN __attribute__(( flatten ))
