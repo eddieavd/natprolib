@@ -1,0 +1,14 @@
+// vim: set ft=cpp:
+//
+//
+//      natprolib
+//
+
+#pragma once
+
+
+#include <container/array>
+#include <container/vector>
+
+#include <range_queries/prefix_array>
+#include <range_queries/fenwick_tree>

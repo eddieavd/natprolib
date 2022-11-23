@@ -1,0 +1,259 @@
+// vim: set ft=cpp:
+//
+//
+//      natprolib
+//      array.hpp
+//
+
+#pragma once
+
+#include <algorithm>
+
+#include <util/util.hpp>
+#include <util/traits.hpp>
+#include <util/iterator.hpp>
+
+
+namespace npl
+{
+
+
+template< typename T, size_t Size >
+struct array
+{
+        using           _self = array;
+        using      value_type = T;
+        using       size_type = size_t;
+        using difference_type = std::ptrdiff_t;
+        using       reference = value_type &;
+        using const_reference = value_type const &;
+        using         pointer = value_type *;
+        using   const_pointer = value_type const *;
+
+        using               iterator = pointer;
+        using         const_iterator = const_pointer;
+        using       reverse_iterator = reverse_iter< iterator >;
+        using const_reverse_iterator = reverse_iter< const_iterator >;
+
+        value_type data_[ Size ];
+
+        constexpr array () noexcept {}
+
+        constexpr array ( array< T, Size > const & _other_ ) noexcept
+        {
+                fill( _other_.begin(), _other_.end() );
+        }
+
+        inline constexpr
+        auto & operator= ( array< T, Size > const & _other_ ) noexcept
+        {
+                fill( _other_.begin(), _other_.end() );
+
+                return *this;
+        }
+
+        inline constexpr
+        void fill ( value_type const & _val_ )
+        {
+                std::fill_n( data(), Size, _val_ );
+        }
+
+        template< typename Iterator >
+        inline constexpr
+        void fill ( Iterator _first_, Iterator _last_ ) noexcept
+        {
+                for( size_type i = 0; i < Size && _first_ != _last_; ++i, ++_first_ )
+                {
+                        data_[ i ] = *_first_;
+                }
+        }
+
+        inline constexpr
+        void swap ( array & _other_ ) noexcept( std::is_nothrow_swappable_v< value_type > )
+        {
+                std::swap_ranges( data(), data() + Size, _other_.data() );
+        }
+
+        inline constexpr       iterator begin ()       noexcept { return       iterator( data()        ); }
+        inline constexpr       iterator   end ()       noexcept { return       iterator( data() + Size ); }
+        inline constexpr const_iterator begin () const noexcept { return const_iterator( data()        ); }
+        inline constexpr const_iterator   end () const noexcept { return const_iterator( data() + Size ); }
+
+        NPL_NODISCARD inline constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator( data()        ); }
+        NPL_NODISCARD inline constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator( data() + Size ); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator( data()        ); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator( data() + Size ); }
+
+        NPL_NODISCARD inline constexpr         const_iterator  cbegin () const noexcept { return  begin(); }
+        NPL_NODISCARD inline constexpr         const_iterator    cend () const noexcept { return    end(); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator crbegin () const noexcept { return rbegin(); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator   crend () const noexcept { return   rend(); }
+
+        NPL_NODISCARD inline constexpr size_type     size () const noexcept { return Size; }
+        NPL_NODISCARD inline constexpr size_type max_size () const noexcept { return Size; }
+        NPL_NODISCARD inline constexpr      bool    empty () const noexcept { return Size == 0; }
+
+        NPL_ALWAYS_INLINE
+        inline constexpr reference operator[] ( size_type const _index_ ) noexcept
+        {
+                NPL_ASSERT( _index_ < Size, "array::operator[]: index out of bounds" );
+
+                return data_[ _index_ ];
+        }
+
+        NPL_ALWAYS_INLINE
+        inline constexpr const_reference operator[] ( size_type const _index_ ) const noexcept
+        {
+                NPL_ASSERT( _index_ < Size, "array::operator[]: index out of bounds" );
+
+                return data_[ _index_ ];
+        }
+
+        NPL_ALWAYS_INLINE
+        constexpr reference at ( size_type const _index_ ) noexcept
+        {
+                NPL_ASSERT( _index_ < Size, "array::at: index out of bounds" );
+
+                return data_[ _index_ ];
+        }
+
+        NPL_ALWAYS_INLINE
+        constexpr const_reference at ( size_type const _index_ ) const noexcept
+        {
+                NPL_ASSERT( _index_ < Size, "array::at: index out of bounds" );
+
+                return data_[ _index_ ];
+        }
+
+        NPL_NODISCARD inline constexpr       reference front ()       noexcept { return ( *this )[        0 ]; }
+        NPL_NODISCARD inline constexpr const_reference front () const noexcept { return ( *this )[        0 ]; }
+        NPL_NODISCARD inline constexpr       reference  back ()       noexcept { return ( *this )[ Size - 1 ]; }
+        NPL_NODISCARD inline constexpr const_reference  back () const noexcept { return ( *this )[ Size - 1 ]; }
+
+        NPL_NODISCARD inline constexpr       pointer data ()       noexcept { return data_; }
+        NPL_NODISCARD inline constexpr const_pointer data () const noexcept { return data_; }
+
+        auto & operator+= ( array< T, Size > const & _other_ ) noexcept
+        {
+                for( size_type i = 0; i < Size; ++i )
+                {
+                        data_[ i ] += _other_[ i ];
+                }
+
+                return *this;
+        }
+        auto & operator-= ( array< T, Size > const & _other_ ) noexcept
+        {
+                for( size_type i = 0; i < Size; ++i )
+                {
+                        data_[ i ] -= _other_[ i ];
+                }
+
+                return *this;
+        }
+        auto operator+ ( array< T, Size > const & _other_ ) const noexcept
+        {
+                array< T, Size > res( *this );
+
+                res += _other_;
+
+                return res;
+        }
+        auto operator- ( array< T, Size > const & _other_ ) const noexcept
+        {
+                array< T, Size > res( *this );
+
+                res -= _other_;
+
+                return res;
+        }
+};
+
+
+template< typename T >
+struct array< T, 0 >
+{
+        using           _self = array;
+        using      value_type = T;
+        using       size_type = size_t;
+        using difference_type = std::ptrdiff_t;
+        using       reference = value_type &;
+        using const_reference = value_type const &;
+        using         pointer = value_type *;
+        using   const_pointer = value_type const *;
+
+        using               iterator = pointer;
+        using         const_iterator = const_pointer;
+        using       reverse_iterator = reverse_iter< iterator >;
+        using const_reverse_iterator = reverse_iter< const_iterator >;
+
+        inline constexpr
+        void fill ( value_type const & )
+        {
+                NPL_ASSERT( false, "array::fill: cannot fill array of size 0" );
+        }
+
+        inline constexpr
+        void swap ( array & ) noexcept
+        {
+                NPL_ASSERT( false, "array::swap: cannot swap array of size 0" );
+        }
+
+        inline constexpr       iterator begin ()       noexcept { return       iterator( data() ); }
+        inline constexpr       iterator   end ()       noexcept { return       iterator( data() ); }
+        inline constexpr const_iterator begin () const noexcept { return const_iterator( data() ); }
+        inline constexpr const_iterator   end () const noexcept { return const_iterator( data() ); }
+
+        NPL_NODISCARD inline constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator( data() ); }
+        NPL_NODISCARD inline constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator( data() ); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator( data() ); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator( data() ); }
+
+        NPL_NODISCARD inline constexpr         const_iterator  cbegin () const noexcept { return  begin(); }
+        NPL_NODISCARD inline constexpr         const_iterator    cend () const noexcept { return    end(); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator crbegin () const noexcept { return rbegin(); }
+        NPL_NODISCARD inline constexpr const_reverse_iterator   crend () const noexcept { return   rend(); }
+
+        NPL_NODISCARD inline constexpr size_type     size () const noexcept { return    0; }
+        NPL_NODISCARD inline constexpr size_type max_size () const noexcept { return    0; }
+        NPL_NODISCARD inline constexpr      bool    empty () const noexcept { return true; }
+
+        NPL_NORETURN
+        inline constexpr reference operator[] ( size_type const ) noexcept
+        {
+                NPL_ASSERT( false, "array::operator[]: called on empty array" );
+                NPL_UNREACHABLE;
+        }
+
+        NPL_NORETURN
+        inline constexpr const_reference operator[] ( size_type const ) const noexcept
+        {
+                NPL_ASSERT( false, "array::operator[]: called on empty array" );
+                NPL_UNREACHABLE;
+        }
+
+        NPL_NORETURN
+        constexpr reference at ( size_type const ) noexcept
+        {
+                NPL_ASSERT( false, "array::at: called on empty array" );
+                NPL_UNREACHABLE;
+        }
+
+        NPL_NORETURN
+        constexpr const_reference at ( size_type const ) const noexcept
+        {
+                NPL_ASSERT( false, "array::at: called on empty array" );
+                NPL_UNREACHABLE;
+        }
+
+        NPL_NODISCARD inline constexpr       reference front ()       noexcept { return ( *this )[ 0 ]; }
+        NPL_NODISCARD inline constexpr const_reference front () const noexcept { return ( *this )[ 0 ]; }
+        NPL_NODISCARD inline constexpr       reference  back ()       noexcept { return ( *this )[ 0 ]; }
+        NPL_NODISCARD inline constexpr const_reference  back () const noexcept { return ( *this )[ 0 ]; }
+
+        NPL_NODISCARD inline constexpr       pointer data ()       noexcept { return nullptr; }
+        NPL_NODISCARD inline constexpr const_pointer data () const noexcept { return nullptr; }
+};
+
+
+} // namespace npl
