@@ -76,9 +76,9 @@ public:
 
         void clear () noexcept { _destruct_at_end( begin_ ); }
 
-        [[ nodiscard ]] size_type     size () const noexcept { return static_cast< size_type >( end_     - begin_ ); }
-        [[ nodiscard ]] size_type capacity () const noexcept { return static_cast< size_type >( end_cap_ - first_ ); }
-        [[ nodiscard ]] bool         empty () const noexcept { return end_ == begin_;                                }
+        NPL_NODISCARD size_type     size () const noexcept { return static_cast< size_type >( end_     - begin_ ); }
+        NPL_NODISCARD size_type capacity () const noexcept { return static_cast< size_type >( end_cap_ - first_ ); }
+        NPL_NODISCARD bool         empty () const noexcept { return end_ == begin_;                                }
 
         size_type _front_spare () const noexcept { return static_cast< size_type >( begin_ - first_ ); }
         size_type  _back_spare () const noexcept { return static_cast< size_type >( end_cap_ - end_ ); }

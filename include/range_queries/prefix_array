@@ -279,13 +279,13 @@ public:
         const_reverse_iterator crend () const noexcept
         { return rend(); }
 
-        [[ nodiscard ]] size_type size () const noexcept
+        NPL_NODISCARD size_type size () const noexcept
         { return static_cast< size_type >( this->end_ - this->begin_ ); }
 
-        [[ nodiscard ]] size_type capacity () const noexcept
+        NPL_NODISCARD size_type capacity () const noexcept
         { return _base::capacity(); }
 
-        [[ nodiscard ]] bool empty () const noexcept
+        NPL_NODISCARD bool empty () const noexcept
         { return this->begin_ == this->end_; }
 
         size_type max_size () const noexcept;
@@ -294,8 +294,8 @@ public:
 
         void shrink_to_fit () noexcept;
 
-              reference operator[] ( size_type const _index_ )       noexcept;
-        const_reference operator[] ( size_type const _index_ ) const noexcept;
+        NPL_ALWAYS_INLINE       reference operator[] ( size_type const _index_ )       noexcept;
+        NPL_ALWAYS_INLINE const_reference operator[] ( size_type const _index_ ) const noexcept;
 
         bool   operator== ( prefix_array< T, Allocator > const & _rhs_ ) const noexcept;
         bool   operator!= ( prefix_array< T, Allocator > const & _rhs_ ) const noexcept;
@@ -348,19 +348,20 @@ public:
         >
         operator== ( ForwardIterator _first_ ) const noexcept;
 
-              reference at ( size_type const _index_ )       noexcept;
-        const_reference at ( size_type const _index_ ) const noexcept;
+        NPL_ALWAYS_INLINE       reference at ( size_type const _index_ )       noexcept;
+        NPL_ALWAYS_INLINE const_reference at ( size_type const _index_ ) const noexcept;
 
-        value_type element_at ( size_type const _index_ ) const noexcept;
+        NPL_ALWAYS_INLINE NPL_FLATTEN value_type element_at ( size_type const _index_ ) const noexcept;
 
-        value_type range (                                          ) const noexcept;
-        value_type range ( size_type const _x_, size_type const _y_ ) const noexcept;
+        NPL_ALWAYS_INLINE NPL_FLATTEN value_type range (                                          ) const noexcept;
+        NPL_ALWAYS_INLINE             value_type range ( size_type const _x_, size_type const _y_ ) const noexcept;
 
           ////////////////////
          // 2D overloads ////
         ////////////////////
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_2d_container_base_t< U > const &
         at ( size_type const _x_, size_type const _y_ ) const noexcept
         {
@@ -368,6 +369,7 @@ public:
         }
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_2d_container_base_t< U > &
         at ( size_type const _x_, size_type const _y_ ) noexcept
         {
@@ -375,6 +377,7 @@ public:
         }
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_2d_range_container_base_t< U >
         element_at ( size_type const _x_, size_type const _y_ ) const noexcept
         {
@@ -382,6 +385,7 @@ public:
         }
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_2d_range_container_base_t< U >
         range ( size_type const _x1_, size_type const _y1_, size_type const _x2_, size_type const _y2_ ) const noexcept
         {
@@ -397,6 +401,7 @@ public:
         ////////////////////
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_3d_container_base_t< U > const &
         at ( size_type const _x_, size_type const _y_, size_type const _z_ ) const noexcept
         {
@@ -404,6 +409,7 @@ public:
         }
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_3d_container_base_t< U > &
         at ( size_type const _x_, size_type const _y_, size_type const _z_ ) noexcept
         {
@@ -411,6 +417,7 @@ public:
         }
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_3d_range_container_base_t< U >
         element_at ( size_type const _x_, size_type const _y_, size_type const _z_ ) const noexcept
         {
@@ -418,6 +425,7 @@ public:
         }
 
         template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
         enable_3d_range_container_base_t< U >
         range ( size_type const _x1_, size_type const _y1_, size_type const _z1_,
                 size_type const _x2_, size_type const _y2_, size_type const _z2_ ) const noexcept
@@ -1481,6 +1489,7 @@ prefix_array< T, Allocator >::end () const noexcept
 
 template< typename T, typename Allocator >
 inline
+NPL_ALWAYS_INLINE
 typename prefix_array< T, Allocator >::reference
 prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) noexcept
 {
@@ -1491,6 +1500,7 @@ prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) noexcept
 
 template< typename T, typename Allocator >
 inline
+NPL_ALWAYS_INLINE
 typename prefix_array< T, Allocator >::const_reference
 prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) const noexcept
 {
@@ -2024,28 +2034,28 @@ struct prefix_array_static
                 }
         }
 
-        [[ nodiscard ]]
+        NPL_NODISCARD
         inline constexpr
         reference at ( size_type const _index_ ) noexcept
         {
                 return this->data_[ _index_ ];
         }
 
-        [[ nodiscard ]]
+        NPL_NODISCARD
         inline constexpr
         const_reference at ( size_type const _index_ ) const noexcept
         {
                 return this->data_[ _index_ ];
         }
 
-        [[ nodiscard ]]
+        NPL_NODISCARD
         inline constexpr
         value_type element_at ( size_type const _index_ ) const noexcept
         {
                 return range( _index_, _index_ );
         }
 
-        [[ nodiscard ]]
+        NPL_NODISCARD
         inline constexpr
         value_type range ( size_type const _x_, size_type const _y_ ) const noexcept
         {

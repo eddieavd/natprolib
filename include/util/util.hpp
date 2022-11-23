@@ -14,8 +14,11 @@
         static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
 
 #ifdef NPL_RELEASE
+#       ifndef NPL_ASSERT
 #       define NPL_ASSERT(cond, ...) ((void)0)
+#       endif
 #else
+#       ifndef NPL_ASSERT
 #       include <cstdlib>
 #       include <iostream>
 
@@ -30,6 +33,7 @@
                                 std::abort();                                         \
                         }                                                              \
                 } while( 0 )
+#       endif
 #endif
 
 #ifdef __GNUC__
@@ -39,9 +43,13 @@
 #endif
 
 #ifdef __GNUC__
+#       ifndef NPL_UNREACHABLE
 #       define NPL_UNREACHABLE __builtin_unreachable()
+#       endif
 #else
+#       ifndef NPL_UNREACHABLE
 #       define NPL_UNREACHABLE std::abort();
+#       endif
 #endif
 
 #ifdef NPL_USE_ATTRIBUTES
@@ -54,9 +62,27 @@
 #       ifndef NPL_NOESCAPE
 #       define NPL_NOESCAPE __attribute__(( noescape ))
 #       endif
+#       ifndef NPL_NORETURN
+#       define NPL_NORETURN [[ noreturn ]]
+#       endif
+#       ifndef NPL_NODISCARD
+#       define NPL_NODISCARD [[ nodiscard ]]
+#       endif
 #else
+#       ifndef NPL_ALWAYS_INLINE
 #       define NPL_ALWAYS_INLINE
+#       endif
+#       ifndef NPL_FLATTEN
 #       define NPL_FLATTEN
+#       endif
+#       ifndef NPL_NOESCAPE
 #       define NPL_NOESCAPE
+#       endif
+#       ifndef NPL_NORETURN
+#       define NPL_NORETURN
+#       endif
+#       ifndef NPL_NODISCARD
+#       define NPL_NODISCARD
+#       endif
 #endif
 
