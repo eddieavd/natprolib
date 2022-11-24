@@ -684,6 +684,26 @@ private:
         }
 };
 
+
+template< typename T,
+          auto     PB     = _default_parent_builder< T >,
+          typename Alloc  = std::allocator< T >,
+          typename        = std::enable_if< _is_allocator< Alloc >::value >,
+          typename Traits = std::allocator_traits< Alloc >
+        >
+segment_tree ( typename Traits::size_type const, T )
+        -> segment_tree< T, PB, Alloc >;
+
+template< typename T,
+          auto     PB     = _default_parent_builder< T >,
+          typename Alloc,
+          typename        = std::enable_if< _is_allocator< Alloc >::value >,
+          typename Traits = std::allocator_traits< Alloc >
+        >
+segment_tree ( typename Traits::size_type const, T, Alloc )
+        -> segment_tree< T, PB, Alloc >;
+
+
 template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_ )
