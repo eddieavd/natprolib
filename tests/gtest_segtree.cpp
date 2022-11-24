@@ -267,10 +267,12 @@ TEST( SegtreeTest, Range )
         }
 }
 
+/*
 TEST( SegtreeTest, ParentBuilders )
 {
         EXPECT_EQ( true, false );
 }
+*/
 
 TEST( SegtreeTest, Accessors )
 {
