@@ -46,19 +46,20 @@ template< typename T, typename Allocator >
 class _segment_tree_base
         : protected _vector_base< T, Allocator >
 {
-public:
+protected:
         template< bool C, typename T_ = T, typename Allocator_ = Allocator >
         class _segment_tree_iterator
                 : public iterator< T_, C, Allocator_ >
         {
                 friend class _segment_tree_iterator< !C, T_, Allocator_ >;
+                friend class _segment_tree_base    <     T , Allocator  >;
         public:
                 using                 _base = iterator< T_, C, Allocator_ >;
                 using npl_iterator_category = segment_tree_iterator_tag;
-        private:
+
                 explicit _segment_tree_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
-protected:
+
         using          _base = _vector_base< T, Allocator >;
         using       iterator = _segment_tree_iterator< false >;
         using const_iterator = _segment_tree_iterator<  true >;
@@ -69,17 +70,27 @@ protected:
         _segment_tree_base ( allocator_type       && _alloc_ ) noexcept : _base ( NPL_MOVE( _alloc_ ) ) {}
 };
 
-template< typename T, auto PB, typename Allocator = std::allocator< T > >
+template< typename T >
+auto _default_parent_builder
+{
+        []( [[ maybe_unused ]] T const & lhs, [[ maybe_unused ]] T const & rhs )
+        {
+                return T();
+        }
+};
+
+template< typename T, auto PB = _default_parent_builder< T >, typename Allocator = std::allocator< T > >
 class segment_tree
         : _segment_tree_base< T, Allocator >
 {
 private:
-        using                   _self =  segment_tree;
-        using                   _base = _segment_tree_base< T, Allocator >;
-        using    _parent_builder_type = decltype( PB );
-        using _default_allocator_type = std::allocator< T >;
+        using                        _self =  segment_tree;
+        using                        _base = _segment_tree_base< T, Allocator >;
+        using         _parent_builder_type = decltype( PB );
+        using      _default_allocator_type = std::allocator< T >;
+        using _default_parent_builder_type = decltype( _default_parent_builder< T > );
 
-        _parent_builder_type pb_{ PB };
+        _parent_builder_type parent_builder_{ PB };
 public:
         using      value_type = T;
         using  allocator_type = Allocator;
@@ -99,7 +110,7 @@ public:
         static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
                         "natprolib::segment_tree: allocator_type::value_type != self::value_type" );
 
-        static_assert( ( std::is_same_v< T, decltype( pb_( T(), T() ) ) > ),
+        static_assert( ( std::is_same_v< T, decltype( parent_builder_( T(), T() ) ) > ),
                         "natprolib::segment_tree: bad parent builder" );
 
         segment_tree () noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) {}
@@ -137,6 +148,7 @@ public:
                                 >
                         > * = 0 );
 
+#if 0
         template< typename InputIterator >
         segment_tree ( InputIterator _first_,
                         typename std::enable_if_t
@@ -165,6 +177,7 @@ public:
                                         typename std::iterator_traits< InputIterator >::reference
                                 >
                         > * = 0 );
+#endif
 
         template< typename ForwardIterator >
         segment_tree ( ForwardIterator _first_,
@@ -243,7 +256,6 @@ public:
         >
         assign ( InputIterator _first_, InputIterator _last_ );
 
-#if 0
         template< typename ForwardIterator >
         typename std::enable_if_t
         <
@@ -257,13 +269,30 @@ public:
                 void
         >
         assign ( ForwardIterator _first_, ForwardIterator _last_ );
-#endif
 
         void assign ( std::initializer_list< value_type > _list_ )
         { assign( _list_.begin(), _list_.end() ); }
 
         allocator_type get_allocator () const noexcept
         { return this->_alloc(); }
+
+        iterator real_begin () noexcept
+        {
+                return iterator( this->begin_ );
+        }
+        const_iterator real_begin () const noexcept
+        {
+                return const_iterator( this->begin_ );
+        }
+
+        iterator real_end () noexcept
+        {
+                return iterator( this->end_ );
+        }
+        const_iterator real_end () const noexcept
+        {
+                return const_iterator( this->end_ );
+        }
 
               iterator begin ()       noexcept;
               iterator   end ()       noexcept;
@@ -294,11 +323,14 @@ public:
         const_reverse_iterator crend () const noexcept
         { return rend(); }
 
-        NPL_NODISCARD size_type size () const noexcept
-        { return static_cast< size_type >( this->end_ - this->begin_ ) / 2; }  //  TODO: AYO PAY ATTENTION
+        NPL_NODISCARD size_type real_size () const noexcept
+        { return static_cast< size_type >( this->end_ - this->begin_ ); }
 
         NPL_NODISCARD size_type capacity () const noexcept
         { return _base::capacity(); }
+
+        NPL_NODISCARD size_type size () const noexcept
+        { return capacity() / 2; }
 
         NPL_NODISCARD bool empty () const noexcept
         { return this->begin_ == this->end_; }
@@ -324,8 +356,8 @@ public:
 
         NPL_ALWAYS_INLINE value_type element_at ( size_type const _index_ ) const noexcept;
 
-        NPL_ALWAYS_INLINE NPL_FLATTEN value_type range (                                          ) const noexcept;
-        NPL_ALWAYS_INLINE             value_type range ( size_type const _x_, size_type const _y_ ) const noexcept;
+        NPL_ALWAYS_INLINE NPL_FLATTEN value_type range (                              ) const noexcept;
+        NPL_ALWAYS_INLINE             value_type range ( size_type _x_, size_type _y_ ) const noexcept;
 
           //////////////////
          // 2D overloads //
@@ -342,11 +374,15 @@ public:
         reference front () noexcept
         {
                 NPL_ASSERT( !empty(), "segment_tree::front: called on empty segment tree" );
+
+                return this->begin_[ capacity() / 2 ];
         }
 
         const_reference front () const noexcept
         {
                 NPL_ASSERT( !empty(), "segment_tree::front: called on empty segment tree" );
+
+                return this->begin_[ capacity() / 2 ];
         }
 
         const_reference cfront () const noexcept
@@ -357,11 +393,15 @@ public:
         reference back () noexcept
         {
                 NPL_ASSERT( !empty(), "segment_tree::back: called on empty segment tree" );
+
+                return this->begin_[ capacity() - 1 ];
         }
 
         const_reference back () const noexcept
         {
                 NPL_ASSERT( !empty(), "segment_tree::back: called on empty segment tree" );
+
+                return this->begin_[ capacity() - 1 ];
         }
 
         const_reference cback () const noexcept
@@ -467,7 +507,7 @@ public:
 
         void clear () noexcept
         {
-                size_type old_size = size();
+                size_type old_size = real_size();
                 _base::clear();
                 _annotate_shrink( old_size );
                 _invalidate_all_iterators();
@@ -493,6 +533,18 @@ private:
         size_type _recommend ( size_type const _new_size_ ) const noexcept;
 
         void _rebuild_tree () noexcept;
+
+        void _update ( size_type const _position_, const_reference _val_ );
+        void _update ( const_iterator  _position_, const_reference _val_ );
+
+        void _update ( size_type const _position_, value_type && _val_ ) noexcept;
+        void _update ( const_iterator  _position_, value_type && _val_ ) noexcept;
+
+        template< typename... Args >
+        void _update ( size_type const _position_, Args... _args_ ) noexcept;
+
+        template< typename... Args >
+        void _update ( const_iterator _position_, Args... _args_ ) noexcept;
 
         void _construct_at_end ( size_type const _count_                        );
         void _construct_at_end ( size_type const _count_, const_reference _val_ );
@@ -542,7 +594,7 @@ private:
         {
                 _invalidate_iterators_past( _new_last_ );
 
-                size_type old_size = size();
+                size_type old_size = real_size();
                 _base::_destruct_at_end( _new_last_ );
                 _annotate_shrink( old_size );
         }
@@ -575,19 +627,19 @@ private:
         void _annotate_delete () const noexcept
         {
                 _annotate_contiguous_container( data(), data() + capacity(),
-                                                data() + size(), data() + capacity() );
+                                                data() + real_size(), data() + capacity() );
         }
 
         void _annotate_increase ( size_type _n_ ) const noexcept
         {
                 _annotate_contiguous_container( data(), data() + capacity(),
-                                                data() + size(), data() + size() + _n_ );
+                                                data() + real_size(), data() + real_size() + _n_ );
         }
 
         void _annotate_shrink ( size_type _old_size_ ) const noexcept
         {
                 _annotate_contiguous_container( data(), data() + capacity(),
-                                                data() + _old_size_, data() + size() );
+                                                data() + _old_size_, data() + real_size() );
         }
 
         struct _construct_transaction
@@ -645,7 +697,7 @@ segment_tree< T, PB, Allocator >::_swap_out_circular_buffer ( split_buffer< valu
         std::swap( this->_end_cap(), _buffer_._end_cap() );
 
         _buffer_.first_ = _buffer_.begin_;
-        _annotate_new( size() );
+        _annotate_new( real_size() );
         _invalidate_all_iterators();
 }
 
@@ -665,7 +717,7 @@ segment_tree< T, PB, Allocator >::_swap_out_circular_buffer ( split_buffer< valu
         std::swap( this->_end_cap(), _buffer_._end_cap() );
 
         _buffer_.first_ = _buffer_.begin_;
-        _annotate_new( size() );
+        _annotate_new( real_size() );
         _invalidate_all_iterators();
 
         return ret;
@@ -675,14 +727,24 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_vallocate ( size_type const _count_ )
 {
-        // default
+        NPL_ASSERT( _count_ <= max_size(), "segment_tree::_vallocate: size > max_size" );
+
+        this->begin_ = this->end_ = _alloc_traits::allocate( this->_alloc(), _count_ );
+        this->end_cap_ = this->begin_ + _count_;
+
+        _annotate_new( 0 );
 }
 
 template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_vdeallocate () noexcept
 {
-        // default
+        if( this->begin_ != nullptr )
+        {
+                clear();
+                _alloc_traits::deallocate( this->_alloc(), this->begin_, capacity() );
+                this->begin_ = this->end_ = this->end_cap_ = nullptr;
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -728,8 +790,18 @@ inline
 typename segment_tree< T, PB, Allocator >::size_type
 segment_tree< T, PB, Allocator >::_recommend ( size_type const _new_size_ ) const noexcept
 {
-        // has to be called on every reallocation
-        // returns closest power of two
+        size_type const ms = max_size();
+
+        NPL_ASSERT( _new_size_ < ms, "segment_tree::_recommend: new size > max size" );
+
+        size_type const cap = capacity();
+
+        if( cap >= ms / 2 )
+        {
+                return ms;
+        }
+
+        return std::max< size_type >( 2 * cap, 2 * ( _round_to_pow2( _new_size_ ) ) );
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -738,25 +810,83 @@ segment_tree< T, PB, Allocator >::_rebuild_tree () noexcept
 {
         // one possible implementation
         {
-                for( auto i = ( size() / 2 ) - 1; i > 0; --i )
+                for( auto i = ( capacity() / 2 ) - 1; i > 0; --i )
                 {
-                        this->begin_[ i ] = pb_( this->begin_[ 2 * i ], this->begin[ 2 * i + 1 ] );
+                        this->begin_[ i ] = parent_builder_( this->begin_[ 2 * i ], this->begin_[ 2 * i + 1 ] );
                 }
         }
 }
 
 template< typename T, auto PB, typename Allocator >
 void
+segment_tree< T, PB, Allocator >::_update ( size_type const _position_, const_reference _val_ )
+{
+
+}
+
+template< typename T, auto PB, typename Allocator >
+void
+segment_tree< T, PB, Allocator >::_update ( const_iterator _position_, const_reference _val_ )
+{
+
+}
+
+template< typename T, auto PB, typename Allocator >
+void
+segment_tree< T, PB, Allocator >::_update ( size_type const _position_, value_type && _val_ ) noexcept
+{
+
+}
+
+template< typename T, auto PB, typename Allocator >
+void
+segment_tree< T, PB, Allocator >::_update ( const_iterator _position_, value_type && _val_ ) noexcept
+{
+
+}
+
+template< typename T, auto PB, typename Allocator >
+template< typename... Args >
+void
+segment_tree< T, PB, Allocator >::_update ( size_type const _position_, Args... _args_ ) noexcept
+{
+
+}
+
+template< typename T, auto PB, typename Allocator >
+template< typename... Args >
+void
+segment_tree< T, PB, Allocator >::_update ( const_iterator _position_, Args... _args_ ) noexcept
+{
+
+}
+
+template< typename T, auto PB, typename Allocator >
+void
 segment_tree< T, PB, Allocator >::_construct_at_end ( size_type const _count_ )
 {
-        // default
+        _construct_transaction tx( *this, _count_ );
+
+        const_pointer new_end = tx.new_end_;
+
+        for( pointer pos = tx.position_; pos != new_end; ++pos, tx.position_ = pos )
+        {
+                _alloc_traits::construct( this->_alloc(), mem::to_address( pos ) );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_construct_at_end ( size_type const _count_, const_reference _val_ )
 {
-        // default
+        _construct_transaction tx( *this, _count_ );
+
+        const_pointer new_end = tx.new_end_;
+
+        for( pointer pos = tx.position_; pos != new_end; ++pos, tx.position_ = pos )
+        {
+                _alloc_traits::construct( this->_alloc(), mem::to_address( pos ), _val_ );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -768,7 +898,9 @@ typename std::enable_if_t
 >
 segment_tree< T, PB, Allocator >::_construct_at_end ( SegtreeIterator _first_, SegtreeIterator _last_, size_type const _count_ )
 {
-        // default
+        _construct_transaction tx( *this, _count_ );
+
+        mem::_construct_range_forward( this->_alloc(), _first_, _last_, tx.position_ );
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -780,9 +912,15 @@ typename std::enable_if_t
         !is_segment_tree_iterator_v < InputIterator >,
         void
 >
-segment_tree< T, PB, Allocator >::_construct_at_end ( InputIterator _first_, InputIterator _last_, size_type const _count_ )
+segment_tree< T, PB, Allocator >::_construct_at_end ( InputIterator _first_, InputIterator _last_, size_type const _count_ )  //  TODO: temp impl
 {
-        // default
+        _construct_transaction tx( *this, _count_ );
+        const_pointer new_end = tx.new_end_;
+
+        for( pointer pos = tx.position_; pos != new_end && _first_ != _last_; ++pos, tx.position_ = pos )
+        {
+                _alloc_traits::construct( this->_alloc(), mem::to_address( pos ), *_first_++ );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -793,9 +931,15 @@ typename std::enable_if_t
         !is_segment_tree_iterator_v < ForwardIterator >,
         void
 >
-segment_tree< T, PB, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
+segment_tree< T, PB, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )  //  TODO: temp impl
 {
-        // default
+        _construct_transaction tx( *this, _count_ );
+        const_pointer new_end = tx.new_end_;
+
+        for( pointer pos = tx.position_; pos != new_end && _first_ != _last_; ++pos, tx.position_ = pos )
+        {
+                _alloc_traits::construct( this->_alloc(), mem::to_address( pos ), *_first_++ );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -815,30 +959,61 @@ segment_tree< T, PB, Allocator >::_append ( size_type const _count_, const_refer
 template< typename T, auto PB, typename Allocator >
 segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_ )
 {
-        // find power of two and allocate double
+        if( _count_ > 0 )
+        {
+                auto new_size = _round_to_pow2( _count_ );
+                auto new_cap  = 2 * new_size;
+
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_, allocator_type const & _alloc_ )
         : _base( _alloc_ )
 {
-        // find power of two and allocate double
+        if( _count_ > 0 )
+        {
+                auto new_size = _round_to_pow2( _count_ );
+                auto new_cap  = 2 * new_size;
+
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_, value_type const & _val_ )
 {
-        // power of two
-        // alloc double
-        // fill
-        // reconstruct tree
+        if( _count_ > 0 )
+        {
+                auto new_size = _round_to_pow2( _count_ );
+                auto new_cap  = 2 * new_size;
+
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+                _construct_at_end( _count_, _val_ );
+                _construct_at_end( new_size - _count_ );
+                _rebuild_tree();
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ )
         : _base( _alloc_ )
 {
-        // same as above
+        if( _count_ > 0 )
+        {
+                auto new_size = _round_to_pow2( _count_ );
+                auto new_cap  = 2 * new_size;
+
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+                _construct_at_end( _count_, _val_ );
+                _construct_at_end( new_size - _count_ );
+                _rebuild_tree();
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -855,7 +1030,15 @@ segment_tree< T, PB, Allocator >::segment_tree ( SegtreeIterator _first_,
                         SegtreeIterator
                 > _last_ )
 {
-        // default
+        size_type count    = std::distance( _first_, _last_ );
+        size_type new_size = _round_to_pow2( count );
+        size_type new_cap  = 2 * new_size;
+
+        _vallocate( new_cap );
+        _construct_at_end( new_size );
+        _construct_at_end( _first_, _last_, count );
+        _construct_at_end( new_size - count );
+        _rebuild_tree();
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -872,9 +1055,18 @@ segment_tree< T, PB, Allocator >::segment_tree ( SegtreeIterator _first_, Segtre
                 > * )
         : _base( _alloc_ )
 {
-        // same as above
+        size_type count    = std::distance( _first_, _last_ );
+        size_type new_size = _round_to_pow2( count );
+        size_type new_cap  = 2 * new_size;
+
+        _vallocate( new_cap );
+        _construct_at_end( new_size );
+        _construct_at_end( _first_, _last_, count );
+        _construct_at_end( new_size - count );
+        _rebuild_tree();
 }
 
+#if 0
 template< typename T, auto PB, typename Allocator >
 template< typename InputIterator >
 segment_tree< T, PB, Allocator >::segment_tree ( InputIterator _first_,
@@ -891,7 +1083,10 @@ segment_tree< T, PB, Allocator >::segment_tree ( InputIterator _first_,
                         InputIterator
                 > _last_ )
 {
-        // default
+        for( ; _first_ != _last_; ++_first_ )
+        {
+                _emplace_back( *_first_ );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -910,8 +1105,12 @@ segment_tree< T, PB, Allocator >::segment_tree ( InputIterator _first_, InputIte
                 > * )
         : _base( _alloc_ )
 {
-        // same as above
+        for( ; _first_ != _last_; ++_first_ )
+        {
+                _emplace_back( *_first_ );
+        }
 }
+#endif
 
 template< typename T, auto PB, typename Allocator >
 template< typename ForwardIterator >
@@ -928,7 +1127,15 @@ segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_,
                         ForwardIterator
                 > _last_ )
 {
-        // default
+        size_type count    = std::distance( _first_, _last_ );
+        size_type new_size = _round_to_pow2( count );
+        size_type new_cap  = 2 * new_size;
+
+        _vallocate( new_cap );
+        _construct_at_end( new_size );
+        _construct_at_end( _first_, _last_, count );
+        _construct_at_end( new_size - count );
+        _rebuild_tree();
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -946,21 +1153,49 @@ segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_, Forwar
                 > * )
         : _base( _alloc_ )
 {
-        // same as above
+        size_type count    = std::distance( _first_, _last_ );
+        size_type new_size = _round_to_pow2( count );
+        size_type new_cap  = 2 * new_size;
+
+        _vallocate( new_cap );
+        _construct_at_end( new_size );
+        _construct_at_end( _first_, _last_, count );
+        _construct_at_end( new_size - count );
+        _rebuild_tree();
 }
 
 template< typename T, auto PB, typename Allocator >
 segment_tree< T, PB, Allocator >::segment_tree ( segment_tree const & _other_ )
         : _base( _alloc_traits::select_on_container_copy_construction( _other_._alloc() ) )
 {
-        // default
+        size_type new_cap  = _other_.capacity();
+
+        if( new_cap > 0 )
+        {
+                _vallocate( new_cap );
+
+                for( size_type i = 0; i < new_cap; ++i )
+                {
+                        _construct_one_at_end( _other_.begin_[ i ] );
+                }
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 segment_tree< T, PB, Allocator >::segment_tree ( segment_tree const & _other_, _identity< allocator_type > const & _alloc_ )
         : _base( _alloc_ )
 {
-        // same as above
+        size_type new_cap  = _other_.capacity();
+
+        if( new_cap > 0 )
+        {
+                _vallocate( new_cap );
+
+                for( size_type i = 0; i < new_cap; ++i )
+                {
+                        _construct_one_at_end( _other_.begin_[ i ] );
+                }
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -968,7 +1203,11 @@ inline
 segment_tree< T, PB, Allocator >::segment_tree ( segment_tree && _other_ ) noexcept
         : _base( NPL_MOVE( _other_._alloc() ) )
 {
-        // default
+        this->begin_   = _other_.begin_  ;
+        this->end_     = _other_.end_    ;
+        this->end_cap_ = _other_.end_cap_;
+
+        _other_.begin_ = _other_.end_ = _other_.end_cap_ = nullptr;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -976,17 +1215,36 @@ inline
 segment_tree< T, PB, Allocator >::segment_tree ( segment_tree && _other_, _identity< allocator_type > const & _alloc_ )
         : _base( _alloc_ )
 {
-        // same as above
+        if( _alloc_ == _other_._alloc() )
+        {
+                this->begin_   = _other_.begin_  ;
+                this->end_     = _other_.end_    ;
+                this->end_cap_ = _other_.end_cap_;
+
+                _other_.begin_ = _other_.end_ = _other_.end_cap_ = nullptr;
+        }
+        else
+        {
+                using mit = std::move_iterator< iterator >;
+                assign( mit( _other_.begin() ), mit( _other_.end() ) );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 inline
 segment_tree< T, PB, Allocator >::segment_tree ( std::initializer_list< value_type > _list_ )
 {
-        // power of two
-        // alloc double
-        // fill
-        // construct tree
+        if( _list_.size() > 0 )
+        {
+                auto new_size = _round_to_pow2( _list_.size() );
+                auto new_cap  = 2 * new_size;
+
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+                _construct_at_end( _list_.begin(), _list_.end(), _list_.size() );
+                _construct_at_end( new_size - _list_.size() );
+                _rebuild_tree();
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -994,7 +1252,16 @@ inline
 segment_tree< T, PB, Allocator >::segment_tree ( std::initializer_list< value_type > _list_, allocator_type const & _alloc_ )
         : _base( _alloc_ )
 {
+        if( _list_.size() > 0 )
+        {
+                auto new_size = _round_to_pow2( _list_.size() );
+                auto new_cap  = 2 * new_size;
 
+                _vallocate( new_cap );
+                _construct_at_end( _list_.begin(), _list_.end(), _list_.size() );
+                _construct_at_end( new_size - _list_.size() );
+                _rebuild_tree();
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1003,7 +1270,10 @@ segment_tree< T, PB, Allocator > &
 segment_tree< T, PB, Allocator >::operator= ( segment_tree && _other_ )
         noexcept( ( noexcept_move_assign_container_v< Allocator, _alloc_traits > ) )
 {
-        // default
+        _move_assign( _other_, std::integral_constant< bool,
+                        _alloc_traits::propagate_on_container_move_assignment::value >() );
+
+        return *this;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1011,7 +1281,15 @@ void
 segment_tree< T, PB, Allocator >::_move_assign ( segment_tree & _other_, std::false_type )
         noexcept( _alloc_traits::is_always_equal::value )
 {
-        // default
+        if( _base::_alloc() != _other_._alloc() )
+        {
+                using mit = std::move_iterator< iterator >;
+                assign( mit( _other_.begin() ), mit( _other_.end() ) );
+        }
+        else
+        {
+                _move_assign( _other_, std::true_type() );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1019,7 +1297,14 @@ void
 segment_tree< T, PB, Allocator >::_move_assign ( segment_tree & _other_, std::true_type )
         noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
 {
-        // default
+        _vdeallocate();
+        _base::_move_assign_alloc( _other_ );
+
+        this->begin_   = _other_.begin_  ;
+        this->end_     = _other_.end_    ;
+        this->end_cap_ = _other_.end_cap_;
+
+        _other_.begin_ = _other_.end_ = _other_.end_cap_ = nullptr;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1027,7 +1312,12 @@ inline
 segment_tree< T, PB, Allocator > &
 segment_tree< T, PB, Allocator >::operator= ( segment_tree const & _other_ )
 {
-        // default
+        if( this != &_other_ )
+        {
+                _base::_copy_assign_alloc( _other_ );
+                assign( _other_.begin(), _other_.end() );
+        }
+        return *this;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1044,7 +1334,42 @@ typename std::enable_if_t
 >
 segment_tree< T, PB, Allocator >::assign ( SegtreeIterator _first_, SegtreeIterator _last_ )
 {
-        // default
+        size_type count    = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type new_size = _round_to_pow2( count );
+        size_type new_cap  = 2 * new_size;
+
+        if( new_cap < capacity() )
+        {
+                SegtreeIterator mid = _last_;
+                bool growing = false;
+
+                if( new_size > real_size() )
+                {
+                        growing = true;
+                        mid = _first_;
+                        std::advance( mid, real_size() );
+                }
+
+                pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
+
+                if( growing )
+                {
+                        _construct_at_end( mid, _last_, new_size - real_size() );
+                }
+                else
+                {
+                        this->_destruct_at_end( mid_ptr );
+                }
+        }
+        else
+        {
+                _vdeallocate();
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+                _construct_at_end( _first_, _last_, count );
+        }
+        _rebuild_tree();
+        _invalidate_all_iterators();
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1063,10 +1388,15 @@ typename std::enable_if_t
 >
 segment_tree< T, PB, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
 {
-        // emplace back
+        this->_destruct_at_end( this->begin_ + capacity() / 2 );
+
+        for( ; _first_ != _last_; ++_first_ )
+        {
+                _emplace_back( *_first_ );
+        }
+        _rebuild_tree();
 }
 
-#if 0
 template< typename T, auto PB, typename Allocator >
 template< typename ForwardIterator >
 typename std::enable_if_t
@@ -1082,9 +1412,29 @@ typename std::enable_if_t
 >
 segment_tree< T, PB, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_ )
 {
+        size_type count    = std::distance( _first_, _last_ );
+        size_type new_size = _round_to_pow2( count );
+        size_type new_cap  = 2 * new_size;
 
+        if( new_cap > capacity() )
+        {
+                clear();
+                _vdeallocate();
+                _vallocate( new_cap );
+                _construct_at_end( new_size );
+                _construct_at_end( _first_, _last_, count );
+                _construct_at_end( new_size - count );
+                _rebuild_tree();
+        }
+        else
+        {
+                this->_destruct_at_end( this->begin_ + capacity() / 2 );
+
+                _construct_at_end( _first_, _last_, count );
+                _construct_at_end( new_size - count );
+                _rebuild_tree();
+        }
 }
-#endif
 
 template< typename T, auto PB, typename Allocator >
 inline
@@ -1107,7 +1457,7 @@ inline
 typename segment_tree< T, PB, Allocator >::iterator
 segment_tree< T, PB, Allocator >::begin () noexcept
 {
-        return _make_iter( this->begin_ );
+        return _make_iter( this->begin_ + capacity() / 2 );
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1115,7 +1465,7 @@ inline
 typename segment_tree< T, PB, Allocator >::const_iterator
 segment_tree< T, PB, Allocator >::begin () const noexcept
 {
-        return _make_iter( this->begin_ );
+        return _make_iter( this->begin_ + capacity() / 2 );
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1139,7 +1489,9 @@ NPL_ALWAYS_INLINE
 typename segment_tree< T, PB, Allocator >::reference
 segment_tree< T, PB, Allocator >::operator[] ( size_type const _index_ ) noexcept
 {
-        // return being + size / 2 + index
+        NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::operator[]: index out of bounds" );
+
+        return this->begin_[ capacity() / 2 + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1147,7 +1499,9 @@ NPL_ALWAYS_INLINE
 typename segment_tree< T, PB, Allocator >::const_reference
 segment_tree< T, PB, Allocator >::operator[] ( size_type const _index_ ) const noexcept
 {
-        // same as above
+        NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::operator[]: index out of bounds" );
+
+        return this->begin_[ capacity() / 2 + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1155,7 +1509,25 @@ inline
 bool
 segment_tree< T, PB, Allocator >::operator== ( segment_tree const & _other_ ) const noexcept
 {
+        if( empty() && _other_.empty() )
+        {
+                return true;
+        }
 
+        if( size() != _other_.size() )
+        {
+                return false;
+        }
+
+        for( size_type i = 0; i < size(); ++i )
+        {
+                if( at( i ) != _other_.at( i ) )
+                {
+                        return false;
+                }
+        }
+
+        return true;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1203,7 +1575,9 @@ NPL_ALWAYS_INLINE
 typename segment_tree< T, PB, Allocator >::reference
 segment_tree< T, PB, Allocator >::at ( size_type const _index_ ) noexcept
 {
-        // same as operator[]
+        NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::at: index out of bounds" );
+
+        return this->begin_[ capacity() / 2 + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1211,7 +1585,9 @@ NPL_ALWAYS_INLINE
 typename segment_tree< T, PB, Allocator >::const_reference
 segment_tree< T, PB, Allocator >::at ( size_type const _index_ ) const noexcept
 {
-        // same as above
+        NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::at: index out of bounds" );
+
+        return this->begin_[ capacity() / 2 + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1219,7 +1595,9 @@ NPL_ALWAYS_INLINE
 typename segment_tree< T, PB, Allocator >::value_type
 segment_tree< T, PB, Allocator >::element_at ( size_type const _index_ ) const noexcept
 {
+        NPL_ASSERT( !empty() && _index_ < capacity(), "segment_tree::element_at: index out of bounds" );
 
+        return this->begin_[ _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1227,15 +1605,38 @@ NPL_ALWAYS_INLINE NPL_FLATTEN
 typename segment_tree< T, PB, Allocator >::value_type
 segment_tree< T, PB, Allocator >::range () const noexcept
 {
+        NPL_ASSERT( !empty(), "segment_tree::range: called on empty segment tree" );
 
+        return range( 0, size() - 1 );
 }
 
 template< typename T, auto PB, typename Allocator >
 NPL_ALWAYS_INLINE
 typename segment_tree< T, PB, Allocator >::value_type
-segment_tree< T, PB, Allocator >::range ( size_type const _x_, size_type const _y_ ) const noexcept
+segment_tree< T, PB, Allocator >::range ( size_type _x_, size_type _y_ ) const noexcept
 {
+        NPL_ASSERT( !empty() && _x_ <= _y_ && _y_ < size(), "segment_tree::range: index out of bounds" );
 
+        _x_ += capacity() / 2;
+        _y_ += capacity() / 2;
+
+        T res = T();
+
+        while( _x_ <= _y_ )
+        {
+                if( _x_ % 2 == 1 )
+                {
+                        res = parent_builder_( res, this->begin_[ _x_++ ] );
+                }
+                if( _y_ % 2 == 0 )
+                {
+                        res = parent_builder_( res, this->begin_[ _y_-- ] );
+                }
+                _x_ /= 2;
+                _y_ /= 2;
+        }
+
+        return res;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1290,7 +1691,16 @@ inline
 typename segment_tree< T, PB, Allocator >::reference
 segment_tree< T, PB, Allocator >::emplace_back ( Args&&... _args_ )
 {
+        if( this->end_ != this->end_cap_ )
+        {
+                _update( size(), NPL_FWD( _args_ )... );
+        }
+        else
+        {
 
+        }
+
+        return this->back();
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1319,7 +1729,18 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::swap ( segment_tree & _other_ ) noexcept
 {
+        NPL_ASSERT( _alloc_traits::propagate_on_container_swap::value || this->_alloc() == _other_._alloc(),
+                        "segment_tree::swap: if lhs.alloc != rhs.alloc, alloc_type needs to propagate on swap" );
 
+        std::swap( this->begin_  , _other_.begin_   );
+        std::swap( this->end_    , _other_.end_     );
+        std::swap( this->end_cap_, _other_.end_cap_ );
+
+        mem::_swap_allocator( this->_alloc(), _other_._alloc(),
+                        std::integral_constant< bool, _alloc_traits::propagate_on_container_swap::value >() );
+
+        _rebuild_tree();
+        _other_._rebuild_tree();
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1338,7 +1759,29 @@ template< typename T, auto PB, typename Allocator >
 bool
 segment_tree< T, PB, Allocator >::_invariants () const noexcept
 {
-
+        if( this->begin_ == nullptr )
+        {
+                if( this->end_ != nullptr || this->end_cap_ != nullptr )
+                {
+                        return false;
+                }
+        }
+        else
+        {
+                if( this->begin_ > this->end_ )
+                {
+                        return false;
+                }
+                if( this->begin_ == this->end_cap_ )
+                {
+                        return false;
+                }
+                if( this->end_ > this->end_cap_ )
+                {
+                        return false;
+                }
+        }
+        return true;
 }
 
 template< typename T, auto PB, typename Allocator >
