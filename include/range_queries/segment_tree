@@ -8,3 +8,656 @@
 #pragma once
 
 
+#include <algorithm>
+
+#include <util/mem.hpp>
+#include <util/util.hpp>
+#include <util/traits.hpp>
+#include <util/iterator.hpp>
+#include <util/split_buffer.hpp>
+
+#include <container/vector>
+
+
+namespace npl
+{
+
+
+template< typename T, typename Allocator >
+class _segment_tree_base;
+
+template< typename T, auto PB, typename Allocator >
+class segment_tree;
+
+
+struct segment_tree_iterator_tag : public random_access_iterator_tag {};
+
+template< typename T >
+struct is_segment_tree_iterator : public has_same_npl_iterator_category< iterator_traits< T >, segment_tree_iterator_tag > {};
+
+template< typename T >
+inline constexpr bool is_segment_tree_iterator_v = is_segment_tree_iterator< T >::value;
+
+
+template< typename T, typename Allocator >
+class _segment_tree_base
+        : protected _vector_base< T, Allocator >
+{
+public:
+        template< bool C, typename T_ = T, typename Allocator_ = Allocator >
+        class _segment_tree_iterator
+                : public iterator< T_, C, Allocator_ >
+        {
+                friend class _segment_tree_iterator< !C, T_, Allocator_ >;
+        public:
+                using                 _base = iterator< T_, C, Allocator_ >;
+                using npl_iterator_category = segment_tree_iterator_tag;
+        private:
+                explicit _segment_tree_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+        };
+protected:
+        using          _base = _vector_base< T, Allocator >;
+        using       iterator = _segment_tree_iterator< false >;
+        using const_iterator = _segment_tree_iterator<  true >;
+        using allocator_type = typename _base::allocator_type;
+
+        _segment_tree_base (                                 ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
+        _segment_tree_base ( allocator_type const &  _alloc_ )          : _base (           _alloc_   ) {}
+        _segment_tree_base ( allocator_type       && _alloc_ ) noexcept : _base ( NPL_MOVE( _alloc_ ) ) {}
+};
+
+template< typename T, auto PB, typename Allocator = std::allocator< T > >
+class segment_tree
+        : _segment_tree_base< T, Allocator >
+{
+private:
+        using                   _self =  segment_tree;
+        using                   _base = _segment_tree_base< T, Allocator >;
+        using    _parent_builder_type = decltype( PB );
+        using _default_allocator_type = std::allocator< T >;
+
+        _parent_builder_type pb_{ PB };
+public:
+        using      value_type = T;
+        using  allocator_type = Allocator;
+        using   _alloc_traits = typename _base::  _alloc_traits;
+        using       reference = typename _base::      reference;
+        using const_reference = typename _base::const_reference;
+        using       size_type = typename _base::      size_type;
+        using difference_type = typename _base::difference_type;
+        using         pointer = typename _base::        pointer;
+        using   const_pointer = typename _base::  const_pointer;
+
+        using               iterator = typename _base::      iterator;
+        using         const_iterator = typename _base::const_iterator;
+        using       reverse_iterator = reverse_iter<       iterator >;
+        using const_reverse_iterator = reverse_iter< const_iterator >;
+
+        static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
+                        "natprolib::segment_tree: allocator_type::value_type != self::value_type" );
+
+        static_assert( ( std::is_same_v< T, decltype( pb_( T(), T() ) ) > ),
+                        "natprolib::segment_tree: bad parent builder" );
+
+        segment_tree () noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) {}
+
+        explicit segment_tree ( allocator_type const & _alloc_ ) noexcept : _base( _alloc_ ) {}
+
+        explicit segment_tree ( size_type const _count_                                 );
+        explicit segment_tree ( size_type const _count_, allocator_type const & _alloc_ );
+
+        segment_tree ( size_type const _count_, value_type const & _val_                                 );
+        segment_tree ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ );
+
+        template< typename SegtreeIterator >
+        segment_tree ( SegtreeIterator _first_,
+                        typename std::enable_if_t
+                        <
+                                is_segment_tree_iterator_v< SegtreeIterator > &&
+                                std::is_constructible_v
+                                <
+                                        value_type,
+                                        typename std::iterator_traits< SegtreeIterator >::reference
+                                >,
+                                SegtreeIterator
+                        > _last_ );
+
+        template< typename SegtreeIterator >
+        segment_tree ( SegtreeIterator _first_, SegtreeIterator _last_, allocator_type const & _alloc_,
+                        typename std::enable_if_t
+                        <
+                                is_segment_tree_iterator_v< SegtreeIterator > &&
+                                std::is_constructible_v
+                                <
+                                        value_type,
+                                        typename std::iterator_traits< SegtreeIterator >::reference
+                                >
+                        > * = 0 );
+
+        template< typename InputIterator >
+        segment_tree ( InputIterator _first_,
+                        typename std::enable_if_t
+                        <
+                                 is_cpp17_input_iterator_v  < InputIterator > &&
+                                !is_cpp17_forward_iterator_v< InputIterator > &&
+                                !is_segment_tree_iterator_v < InputIterator > &&
+                                std::is_constructible_v
+                                <
+                                        value_type,
+                                        typename std::iterator_traits< InputIterator >::reference
+                                >,
+                                InputIterator
+                        > _last_ );
+
+        template< typename InputIterator >
+        segment_tree ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
+                        typename std::enable_if_t
+                        <
+                                 is_cpp17_input_iterator_v  < InputIterator > &&
+                                !is_cpp17_forward_iterator_v< InputIterator > &&
+                                !is_segment_tree_iterator_v < InputIterator > &&
+                                std::is_constructible_v
+                                <
+                                        value_type,
+                                        typename std::iterator_traits< InputIterator >::reference
+                                >
+                        > * = 0 );
+
+        template< typename ForwardIterator >
+        segment_tree ( ForwardIterator _first_,
+                        typename std::enable_if_t
+                        <
+                                 is_cpp17_forward_iterator_v< ForwardIterator > &&
+                                !is_segment_tree_iterator_v < ForwardIterator > &&
+                                std::is_constructible_v
+                                <
+                                        value_type,
+                                        typename std::iterator_traits< ForwardIterator >::reference
+                                >,
+                                ForwardIterator
+                        > _last_ );
+
+        template< typename ForwardIterator >
+        segment_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
+                        typename std::enable_if_t
+                        <
+                                 is_cpp17_forward_iterator_v< ForwardIterator > &&
+                                !is_segment_tree_iterator_v < ForwardIterator > &&
+                                std::is_constructible_v
+                                <
+                                        value_type,
+                                        typename std::iterator_traits< ForwardIterator >::reference
+                                >
+                        > * = 0 );
+
+        ~segment_tree ()
+        {
+                _annotate_delete();
+        }
+
+        segment_tree ( segment_tree const & _other_                                              );
+        segment_tree ( segment_tree const & _other_, _identity< allocator_type > const & _alloc_ );
+
+        segment_tree & operator= ( segment_tree const & _other_ );
+
+        segment_tree ( segment_tree && _other_                                              );
+        segment_tree ( segment_tree && _other_, _identity< allocator_type > const & _alloc_ );
+
+        segment_tree & operator= ( segment_tree && _other_ )
+                noexcept( ( noexcept_move_assign_container_v< allocator_type, _alloc_traits > ) );
+
+        segment_tree ( std::initializer_list< value_type > _list_                                 );
+        segment_tree ( std::initializer_list< value_type > _list_, allocator_type const & _alloc_ );
+
+        segment_tree & operator= ( std::initializer_list< value_type > _list_ )
+        { assign( _list_.begin(), _list_.end() ); return *this; }
+
+        template< typename SegtreeIterator >
+        typename std::enable_if_t
+        <
+                is_segment_tree_iterator_v< SegtreeIterator > &&
+                std::is_constructible_v
+                <
+                        value_type,
+                        typename std::iterator_traits< SegtreeIterator >::reference
+                >,
+                void
+        >
+        assign ( SegtreeIterator _first_, SegtreeIterator _last_ );
+
+        template< typename InputIterator >
+        typename std::enable_if_t
+        <
+                 is_cpp17_input_iterator_v  < InputIterator > &&
+                !is_cpp17_forward_iterator_v< InputIterator > &&
+                !is_segment_tree_iterator_v < InputIterator > &&
+                std::is_constructible_v
+                <
+                        value_type,
+                        typename std::iterator_traits< InputIterator >::reference
+                >,
+                void
+        >
+        assign ( InputIterator _first_, InputIterator _last_ );
+
+#if 0
+        template< typename ForwardIterator >
+        typename std::enable_if_t
+        <
+                 is_cpp17_forward_iterator_v< ForwardIterator > &&
+                !is_segment_tree_iterator_v < ForwardIterator > &&
+                std::is_constructible_v
+                <
+                        value_type,
+                        typename std::iterator_traits< ForwardIterator >::reference
+                >,
+                void
+        >
+        assign ( ForwardIterator _first_, ForwardIterator _last_ );
+#endif
+
+        void assign ( std::initializer_list< value_type > _list_ )
+        { assign( _list_.begin(), _list_.end() ); }
+
+        allocator_type get_allocator () const noexcept
+        { return this->_alloc(); }
+
+              iterator begin ()       noexcept;
+              iterator   end ()       noexcept;
+        const_iterator begin () const noexcept;
+        const_iterator   end () const noexcept;
+
+        reverse_iterator rbegin () noexcept
+        { return reverse_iterator( end() ); }
+
+        reverse_iterator rend () noexcept
+        { return reverse_iterator( begin() ); }
+
+        const_reverse_iterator rbegin () const noexcept
+        { return const_reverse_iterator( end() ); }
+
+        const_reverse_iterator rend () const noexcept
+        { return const_reverse_iterator( begin() ); }
+
+        const_iterator cbegin () const noexcept
+        { return begin(); }
+
+        const_iterator cend () const noexcept
+        { return end(); }
+
+        const_reverse_iterator crbegin () const noexcept
+        { return rbegin(); }
+
+        const_reverse_iterator crend () const noexcept
+        { return rend(); }
+
+        NPL_NODISCARD size_type size () const noexcept
+        { return static_cast< size_type >( this->end_ - this->begin_ ) / 2; }  //  TODO: AYO PAY ATTENTION
+
+        NPL_NODISCARD size_type capacity () const noexcept
+        { return _base::capacity(); }
+
+        NPL_NODISCARD bool empty () const noexcept
+        { return this->begin_ == this->end_; }
+
+        size_type max_size () const noexcept;
+
+        void reserve ( size_type const _size_ );
+
+        void shrink_to_fit () noexcept;
+
+        NPL_ALWAYS_INLINE       reference operator[] ( size_type const _index_ )       noexcept;
+        NPL_ALWAYS_INLINE const_reference operator[] ( size_type const _index_ ) const noexcept;
+
+        bool   operator== ( segment_tree const & _rhs_ ) const noexcept;
+        bool   operator!= ( segment_tree const & _rhs_ ) const noexcept;
+        auto   operator+  ( segment_tree const & _rhs_ ) const         ;
+        auto & operator+= ( segment_tree const & _rhs_ )       noexcept;
+        auto   operator-  ( segment_tree const & _rhs_ ) const         ;
+        auto & operator-= ( segment_tree const & _rhs_ )       noexcept;
+
+        NPL_ALWAYS_INLINE       reference at ( size_type const _index_ )       noexcept;
+        NPL_ALWAYS_INLINE const_reference at ( size_type const _index_ ) const noexcept;
+
+        NPL_ALWAYS_INLINE value_type element_at ( size_type const _index_ ) const noexcept;
+
+        NPL_ALWAYS_INLINE NPL_FLATTEN value_type range (                                          ) const noexcept;
+        NPL_ALWAYS_INLINE             value_type range ( size_type const _x_, size_type const _y_ ) const noexcept;
+
+          //////////////////
+         // 2D overloads //
+        //////////////////
+
+        //////////////////
+
+          //////////////////
+         // 3D overloads //
+        //////////////////
+
+        //////////////////
+
+        reference front () noexcept
+        {
+                NPL_ASSERT( !empty(), "segment_tree::front: called on empty segment tree" );
+        }
+
+        const_reference front () const noexcept
+        {
+                NPL_ASSERT( !empty(), "segment_tree::front: called on empty segment tree" );
+        }
+
+        const_reference cfront () const noexcept
+        {
+                return front();
+        }
+
+        reference back () noexcept
+        {
+                NPL_ASSERT( !empty(), "segment_tree::back: called on empty segment tree" );
+        }
+
+        const_reference back () const noexcept
+        {
+                NPL_ASSERT( !empty(), "segment_tree::back: called on empty segment tree" );
+        }
+
+        const_reference cback () const noexcept
+        {
+                return back();
+        }
+
+        value_type * data () noexcept
+        { return mem::to_address( this->begin_ ); }
+
+        value_type const * data () const noexcept
+        { return mem::to_address( this->begin_ ); }
+
+        template< typename Arg >
+        void _emplace_back ( Arg&& _arg_ )
+        {
+                emplace_back( NPL_FWD( _arg_ ) );
+        }
+
+        void push_back ( const_reference _val_ );
+
+        template< typename... Args >
+        void push_back ( const_reference _val_, Args... _args_ )
+        {
+                push_back( _val_ );
+                push_back( _args_... );
+        }
+
+        void push_back ( value_type && _val_ );
+
+        template< typename... Args >
+        void push_back ( value_type && _val_, Args... _args_ )
+        {
+                push_back( _val_ );
+                push_back( _args_... );
+        }
+
+        template< typename... Args >
+        reference emplace_back ( Args&&... _args_ );
+
+        void pop_back ();
+
+        iterator insert ( const_iterator _position_, const_reference    _val_ );
+        iterator insert ( const_iterator _position_, value_type      && _val_ );
+
+        template< typename... Args >
+        iterator emplace ( const_iterator _position_, Args&&... _args_ );
+
+        iterator insert ( const_iterator _position_, size_type const _count_, const_reference _val_ );
+
+        template< typename SegtreeIterator >
+        typename std::enable_if_t
+        <
+                is_segment_tree_iterator_v< SegtreeIterator > &&
+                std::is_constructible_v
+                <
+                        value_type,
+                        typename std::iterator_traits< SegtreeIterator >::reference
+                >,
+                iterator
+        >
+        insert ( const_iterator _position_, SegtreeIterator _first_, SegtreeIterator _last_ );
+
+        template< typename InputIterator >
+        typename std::enable_if_t
+        <
+                 is_cpp17_input_iterator_v  < InputIterator > &&
+                !is_cpp17_forward_iterator_v< InputIterator > &&
+                !is_segment_tree_iterator_v < InputIterator > &&
+                std::is_constructible_v
+                <
+                        value_type,
+                        typename std::iterator_traits< InputIterator >::reference
+                >,
+                iterator
+        >
+        insert ( const_iterator _position_, InputIterator _first_, InputIterator _last_ );
+
+        template< typename ForwardIterator >
+        typename std::enable_if_t
+        <
+                is_cpp17_forward_iterator_v< ForwardIterator > &&
+                !is_segment_tree_iterator_v< ForwardIterator > &&
+                std::is_constructible_v
+                <
+                        value_type,
+                        typename std::iterator_traits< ForwardIterator >::reference
+                >,
+                iterator
+        >
+        insert ( const_iterator _position_, ForwardIterator _first_, ForwardIterator _last_ );
+
+        iterator insert ( const_iterator _position_, std::initializer_list< value_type > _list_ )
+        { return insert( _position_, _list_.begin(), _list_.end() ); }
+
+        iterator erase ( const_iterator _position_                        );
+        iterator erase ( const_iterator    _first_, const_iterator _last_ );
+
+        void resize ( size_type const _count_                        );
+        void resize ( size_type const _count_, const_reference _val_ );
+
+        void swap ( segment_tree & ) noexcept;
+
+        void clear () noexcept
+        {
+                size_type old_size = size();
+                _base::clear();
+                _annotate_shrink( old_size );
+                _invalidate_all_iterators();
+        }
+
+        bool _invariants () const;
+
+        bool _dereferenceable ( const_iterator const * _i_                     ) const;
+        bool _decrementable   ( const_iterator const * _i_                     ) const;
+        bool _addable         ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
+        bool _subscriptable   ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
+
+private:
+        void _invalidate_all_iterators  ();
+        void _invalidate_iterators_past ( pointer _new_last_ );
+
+        void _vallocate   ( size_type const _count_ );
+        void _vdeallocate (                         ) noexcept;
+
+        size_type _recommend ( size_type const _new_size_ ) const noexcept;
+
+        void _construct_at_end ( size_type const _count_                        );
+        void _construct_at_end ( size_type const _count_, const_reference _val_ );
+
+        template< typename SegtreeIterator >
+        typename std::enable_if_t
+        <
+                is_segment_tree_iterator_v< SegtreeIterator >,
+                void
+        >
+        _construct_at_end ( SegtreeIterator _first_, SegtreeIterator _last_, size_type const _count_ );
+
+        template< typename InputIterator >
+        typename std::enable_if_t
+        <
+                 is_cpp17_input_iterator_v  < InputIterator > &&
+                !is_cpp17_forward_iterator_v< InputIterator > &&
+                !is_segment_tree_iterator_v < InputIterator >,
+                void
+        >
+        _construct_at_end ( InputIterator _first_, InputIterator _last_, size_type const _count_ );
+
+        template< typename ForwardIterator >
+        typename std::enable_if_t
+        <
+                 is_cpp17_forward_iterator_v< ForwardIterator > &&
+                !is_segment_tree_iterator_v < ForwardIterator >,
+                void
+        >
+        _construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ );
+
+        void _append ( size_type const _count_                        );
+        void _append ( size_type const _count_, const_reference _val_ );
+
+              iterator _make_iter ( pointer _ptr_ )       noexcept;
+        const_iterator _make_iter ( pointer _ptr_ ) const noexcept;
+
+        void    _swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_                );
+        pointer _swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_, pointer _ptr_ );
+
+        void _move_range ( pointer _from_s_, pointer _from_e_, pointer _to_ );
+
+        void _move_assign ( segment_tree & _other_, std::true_type  ) noexcept( std::is_nothrow_move_assignable_v< allocator_type > );
+        void _move_assign ( segment_tree & _other_, std::false_type ) noexcept( _alloc_traits::is_always_equal::value );
+
+        void _destruct_at_end ( pointer _new_last_ ) noexcept
+        {
+                _invalidate_iterators_past( _new_last_ );
+
+                size_type old_size = size();
+                _base::_destruct_at_end( _new_last_ );
+                _annotate_shrink( old_size );
+        }
+
+        template< typename U >
+        inline void _push_back_slow_path ( U && _val_ );
+
+        template< typename... Args >
+        inline void _emplace_back_slow_path ( Args&&... _args_ );
+
+#ifdef NPL_HAS_ASAN
+        void _annotate_contiguous_container ( void const * _beg_, void const * _end_,
+                                              void const * _old_mid_,
+                                              void const * _new_mid_ ) const
+        {
+                if( _beg_ && std::is_same_v< allocator_type, _default_allocator_type > )
+                {
+                        __sanitizer_annotate_contiguous_container( _beg_, _end_, _old_mid_, _new_mid_ );
+                }
+        }
+#else
+        void _annotate_contiguous_container ( void const *, void const *, void const *, void const * ) const noexcept {}
+#endif
+        void _annotate_new ( size_type _current_size_ ) const noexcept
+        {
+                _annotate_contiguous_container( data(), data() + capacity(),
+                                                data() + capacity(), data() + _current_size_ );
+        }
+
+        void _annotate_delete () const noexcept
+        {
+                _annotate_contiguous_container( data(), data() + capacity(),
+                                                data() + size(), data() + capacity() );
+        }
+
+        void _annotate_increase ( size_type _n_ ) const noexcept
+        {
+                _annotate_contiguous_container( data(), data() + capacity(),
+                                                data() + size(), data() + size() + _n_ );
+        }
+
+        void _annotate_shrink ( size_type _old_size_ ) const noexcept
+        {
+                _annotate_contiguous_container( data(), data() + capacity(),
+                                                data() + _old_size_, data() + size() );
+        }
+
+        struct _construct_transaction
+        {
+                explicit _construct_transaction ( segment_tree & _segtree_, size_type const _count_ )
+                        : segtree_ ( _segtree_ ),
+                          position_( _segtree_.end_ ),
+                          new_end_ ( _segtree_.end_ + _count_ )
+                {
+#ifdef NPL_HAS_ASAN
+                        segtree_._annotate_increase( _count_ );
+#endif
+                }
+
+                ~_construct_transaction ()
+                {
+                        segtree_.end_ = position_;
+#ifdef NPL_HAS_ASAN
+                        if( position_ != new_end_ )
+                        {
+                                segtree_._annotate_shrink( new_end_ - segtree_.begin_ );
+                        }
+#endif
+                }
+
+                segment_tree &      segtree_ ;
+                pointer             position_;
+                const_pointer const new_end_ ;
+
+        private:
+                _construct_transaction             ( _construct_transaction const & ) = delete;
+                _construct_transaction & operator= ( _construct_transaction const & ) = delete;
+        };
+
+        template< typename... Args >
+        void _construct_one_at_end ( Args... _args_ )
+        {
+                _construct_transaction tx( *this, 1 );
+
+                _alloc_traits::construct( this->_alloc(), mem::to_address( tx.position_ ), NPL_FWD( _args_ )... );
+                ++tx.position_;
+        }
+};
+
+
+} // namespace npl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
