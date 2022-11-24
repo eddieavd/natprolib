@@ -9,11 +9,12 @@ FetchContent_MakeAvailable( googletest )
 
 enable_testing()
 
-file( GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
 add_executable(
         gtest_nplib
-        ${sources}
+        gtest_nplib.cpp
+        gtest_vector.cpp
+        gtest_prefix.cpp
+        gtest_fenwick.cpp
 )
 target_link_libraries(
         gtest_nplib
