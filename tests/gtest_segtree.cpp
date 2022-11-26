@@ -438,8 +438,7 @@ TEST( SegtreeTest, TwoDimensional )
 
                 for( std::size_t j = 0; j < seg2d.at( i ).size(); ++j )
                 {
-//                        EXPECT_EQ( seg2d.at( i, j ), seg1d.at( j ) );
-                        EXPECT_EQ( seg2d.at( i ).at( j ), seg1d.at( j ) );
+                        EXPECT_EQ( seg2d.at( i, j ), seg1d.at( j ) );
                 }
         }
 }
@@ -460,14 +459,11 @@ TEST( SegtreeTest, ThreeDimensional )
 
                 for( std::size_t j = 0; j < seg3d.at( i ).size(); ++j )
                 {
-//                        EXPECT_EQ( seg3d.at( i, j ), seg2d.at( j ) );
-                        EXPECT_EQ( seg3d.at( i ).at( j ), seg2d.at( j ) );
+                        EXPECT_EQ( seg3d.at( i, j ), seg2d.at( j ) );
 
-//                        for( std::size_t k = 0; k < seg3d.at( i, j ).size(); ++k )
-                        for( std::size_t k = 0; k < seg3d.at( i ).at( j ).size(); ++k )
+                        for( std::size_t k = 0; k < seg3d.at( i, j ).size(); ++k )
                         {
-//                                EXPECT_EQ( seg3d.at( i, j, k ), seg2d.at( j, k ) );
-                                EXPECT_EQ( seg3d.at( i ).at( j ).at( k ), seg2d.at( j ).at( k ) );
+                                EXPECT_EQ( seg3d.at( i, j, k ), seg2d.at( j, k ) );
                         }
                 }
         }
