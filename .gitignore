@@ -1,3 +1,4 @@
+notes
 .cache
 *build*
 *.sh
@@ -5,6 +6,7 @@
 *.swp
 *.swo
 *.json
+*.vimrc
 Dox*
 dox
 .DS_Store

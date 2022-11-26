@@ -9,11 +9,13 @@ FetchContent_MakeAvailable( googletest )
 
 enable_testing()
 
-file( GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
 add_executable(
         gtest_nplib
-        ${sources}
+        gtest_nplib.cpp
+        gtest_vector.cpp
+        gtest_prefix.cpp
+        gtest_fenwick.cpp
+        gtest_segtree.cpp
 )
 target_link_libraries(
         gtest_nplib
@@ -24,6 +26,13 @@ target_include_directories(
         PUBLIC
         ${CMAKE_HOME_DIRECTORY}/include
 )
+
+add_compile_options( -O1 )
+add_compile_definitions( NPL_DEBUG )
+
+if( NPL_HAS_ASAN )
+        add_compile_definitions( NPL_HAS_ASAN )
+endif()
 
 include( GoogleTest )
 gtest_discover_tests( gtest_nplib )

@@ -68,11 +68,13 @@ inline constexpr bool is_default_allocator_v = is_default_allocator< T >::value;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 template< typename Alloc, typename... Args,
           typename = decltype( std::declval< Alloc >().construct( std::declval< Args >()... ) ) >
 static std::true_type test_has_construct( int );
 template< typename Alloc, typename... >
 static std::false_type test_has_construct( ... );
+
 #pragma GCC diagnostic pop
 
 template< typename Alloc, typename... Args >

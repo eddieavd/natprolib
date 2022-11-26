@@ -36,6 +36,7 @@
 #       endif
 #endif
 
+
 #ifdef __GNUC__
 #       ifndef NPL_USE_ATTRIBUTES
 #       define NPL_USE_ATTRIBUTES
@@ -74,6 +75,12 @@
 #       ifndef NPL_NODISCARD
 #       define NPL_NODISCARD [[ nodiscard ]]
 #       endif
+#       ifndef NPL_LIKELY
+#       define NPL_LIKELY __attribute__(( likely ))
+#       endif
+#       ifndef NPL_UNLIKELY
+#       define NPL_UNLIKELY __attribute__(( unlikely ))
+#       endif
 #else
 #       ifndef NPL_ALWAYS_INLINE
 #       define NPL_ALWAYS_INLINE
@@ -89,6 +96,12 @@
 #       endif
 #       ifndef NPL_NODISCARD
 #       define NPL_NODISCARD
+#       endif
+#       ifndef NPL_LIKELY
+#       define NPL_LIKELY
+#       endif
+#       ifndef NPL_UNLIKELY
+#       define NPL_UNLIKELY
 #       endif
 #endif
 
