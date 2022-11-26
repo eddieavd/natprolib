@@ -108,7 +108,7 @@ public:
         static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
                         "natprolib::segment_tree: allocator_type::value_type != self::value_type" );
 
-        static_assert( ( std::is_same_v< T, decltype( parent_builder_( T(), T() ) ) > ),
+        static_assert( ( std::is_same_v< T, std::remove_cvref_t< decltype( parent_builder_( T(), T() ) ) > > ),
                         "natprolib::segment_tree: bad parent builder" );
 
         segment_tree () noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) {}
