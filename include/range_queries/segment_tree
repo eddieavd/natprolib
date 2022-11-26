@@ -358,11 +358,76 @@ public:
          // 2D overloads //
         //////////////////
 
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_2d_container_base_t< U > const &
+        at ( size_type const _x_, size_type const _y_ ) const noexcept
+        {
+                return at( _x_ ).at( _y_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_2d_container_base_t< U > &
+        at ( size_type const _x_, size_type const _y_ ) noexcept
+        {
+                return at( _x_ ).at( _y_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_2d_range_container_base_t< U >
+        element_at ( size_type const _x_, size_type const _y_ ) const noexcept
+        {
+                return element_at( _x_ ).element_at( _y_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_2d_range_container_base_t< U >
+        range ( size_type const _x1_, size_type const _y1_, size_type const _x2_, size_type const _y2_ ) const noexcept
+        {
+                return range( _x1_, _x2_ ).range( _y1_, _y2_ );
+        }
+
         //////////////////
 
           //////////////////
          // 3D overloads //
         //////////////////
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_3d_container_base_t< U > const &
+        at ( size_type const _x_, size_type const _y_, size_type const _z_ ) const noexcept
+        {
+                return at( _x_ ).at( _y_ ).at( _z_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_3d_container_base_t< U > &
+        at ( size_type const _x_, size_type const _y_, size_type const _z_ ) noexcept
+        {
+                return at( _x_ ).at( _y_ ).at( _z_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_3d_range_container_base_t< U >
+        element_at ( size_type const _x_, size_type const _y_, size_type const _z_ ) const noexcept
+        {
+                return element_at( _x_ ).element_at( _y_, _z_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_3d_range_container_base_t< U >
+        range ( size_type const _x1_, size_type const _y1_, size_type const _z1_,
+                size_type const _x2_, size_type const _y2_, size_type const _z2_ )
+        {
+                return range( _x1_, _x2_ ).range( _y1_, _z1_, _y2_, _z2_ );
+        }
 
         //////////////////
 
