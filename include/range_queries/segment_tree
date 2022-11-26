@@ -7,9 +7,6 @@
 
 #pragma once
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 
 #include <algorithm>
 
@@ -29,7 +26,8 @@ namespace npl
 template< typename T, typename Allocator >
 class _segment_tree_base;
 
-template< typename T, auto PB, typename Allocator >
+template< typename T, auto PB, typename Allocator > /* ,
+          typename = std::enable_if_t< std::is_default_constructible_v< T > > > */
 class segment_tree;
 
 
@@ -79,7 +77,7 @@ auto _default_parent_builder
         }
 };
 
-template< typename T, auto PB = _default_parent_builder< T >, typename Allocator = std::allocator< T > >
+template< typename T, auto PB = _default_parent_builder< T >, typename Allocator = std::allocator< T > > /* , typename ENABLED > */
 class segment_tree
         : _segment_tree_base< T, Allocator >
 {
@@ -241,6 +239,7 @@ public:
         >
         assign ( SegtreeIterator _first_, SegtreeIterator _last_ );
 
+#if 0
         template< typename InputIterator >
         typename std::enable_if_t
         <
@@ -255,6 +254,7 @@ public:
                 void
         >
         assign ( InputIterator _first_, InputIterator _last_ );
+#endif
 
         template< typename ForwardIterator >
         typename std::enable_if_t
@@ -276,28 +276,12 @@ public:
         allocator_type get_allocator () const noexcept
         { return this->_alloc(); }
 
-        iterator real_begin () noexcept
-        {
-                return iterator( this->begin_ );
-        }
-        const_iterator real_begin () const noexcept
-        {
-                return const_iterator( this->begin_ );
-        }
-
-        iterator real_end () noexcept
-        {
-                return iterator( this->end_ );
-        }
-        const_iterator real_end () const noexcept
-        {
-                return const_iterator( this->end_ );
-        }
-
-              iterator begin ()       noexcept;
-              iterator   end ()       noexcept;
-        const_iterator begin () const noexcept;
-        const_iterator   end () const noexcept;
+              iterator real_begin ()       noexcept;
+              iterator      begin ()       noexcept;
+              iterator        end ()       noexcept;
+        const_iterator real_begin () const noexcept;
+        const_iterator      begin () const noexcept;
+        const_iterator        end () const noexcept;
 
         reverse_iterator rbegin () noexcept
         { return reverse_iterator( end() ); }
@@ -351,6 +335,17 @@ public:
         auto   operator-  ( segment_tree const & _rhs_ ) const         ;
         auto & operator-= ( segment_tree const & _rhs_ )       noexcept;
 
+        void update ( size_type const _position_, const_reference _val_ ) { _update( _position_, _val_ ); }
+        void update ( iterator        _position_, const_reference _val_ ) { _update( _position_, _val_ ); }
+
+        void update ( size_type const _position_, value_type && _val_ ) noexcept { _update( _position_, NPL_MOVE( _val_ ) ); }
+        void update ( iterator        _position_, value_type && _val_ ) noexcept { _update( _position_, NPL_MOVE( _val_ ) ); }
+
+        template< typename... Args >
+        void update ( size_type const _position_, Args... _args_ ) { _update( _position_, NPL_FWD( _args_ )... ); }
+        template< typename... Args >
+        void update ( iterator        _position_, Args... _args_ ) { _update( _position_, NPL_FWD( _args_ )... ); }
+
         NPL_ALWAYS_INLINE       reference at ( size_type const _index_ )       noexcept;
         NPL_ALWAYS_INLINE const_reference at ( size_type const _index_ ) const noexcept;
 
@@ -375,14 +370,14 @@ public:
         {
                 NPL_ASSERT( !empty(), "segment_tree::front: called on empty segment tree" );
 
-                return this->begin_[ capacity() / 2 ];
+                return this->begin_[ size() ];
         }
 
         const_reference front () const noexcept
         {
                 NPL_ASSERT( !empty(), "segment_tree::front: called on empty segment tree" );
 
-                return this->begin_[ capacity() / 2 ];
+                return this->begin_[ size() ];
         }
 
         const_reference cfront () const noexcept
@@ -534,17 +529,20 @@ private:
 
         void _rebuild_tree () noexcept;
 
-        void _update ( size_type const _position_, const_reference _val_ );
-        void _update ( const_iterator  _position_, const_reference _val_ );
+        void _update ( size_type _position_, const_reference _val_ );
+        void _update ( iterator  _position_, const_reference _val_ );
 
-        void _update ( size_type const _position_, value_type && _val_ ) noexcept;
-        void _update ( const_iterator  _position_, value_type && _val_ ) noexcept;
-
-        template< typename... Args >
-        void _update ( size_type const _position_, Args... _args_ ) noexcept;
+        void _update ( size_type _position_, value_type && _val_ ) noexcept;
+        void _update ( iterator  _position_, value_type && _val_ ) noexcept;
 
         template< typename... Args >
-        void _update ( const_iterator _position_, Args... _args_ ) noexcept;
+        void _update ( size_type _position_, Args... _args_ );
+
+        template< typename... Args >
+        void _update ( iterator _position_, Args... _args_ );
+
+        void _trim_tree   ( size_type const _new_size_ ) noexcept;
+        void _expand_tree ( size_type const _new_size_ );
 
         void _construct_at_end ( size_type const _count_                        );
         void _construct_at_end ( size_type const _count_, const_reference _val_ );
@@ -582,6 +580,7 @@ private:
               iterator _make_iter (       pointer _ptr_ )       noexcept;
         const_iterator _make_iter ( const_pointer _ptr_ ) const noexcept;
 
+        void    _swap_out_buffer          ( split_buffer< value_type, allocator_type & > & _buffer_                ) noexcept;
         void    _swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_                );
         pointer _swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_, pointer _ptr_ );
 
@@ -703,6 +702,21 @@ template< typename T,
 segment_tree ( typename Traits::size_type const, T, Alloc )
         -> segment_tree< T, PB, Alloc >;
 
+
+template< typename T, auto PB, typename Allocator >
+void
+segment_tree< T, PB, Allocator >::_swap_out_buffer ( split_buffer< value_type, allocator_type & > & _buffer_ ) noexcept
+{
+        _annotate_delete();
+
+        std::swap( this->begin_    , _buffer_.begin_     );
+        std::swap( this->end_      , _buffer_.end_       );
+        std::swap( this->_end_cap(), _buffer_._end_cap() );
+
+        _buffer_.first_ = _buffer_.begin_;
+        _annotate_new( real_size() );
+        _invalidate_all_iterators();
+}
 
 template< typename T, auto PB, typename Allocator >
 void
@@ -828,57 +842,123 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_rebuild_tree () noexcept
 {
-        // one possible implementation
+        for( auto i = ( size() ) - 1; i > 0; --i )
         {
-                for( auto i = ( capacity() / 2 ) - 1; i > 0; --i )
-                {
-                        this->begin_[ i ] = parent_builder_( this->begin_[ 2 * i ], this->begin_[ 2 * i + 1 ] );
-                }
+                this->begin_[ i ] = parent_builder_( this->begin_[ 2 * i ], this->begin_[ 2 * i + 1 ] );
         }
 }
 
 template< typename T, auto PB, typename Allocator >
 void
-segment_tree< T, PB, Allocator >::_update ( size_type const _position_, const_reference _val_ )
+segment_tree< T, PB, Allocator >::_update ( size_type _position_, const_reference _val_ )
 {
+        _position_ += size();
 
+        this->begin_[ _position_ ] = _val_;
+
+        for( _position_ /= 2; _position_ >= 1; _position_ /= 2 )
+        {
+                this->begin_[ _position_ ] = parent_builder_( this->begin_[ 2 * _position_ ], this->begin_[ 2 * _position_ + 1 ] );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 void
-segment_tree< T, PB, Allocator >::_update ( const_iterator _position_, const_reference _val_ )
+segment_tree< T, PB, Allocator >::_update ( iterator _position_, const_reference _val_ )
 {
+        size_type index = std::distance( begin() + size(), _position_ );
 
+        _update( index, _val_ );
 }
 
 template< typename T, auto PB, typename Allocator >
 void
-segment_tree< T, PB, Allocator >::_update ( size_type const _position_, value_type && _val_ ) noexcept
+segment_tree< T, PB, Allocator >::_update ( size_type _position_, value_type && _val_ ) noexcept
 {
+        _position_ += size();
 
+        this->begin_[ _position_ ] = NPL_MOVE( _val_ );
+
+        for( _position_ /= 2; _position_ >= 1; _position_ /= 2 )
+        {
+                this->begin_[ _position_ ] = parent_builder_( this->begin_[ 2 * _position_ ], this->begin_[ 2 * _position_ + 1 ] );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 void
-segment_tree< T, PB, Allocator >::_update ( const_iterator _position_, value_type && _val_ ) noexcept
+segment_tree< T, PB, Allocator >::_update ( iterator _position_, value_type && _val_ ) noexcept
 {
+        size_type index = std::distance( begin() + size(), _position_ );
 
+        _update( index, NPL_MOVE( _val_ ) );
 }
 
 template< typename T, auto PB, typename Allocator >
 template< typename... Args >
 void
-segment_tree< T, PB, Allocator >::_update ( size_type const _position_, Args... _args_ ) noexcept
+segment_tree< T, PB, Allocator >::_update ( size_type _position_, Args... _args_ )
 {
+        _position_ += size();
 
+        this->begin_[ _position_ ] = NPL_MOVE( T( _args_... ) );
+
+        for( _position_ /= 2; _position_ >= 1; _position_ /= 2 )
+        {
+                this->begin_[ _position_ ] = parent_builder_( this->begin_[ 2 * _position_ ], this->begin_[ 2 * _position_ + 1 ] );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 template< typename... Args >
 void
-segment_tree< T, PB, Allocator >::_update ( const_iterator _position_, Args... _args_ ) noexcept
+segment_tree< T, PB, Allocator >::_update ( iterator _position_, Args... _args_ )
 {
+        size_type index = std::distance( begin() + size(), _position_ );
 
+        _update( index, NPL_FWD( _args_ )... );
+}
+
+template< typename T, auto PB, typename Allocator >
+void
+segment_tree< T, PB, Allocator >::_trim_tree ( size_type const _new_size_ ) noexcept
+{
+        size_type new_cap = 2 * _new_size_;
+
+        auto end_iter = begin();
+        end_iter += _new_size_;
+
+        allocator_type & alloc = this->_alloc();
+
+        split_buffer< value_type, allocator_type & > buffer( new_cap, 0, alloc );
+
+        buffer._construct_at_end( _new_size_ );
+        buffer._construct_at_end( begin(), end_iter );
+
+        _swap_out_buffer( buffer );
+        _rebuild_tree();
+}
+
+template< typename T, auto PB, typename Allocator >
+void
+segment_tree< T, PB, Allocator >::_expand_tree ( size_type const _new_size_ )
+{
+        size_type current_size = size();
+        size_type current_cap  = capacity();
+        size_type new_cap      = 2 * _new_size_;
+
+        allocator_type & alloc = this->_alloc();
+
+        split_buffer< value_type, allocator_type & > buffer( new_cap, current_cap, alloc );
+        buffer._construct_at_end( new_cap - current_cap );
+        _swap_out_circular_buffer( buffer );
+
+        for( size_type i = 0; i < current_size; ++i )
+        {
+                this->begin_[ new_cap / 2 + i ] = NPL_MOVE( this->begin_[ current_cap / 2 + i ] );
+        }
+
+        _rebuild_tree();
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -960,20 +1040,6 @@ segment_tree< T, PB, Allocator >::_construct_at_end ( ForwardIterator _first_, F
         {
                 _alloc_traits::construct( this->_alloc(), mem::to_address( pos ), *_first_++ );
         }
-}
-
-template< typename T, auto PB, typename Allocator >
-void
-segment_tree< T, PB, Allocator >::_append ( size_type const _count_ )
-{
-        // default
-}
-
-template< typename T, auto PB, typename Allocator >
-void
-segment_tree< T, PB, Allocator >::_append ( size_type const _count_, const_reference _val_ )
-{
-        // default
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1358,7 +1424,7 @@ segment_tree< T, PB, Allocator >::assign ( SegtreeIterator _first_, SegtreeItera
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
-        if( new_cap < capacity() )
+        if( false /* new_cap < capacity() */ )
         {
                 SegtreeIterator mid = _last_;
                 bool growing = false;
@@ -1387,11 +1453,13 @@ segment_tree< T, PB, Allocator >::assign ( SegtreeIterator _first_, SegtreeItera
                 _vallocate( new_cap );
                 _construct_at_end( new_size );
                 _construct_at_end( _first_, _last_, count );
+                _construct_at_end( new_size - count );
         }
         _rebuild_tree();
         _invalidate_all_iterators();
 }
 
+#if 0
 template< typename T, auto PB, typename Allocator >
 template< typename InputIterator >
 typename std::enable_if_t
@@ -1408,7 +1476,7 @@ typename std::enable_if_t
 >
 segment_tree< T, PB, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
 {
-        this->_destruct_at_end( this->begin_ + capacity() / 2 );
+        this->_destruct_at_end( this->begin_ + size() );
 
         for( ; _first_ != _last_; ++_first_ )
         {
@@ -1416,6 +1484,7 @@ segment_tree< T, PB, Allocator >::assign ( InputIterator _first_, InputIterator 
         }
         _rebuild_tree();
 }
+#endif
 
 template< typename T, auto PB, typename Allocator >
 template< typename ForwardIterator >
@@ -1448,7 +1517,7 @@ segment_tree< T, PB, Allocator >::assign ( ForwardIterator _first_, ForwardItera
         }
         else
         {
-                this->_destruct_at_end( this->begin_ + capacity() / 2 );
+                this->_destruct_at_end( this->begin_ + size() );
 
                 _construct_at_end( _first_, _last_, count );
                 _construct_at_end( new_size - count );
@@ -1475,9 +1544,25 @@ segment_tree< T, PB, Allocator >::_make_iter ( const_pointer _ptr_ ) const noexc
 template< typename T, auto PB, typename Allocator >
 inline
 typename segment_tree< T, PB, Allocator >::iterator
+segment_tree< T, PB, Allocator >::real_begin () noexcept
+{
+        return _make_iter( this->begin_ );
+}
+
+template< typename T, auto PB, typename Allocator >
+inline
+typename segment_tree< T, PB, Allocator >::const_iterator
+segment_tree< T, PB, Allocator >::real_begin () const noexcept
+{
+        return _make_iter( this->begin_ );
+}
+
+template< typename T, auto PB, typename Allocator >
+inline
+typename segment_tree< T, PB, Allocator >::iterator
 segment_tree< T, PB, Allocator >::begin () noexcept
 {
-        return _make_iter( this->begin_ + capacity() / 2 );
+        return _make_iter( this->begin_ + size() );
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1485,7 +1570,7 @@ inline
 typename segment_tree< T, PB, Allocator >::const_iterator
 segment_tree< T, PB, Allocator >::begin () const noexcept
 {
-        return _make_iter( this->begin_ + capacity() / 2 );
+        return _make_iter( this->begin_ + size() );
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1511,7 +1596,7 @@ segment_tree< T, PB, Allocator >::operator[] ( size_type const _index_ ) noexcep
 {
         NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::operator[]: index out of bounds" );
 
-        return this->begin_[ capacity() / 2 + _index_ ];
+        return this->begin_[ size() + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1521,7 +1606,7 @@ segment_tree< T, PB, Allocator >::operator[] ( size_type const _index_ ) const n
 {
         NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::operator[]: index out of bounds" );
 
-        return this->begin_[ capacity() / 2 + _index_ ];
+        return this->begin_[ size() + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1563,7 +1648,14 @@ inline
 auto &
 segment_tree< T, PB, Allocator >::operator+= ( segment_tree const & _other_ ) noexcept
 {
+        NPL_ASSERT( size() == _other_.size(), "segment_tree::operator+=: container size mismatch" );
 
+        for( size_type i = 0; i < size(); ++i )
+        {
+                at( i ) += _other_.at( i );
+        }
+
+        return *this;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1571,7 +1663,13 @@ inline
 auto
 segment_tree< T, PB, Allocator >::operator+ ( segment_tree const & _other_ ) const
 {
+        NPL_ASSERT( size() == _other_.size(), "segment_tree::operator+: container size mismatch" );
 
+        _self res( *this );
+
+        res += _other_;
+
+        return res;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1579,7 +1677,14 @@ inline
 auto &
 segment_tree< T, PB, Allocator >::operator-= ( segment_tree const & _other_ ) noexcept
 {
+        NPL_ASSERT( size() == _other_.size(), "segment_tree::operator-=: container size mismatch" );
 
+        for( size_type i = 0; i < size(); ++i )
+        {
+                at( i ) -= _other_.at( i );
+        }
+
+        return *this;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1587,7 +1692,13 @@ inline
 auto
 segment_tree< T, PB, Allocator >::operator- ( segment_tree const & _other_ ) const
 {
+        NPL_ASSERT( size() == _other_.size(), "segment_tree::operator-: container size mismatch" );
 
+        _self res( *this );
+
+        res -= _other_;
+
+        return res;
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1597,7 +1708,7 @@ segment_tree< T, PB, Allocator >::at ( size_type const _index_ ) noexcept
 {
         NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::at: index out of bounds" );
 
-        return this->begin_[ capacity() / 2 + _index_ ];
+        return this->begin_[ size() + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1607,7 +1718,7 @@ segment_tree< T, PB, Allocator >::at ( size_type const _index_ ) const noexcept
 {
         NPL_ASSERT( !empty() && _index_ < size(), "segment_tree::at: index out of bounds" );
 
-        return this->begin_[ capacity() / 2 + _index_ ];
+        return this->begin_[ size() + _index_ ];
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1637,8 +1748,8 @@ segment_tree< T, PB, Allocator >::range ( size_type _x_, size_type _y_ ) const n
 {
         NPL_ASSERT( !empty() && _x_ <= _y_ && _y_ < size(), "segment_tree::range: index out of bounds" );
 
-        _x_ += capacity() / 2;
-        _y_ += capacity() / 2;
+        _x_ += size();
+        _y_ += size();
 
         T res = T();
 
@@ -1663,9 +1774,10 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::reserve ( size_type const _size_ )
 {
-
+        resize( _size_ );
 }
 
+#if 0
 template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::shrink_to_fit () noexcept
@@ -1730,19 +1842,42 @@ segment_tree< T, PB, Allocator >::pop_back ()
 {
 
 }
+#endif
 
 template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::resize ( size_type const _size_ )
 {
+        size_type new_size = _round_to_pow2( _size_ );
+        size_type new_cap  = 2 * new_size;
 
+        if( new_cap < capacity() )
+        {
+                _trim_tree( new_size );
+        }
+        else if( new_cap > capacity() )
+        {
+                _expand_tree( new_size );
+        }
+        else
+        {
+                return;
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
 void
-segment_tree< T, PB, Allocator >::resize ( size_type const _size_, const_reference _val_ )
+segment_tree< T, PB, Allocator >::resize ( size_type const _size_, const_reference _val_ )  //  TODO: expand and fill, dont replace current values idiot
 {
+        size_type new_size = _round_to_pow2( _size_ );
+        size_type new_cap  = 2 * new_size;
 
+        clear();
+        _vdeallocate();
+        _vallocate( new_cap );
+        _construct_at_end( new_size );
+        _construct_at_end( new_size, _val_ );
+        _rebuild_tree();
 }
 
 template< typename T, auto PB, typename Allocator >
