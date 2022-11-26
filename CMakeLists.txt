@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.21 )
 
-project( natprolib VERSION 2.1.0 )
+project( natprolib VERSION 2.1.1 )
 
 option( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
