@@ -9,6 +9,8 @@
 
 #include <memory>
 
+#include "util.hpp"
+
 #define NPL_MOVE_IF_NOEXCEPT(...) \
         _move_if_noexcept(__VA_ARGS__)
 
@@ -46,6 +48,12 @@ struct is_final : public std::is_final< T > {};
 
 template< typename T >
 inline constexpr bool is_final_v = is_final< T >::value;
+
+template< typename T >
+struct is_ptr_to_const : std::is_const< std::remove_pointer_t< T > > {};
+
+template< typename T >
+inline constexpr bool is_ptr_to_const_v = is_ptr_to_const< T >::value;
 
 template< typename Alloc, typename = void, typename = void >
 struct _is_allocator : std::false_type {};
@@ -211,6 +219,12 @@ using _2d_container_base_t = typename Container::value_type::value_type;
 
 template< typename Container >
 using _3d_container_base_t = typename Container::value_type::value_type::value_type;
+
+template< typename Container >
+struct enable_2d_container : std::enable_if< is_2d_container_v< Container > > {};
+
+template< typename Container >
+using enable_2d_container_t = typename enable_2d_container< Container >::type;
 
 template< typename Container >
 struct enable_2d_container_base : std::enable_if< is_2d_container_v< Container >, _2d_container_base_t< Container > > {};

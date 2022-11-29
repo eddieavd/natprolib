@@ -36,6 +36,12 @@ constexpr auto to_address ( T const & _ptr_ ) noexcept
         return std::pointer_traits< T >::to_address( _ptr_ );
 }
 
+template< typename T, typename... Args >
+constexpr T * construct_at ( T * _ptr_, Args&&... _args_ )
+{
+        return new( _ptr_ ) T{ NPL_FWD( _args_ )... };
+}
+
 template< typename Alloc >
 void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, std::true_type ) noexcept
 {
