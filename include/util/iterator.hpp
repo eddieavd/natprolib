@@ -109,9 +109,9 @@ public:
         using         _alloc_traits = typename std::allocator_traits< Allocator >;
         using       difference_type = typename _alloc_traits::difference_type;
         using               pointer = std::conditional_t< C, value_type const *, value_type * >;
-        using         const_pointer = pointer;
         using             reference = std::conditional_t< C, value_type const &, value_type & >;
-        using       const_reference = reference;
+        using         const_pointer = value_type const *;
+        using       const_reference = value_type const &;
         using     iterator_category = std::random_access_iterator_tag;
         using npl_iterator_category =      random_access_iterator_tag;
 
@@ -172,11 +172,32 @@ public:
         operator iterator< T, true, Allocator > () const noexcept
         { return iterator< T, true, Allocator >{ ptr_ }; }
 
-        constexpr const_pointer raw () const noexcept
+        /*
+        constexpr
+        std::enable_if_t
+        <
+                is_ptr_to_const_v< pointer >,
+                pointer
+        >
+        raw () const noexcept
         { return ptr_; }
+
+        constexpr
+        std::enable_if_t
+        <
+                !is_ptr_to_const_v< pointer >,
+                pointer
+        >
+        raw () noexcept
+        { return ptr_; }
+        */
 
         constexpr pointer raw () noexcept
         { return ptr_; }
+
+        constexpr const_pointer raw () const noexcept
+        { return ptr_; }
+
 protected:
         pointer ptr_;
 
