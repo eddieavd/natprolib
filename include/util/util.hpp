@@ -36,6 +36,10 @@
 #       endif
 #endif
 
+#ifndef NPL_STATIC_ASSERT
+#define NPL_STATIC_ASSERT(cond, msg) static_assert( cond, msg )
+#endif
+
 
 #ifdef __GNUC__
 #       ifndef NPL_USE_ATTRIBUTES

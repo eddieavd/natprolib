@@ -21,6 +21,18 @@ namespace npl
 template< typename T, size_t Size >
 struct array
 {
+        template< bool C, typename T_ = T >
+        class _array_iterator
+                : public iterator< T_, C >
+        {
+                friend class  _array_iterator< !C, T_   >;
+                friend struct  array         <  T, Size >;
+        public:
+                using _base = iterator< T_, C >;
+
+                explicit _array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+        };
+
         using           _self = array;
         using      value_type = T;
         using       size_type = size_t;
@@ -30,9 +42,9 @@ struct array
         using         pointer = value_type *;
         using   const_pointer = value_type const *;
 
-        using               iterator = pointer;
-        using         const_iterator = const_pointer;
-        using       reverse_iterator = reverse_iter< iterator >;
+        using               iterator = _array_iterator< false >      ;
+        using         const_iterator = _array_iterator<  true >      ;
+        using       reverse_iterator = reverse_iter<       iterator >;
         using const_reverse_iterator = reverse_iter< const_iterator >;
 
         value_type data_[ Size ];

@@ -40,13 +40,15 @@ inline constexpr bool is_fenwick_tree_iterator_v = is_fenwick_tree_iterator< T >
 
 template< typename T, bool C, typename Allocator >
 class _fenwick_tree_iterator
-        : public iterator< T, C, Allocator >
+        : public iterator< T, C >
 {
         friend class _fenwick_tree_iterator< T, !C, Allocator >;
         friend class _fenwick_tree_base    < T,     Allocator >;
         friend class  fenwick_tree         < T,     Allocator >;
 public:
-        using                 _base = iterator< T, C, Allocator >;
+        using                 _base = iterator< T, C >;
+        using         _alloc_traits = std::allocator_traits< Allocator >;
+        using       difference_type = typename _alloc_traits::difference_type;
         using npl_iterator_category = fenwick_tree_iterator_tag;
 private:
         explicit _fenwick_tree_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}

@@ -100,14 +100,14 @@ struct iterator_traits< T* >
 };
 
 
-template< typename T, bool C, typename Allocator >
+template< typename T, bool C >
 class iterator
 {
-        friend class iterator< T, !C, Allocator >;
+        friend class iterator< T, !C >;
 public:
+        using                 _self = iterator;
         using            value_type = T;
-        using         _alloc_traits = typename std::allocator_traits< Allocator >;
-        using       difference_type = typename _alloc_traits::difference_type;
+        using       difference_type = std::ptrdiff_t;
         using               pointer = std::conditional_t< C, value_type const *, value_type * >;
         using             reference = std::conditional_t< C, value_type const &, value_type & >;
         using         const_pointer = value_type const *;
@@ -124,32 +124,32 @@ public:
 
         template< bool R >
         constexpr
-        bool operator== ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        bool operator== ( iterator< T, R > const & rhs ) const noexcept
         { return ptr_ == rhs.ptr_; }
 
         template< bool R >
         constexpr
-        bool operator!= ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        bool operator!= ( iterator< T, R > const & rhs ) const noexcept
         { return !operator==( rhs ); }
 
         template< bool R >
         constexpr
-        difference_type operator+ ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        difference_type operator+ ( iterator< T, R > const & rhs ) const noexcept
         { return static_cast< difference_type >( ptr_ + rhs.ptr_ ); }
 
         template< bool R >
         constexpr
-        difference_type operator- ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        difference_type operator- ( iterator< T, R > const & rhs ) const noexcept
         { return static_cast< difference_type >( ptr_ - rhs.ptr_ ); }
 
         template< bool R >
         constexpr
-        iterator & operator+= ( iterator< T, R, Allocator > const & rhs ) noexcept
+        iterator & operator+= ( iterator< T, R > const & rhs ) noexcept
         { ptr_ += rhs.ptr_; return *this; }
 
         template< bool R >
         constexpr
-        iterator & operator-= ( iterator< T, R, Allocator > const & rhs ) noexcept
+        iterator & operator-= ( iterator< T, R > const & rhs ) noexcept
         { ptr_ -= rhs.ptr_; return *this; }
 
         constexpr
@@ -169,8 +169,8 @@ public:
         { return iterator( ptr_ - _offset_ ); }
 
         constexpr
-        operator iterator< T, true, Allocator > () const noexcept
-        { return iterator< T, true, Allocator >{ ptr_ }; }
+        operator iterator< T, true > () const noexcept
+        { return iterator< T, true >{ ptr_ }; }
 
         /*
         constexpr

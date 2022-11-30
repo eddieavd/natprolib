@@ -32,16 +32,28 @@ template< typename T, typename Allocator >
 class vector;
 
 
+struct vector_iterator_tag : public random_access_iterator_tag {};
+
+template< typename T >
+struct is_vector_iterator : public has_same_npl_iterator_category< iterator_traits< T >, vector_iterator_tag > {};
+
+template< typename T >
+inline constexpr bool is_vector_iterator_v = is_vector_iterator< T >::value;
+
+
 template< typename T, bool C, typename Allocator >
 class _vector_iterator
-        : public iterator< T, C, Allocator >
+        : public iterator< T, C >
 {
         friend class _vector_iterator< T, !C, Allocator >;
         friend class _vector_base    < T,     Allocator >;
         friend class  vector         < T,     Allocator >;
-
-        using _base = iterator< T, C, Allocator >;
-
+public:
+        using                 _base = iterator< T, C >;
+        using         _alloc_traits = std::allocator_traits< Allocator >;
+        using       difference_type = typename _alloc_traits::difference_type;
+        using npl_iterator_category = vector_iterator_tag;
+private:
         explicit _vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
 };
 
@@ -990,7 +1002,7 @@ template< typename ForwardIterator >
 vector< T, Allocator >::vector ( ForwardIterator _first_,
                 typename std::enable_if_t
                 <
-                         is_cpp17_forward_iterator_v< ForwardIterator > &&
+                        is_cpp17_forward_iterator_v< ForwardIterator > &&
                         std::is_constructible_v
                         <
                                 value_type,

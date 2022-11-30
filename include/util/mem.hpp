@@ -10,6 +10,7 @@
 
 #include "util.hpp"
 #include "traits.hpp"
+#include "iterator.hpp"
 
 
 namespace npl
@@ -40,6 +41,23 @@ template< typename T, typename... Args >
 constexpr T * construct_at ( T * _ptr_, Args&&... _args_ )
 {
         return new( _ptr_ ) T{ NPL_FWD( _args_ )... };
+}
+
+template< typename Iter, typename... Args >
+constexpr auto construct_at ( Iter _iter_, Args&&... _args_ ) -> _iter_value_type< Iter > *
+{
+        using T = _iter_value_type< Iter >;
+
+        return new( _iter_.raw() ) T{ NPL_FWD( _args_ )... };
+}
+
+template< typename T >
+inline
+constexpr void destruct_at ( T * _ptr_ )
+{
+        NPL_ASSERT( _ptr_, "mem::destruct_at: nullptr passed to destruct_at" );
+
+        _ptr_->~T();
 }
 
 template< typename Alloc >
