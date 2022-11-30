@@ -52,37 +52,44 @@ protected:
 
         template< bool C, typename T_ = typename storage::value_type >
         class _static_vector_iterator
-                : public storage::iterator
+                : public iterator< T_, C >
         {
                 friend class _static_vector_iterator< !C, T_ >;
                 friend class  static_vector         <  T, N  >;
         public:
-                using                 _base = typename storage::iterator;
-                using npl_iterator_category = static_vector_iterator_tag;
+                using                 _base = iterator< T_, C >          ;
+                using            value_type = T                          ;
+                using               pointer = value_type *               ;
+                using         const_pointer = value_type const *         ;
+                using             reference = value_type &               ;
+                using       const_reference = value_type const &         ;
+                using npl_iterator_category = static_vector_iterator_tag ;
 
-                constexpr typename _base::pointer   operator-> () const noexcept { return &this->ptr_->val; }
-                constexpr typename _base::reference operator*  () const noexcept { return  this->ptr_->val; }
+                constexpr pointer   operator-> () const noexcept { return &this->ptr_->val_; }
+                constexpr reference operator*  () const noexcept { return  this->ptr_->val_; }
 
-                constexpr operator typename _base::pointer () const noexcept { return &this->ptr_->val; }
+                constexpr operator pointer () const noexcept { return &this->ptr_->val_; }
 
-                constexpr typename _base::pointer raw () noexcept
-                { return &this->ptr_->val; }
+                constexpr pointer raw () noexcept
+                { return &this->ptr_->val_; }
 
-                constexpr typename _base::const_pointer raw () const noexcept
-                { return &this->ptr_->val; }
-
+                constexpr const_pointer raw () const noexcept
+                { return &this->ptr_->val_; }
+        private:
                 explicit _static_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+
+                explicit _static_vector_iterator ( _base const & _other_ ) : _base( _other_ ) {}
         };
 public:
-        using           _base = storage       ;
-        using           _self = static_vector ;
-        using      value_type = T             ;
-        using         pointer = T       *     ;
-        using   const_pointer = T const *     ;
-        using       reference = T       &     ;
-        using const_reference = T const &     ;
-        using       size_type = size_t        ;
-        using difference_type = std::ptrdiff_t;
+        using           _base = storage            ;
+        using           _self = static_vector      ;
+        using      value_type = T                  ;
+        using         pointer = value_type       * ;
+        using   const_pointer = value_type const * ;
+        using       reference = value_type       & ;
+        using const_reference = value_type const & ;
+        using       size_type = size_t             ;
+        using difference_type = std::ptrdiff_t     ;
 
         using               iterator = _static_vector_iterator< false >;
         using         const_iterator = _static_vector_iterator<  true >;
@@ -129,15 +136,15 @@ public:
         NPL_NODISCARD constexpr       pointer data ()       noexcept { return &data_[ 0 ].val; }
         NPL_NODISCARD constexpr const_pointer data () const noexcept { return &data_[ 0 ].val; }
 
-        NPL_NODISCARD constexpr       iterator begin ()       noexcept { return       iterator{ data_.begin() }; }
-        NPL_NODISCARD constexpr const_iterator begin () const noexcept { return const_iterator{ data_.begin() }; }
-        NPL_NODISCARD constexpr       iterator   end ()       noexcept { return       iterator{ data_.  end() }; }
-        NPL_NODISCARD constexpr const_iterator   end () const noexcept { return const_iterator{ data_.  end() }; }
+        NPL_NODISCARD constexpr       iterator begin ()       noexcept { return       iterator{ data_.begin().raw() }; }
+        NPL_NODISCARD constexpr const_iterator begin () const noexcept { return const_iterator{ data_.begin().raw() }; }
+        NPL_NODISCARD constexpr       iterator   end ()       noexcept { return       iterator{ data_.  end().raw() }; }
+        NPL_NODISCARD constexpr const_iterator   end () const noexcept { return const_iterator{ data_.  end().raw() }; }
 
-        NPL_NODISCARD constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator{ data_.  end() }; }
-        NPL_NODISCARD constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator{ data_.  end() }; }
-        NPL_NODISCARD constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator{ data_.begin() }; }
-        NPL_NODISCARD constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator{ data_.begin() }; }
+        NPL_NODISCARD constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator{ data_.  end().raw() }; }
+        NPL_NODISCARD constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator{ data_.  end().raw() }; }
+        NPL_NODISCARD constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator{ data_.begin().raw() }; }
+        NPL_NODISCARD constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator{ data_.begin().raw() }; }
 
         NPL_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin(); }
         NPL_NODISCARD constexpr const_iterator   cend () const noexcept { return   end(); }

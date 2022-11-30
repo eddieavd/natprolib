@@ -115,12 +115,12 @@ public:
         using     iterator_category = std::random_access_iterator_tag;
         using npl_iterator_category =      random_access_iterator_tag;
 
-        constexpr pointer     operator-> (     ) const {   return std::addressof( operator*() ); }
-        constexpr reference   operator*  (     ) const {                           return *ptr_; }
-        constexpr iterator  & operator++ (     )       {                   ptr_++; return *this; }
-        constexpr iterator  & operator-- (     )       {                   ptr_--; return *this; }
-        constexpr iterator    operator++ ( int )       { auto it = *this; ++*this; return    it; }
-        constexpr iterator    operator-- ( int )       { auto it = *this; --*this; return    it; }
+        constexpr pointer     operator-> (     ) const noexcept {   return std::addressof( operator*() ); }
+        constexpr reference   operator*  (     ) const noexcept {                           return *ptr_; }
+        constexpr iterator  & operator++ (     )       noexcept {                   ptr_++; return *this; }
+        constexpr iterator  & operator-- (     )       noexcept {                   ptr_--; return *this; }
+        constexpr iterator    operator++ ( int )       noexcept { auto it = *this; ++*this; return    it; }
+        constexpr iterator    operator-- ( int )       noexcept { auto it = *this; --*this; return    it; }
 
         template< bool R >
         constexpr
@@ -217,11 +217,11 @@ public:
         using       const_reference = reference;
         using     iterator_category = typename _base::iterator_category;
 
-        constexpr reference       operator*  (     ) const { auto it = iter_;          return *--it; }
-        constexpr reverse_iter  & operator++ (     )       {                 iter_-- ; return *this; }
-        constexpr reverse_iter  & operator-- (     )       {                 iter_++ ; return *this; }
-        constexpr reverse_iter    operator++ ( int )       { auto it = *this; --*this; return    it; }
-        constexpr reverse_iter    operator-- ( int )       { auto it = *this; ++*this; return    it; }
+        constexpr reference       operator*  (     ) const noexcept { auto it = iter_;          return *--it; }
+        constexpr reverse_iter  & operator++ (     )       noexcept {                 iter_-- ; return *this; }
+        constexpr reverse_iter  & operator-- (     )       noexcept {                 iter_++ ; return *this; }
+        constexpr reverse_iter    operator++ ( int )       noexcept { auto it = *this; --*this; return    it; }
+        constexpr reverse_iter    operator-- ( int )       noexcept { auto it = *this; ++*this; return    it; }
 
         constexpr bool operator== ( reverse_iter const & _other_ ) const noexcept
         { return iter_ == _other_.iter_; }

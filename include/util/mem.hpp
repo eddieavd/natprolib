@@ -44,11 +44,13 @@ constexpr T * construct_at ( T * _ptr_, Args&&... _args_ )
 }
 
 template< typename Iter, typename... Args >
-constexpr auto construct_at ( Iter _iter_, Args&&... _args_ ) -> _iter_value_type< Iter > *
+constexpr auto construct_at ( Iter const & _iter_, Args&&... _args_ ) -> _iter_value_type< Iter > *
 {
         using T = _iter_value_type< Iter >;
 
-        return new( _iter_.raw() ) T{ NPL_FWD( _args_ )... };
+        T * ptr = const_cast< T * >( _iter_.raw() );
+
+        return new( ptr ) T{ NPL_FWD( _args_ )... };
 }
 
 template< typename T >
