@@ -41,13 +41,13 @@ inline constexpr bool is_prefix_array_iterator_v = is_prefix_array_iterator< T >
 
 template< typename T, bool C, typename Allocator >
 class _prefix_array_iterator
-          : public iterator< T, C >
+          : public iterator< C, T >
 {
         friend class _prefix_array_iterator< T, !C, Allocator >;
         friend class _prefix_array_base    < T,     Allocator >;
         friend class  prefix_array         < T,     Allocator >;
 public:
-        using                 _base = iterator< T, C >;
+        using                 _base = iterator< C, T >;
         using         _alloc_traits = std::allocator_traits< Allocator >;
         using       difference_type = typename _alloc_traits::difference_type;
         using npl_iterator_category = prefix_array_iterator_tag;

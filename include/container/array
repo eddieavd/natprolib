@@ -23,12 +23,12 @@ struct array
 {
         template< bool C, typename T_ = T >
         class _array_iterator
-                : public iterator< T_, C >
+                : public iterator< C, T_ >
         {
                 friend class  _array_iterator< !C, T_   >;
                 friend struct  array         <  T, Size >;
         public:
-                using _base = iterator< T_, C >;
+                using _base = iterator< C, T_ >;
 
                 explicit _array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
