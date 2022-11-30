@@ -67,20 +67,20 @@ struct some_addable_data
         }
 };
 
-template< typename T, bool C, typename Allocator >
+template< typename T, bool C >
 class iterator
-        : public npl::iterator< T, C, Allocator >
+        : public npl::iterator< T, C >
 {
-        using _base = npl::iterator< T, C, Allocator >;
+        using _base = npl::iterator< T, C >;
 public:
         iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
 };
 
 template< typename T, bool C, typename Allocator >
 class input_iterator
-        : public npl::iterator< T, C, Allocator >
+        : public npl::iterator< T, C >
 {
-        using _base = npl::iterator< T, C, Allocator >;
+        using _base = npl::iterator< T, C >;
 public:
         using iterator_category = std::input_iterator_tag;
 
