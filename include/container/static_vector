@@ -36,11 +36,14 @@ inline constexpr bool is_static_vector_iterator_v = is_static_vector_iterator< T
 template< typename T, size_t N >
 class static_vector
 {
-protected:
+private:
         union storage_t
         {
-                T    val_  ;
-                char align_;
+                using raw   = T    ;
+                using dummy = char ;
+
+                raw   val_   ;
+                dummy align_ ;
 
                 constexpr storage_t () noexcept : align_{ 0 } {}
 
@@ -54,14 +57,17 @@ protected:
         class _static_vector_iterator
                 : public iterator< C, T_ >
         {
-                friend class _static_vector_iterator< !C, T_ >;
-                friend class  static_vector         <  T, N  >;
+                using storage_raw_type   = typename storage::value_type::raw ;
+                using storage_value_type = typename storage::value_type      ;
+
+                friend class  static_vector         < storage_raw_type, N    > ;
+                friend class _static_vector_iterator< !C, storage_value_type > ;
         public:
                 using                 _base = iterator< C, T_ >          ;
-                using            value_type = T                          ;
-                using               pointer = value_type *               ;
+                using            value_type = storage_raw_type           ;
+                using               pointer = value_type       *         ;
                 using         const_pointer = value_type const *         ;
-                using             reference = value_type &               ;
+                using             reference = value_type       &         ;
                 using       const_reference = value_type const &         ;
                 using npl_iterator_category = static_vector_iterator_tag ;
 
@@ -77,24 +83,30 @@ protected:
                 { return &this->ptr_->val_; }
         private:
                 explicit _static_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
-
-                explicit _static_vector_iterator ( _base const & _other_ ) : _base( _other_ ) {}
         };
 public:
-        using           _base = storage            ;
-        using           _self = static_vector      ;
-        using      value_type = T                  ;
+        using        _base = storage       ;
+        using        _self = static_vector ;
+        using   value_type = T             ;
+        using storage_type = storage_t     ;
+
         using         pointer = value_type       * ;
         using   const_pointer = value_type const * ;
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
-        using       size_type = size_t             ;
-        using difference_type = std::ptrdiff_t     ;
 
-        using               iterator = _static_vector_iterator< false >;
-        using         const_iterator = _static_vector_iterator<  true >;
-        using       reverse_iterator = reverse_iter<       iterator >  ;
-        using const_reverse_iterator = reverse_iter< const_iterator >  ;
+        using         str_pointer = storage_type       * ;
+        using   str_const_pointer = storage_type const * ;
+        using       str_reference = storage_type       & ;
+        using str_const_reference = storage_type const & ;
+
+        using       size_type = size_t         ;
+        using difference_type = std::ptrdiff_t ;
+
+        using               iterator = _static_vector_iterator< false > ;
+        using         const_iterator = _static_vector_iterator<  true > ;
+        using       reverse_iterator = reverse_iter<       iterator >   ;
+        using const_reverse_iterator = reverse_iter< const_iterator >   ;
 
         constexpr static auto static_capacity{ N };
 
