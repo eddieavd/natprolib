@@ -1,0 +1,440 @@
+// vim: set ft=cpp:
+//
+//
+//      natprolib
+//      static_vector.hpp
+//
+
+#pragma once
+
+
+#include <util/mem.hpp>
+#include <util/util.hpp>
+#include <util/traits.hpp>
+#include <util/iterator.hpp>
+
+#include <container/array>
+
+
+namespace npl
+{
+
+
+template< typename T, size_t N >
+class static_vector;
+
+
+struct static_vector_iterator_tag : public random_access_iterator_tag {};
+
+template< typename T >
+struct is_static_vector_iterator : public has_same_npl_iterator_category< iterator_traits< T >, static_vector_iterator_tag > {};
+
+template< typename T >
+inline constexpr bool is_static_vector_iterator_v = is_static_vector_iterator< T >::value;
+
+
+template< typename T, size_t N >
+class static_vector
+{
+protected:
+        union storage_t
+        {
+                T    val_  ;
+                char align_;
+
+                constexpr storage_t () noexcept : align_{ 0 } {}
+
+                constexpr operator T () const noexcept
+                { return val_; }
+        };
+
+        using storage = array< storage_t, N >;
+
+        template< bool C, typename T_ = typename storage::value_type >
+        class _static_vector_iterator
+                : public storage::iterator
+        {
+                friend class _static_vector_iterator< !C, T_ >;
+                friend class  static_vector         <  T, N  >;
+        public:
+                using                 _base = typename storage::iterator;
+                using npl_iterator_category = static_vector_iterator_tag;
+
+                constexpr typename _base::pointer   operator-> () const noexcept { return &this->ptr_->val; }
+                constexpr typename _base::reference operator*  () const noexcept { return  this->ptr_->val; }
+
+                constexpr operator typename _base::pointer () const noexcept { return &this->ptr_->val; }
+
+                constexpr typename _base::pointer raw () noexcept
+                { return &this->ptr_->val; }
+
+                constexpr typename _base::const_pointer raw () const noexcept
+                { return &this->ptr_->val; }
+
+                explicit _static_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+        };
+public:
+        using           _base = storage       ;
+        using           _self = static_vector ;
+        using      value_type = T             ;
+        using         pointer = T       *     ;
+        using   const_pointer = T const *     ;
+        using       reference = T       &     ;
+        using const_reference = T const &     ;
+        using       size_type = size_t        ;
+        using difference_type = std::ptrdiff_t;
+
+        using               iterator = _static_vector_iterator< false >;
+        using         const_iterator = _static_vector_iterator<  true >;
+        using       reverse_iterator = reverse_iter<       iterator >  ;
+        using const_reverse_iterator = reverse_iter< const_iterator >  ;
+
+        constexpr static auto static_capacity{ N };
+
+        constexpr static_vector () noexcept = default;
+
+        constexpr static_vector ( size_type const _count_                        ) noexcept( noexcept( value_type{       } ) );
+        constexpr static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) );
+        constexpr static_vector ( std::initializer_list< value_type >     _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > );
+
+        constexpr static_vector ( static_vector const &  _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > );
+        constexpr static_vector ( static_vector       && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > );
+
+        constexpr ~static_vector () noexcept requires( std::is_trivially_destructible_v< value_type > ) = default;
+
+        constexpr ~static_vector () noexcept( std::is_nothrow_destructible_v< value_type > ) requires ( !std::is_trivially_destructible_v< value_type > )
+        {
+                clear();
+        }
+
+        constexpr static_vector & operator= ( static_vector const &  _other_ ) noexcept( std::is_nothrow_copy_assignable_v   < value_type > &&
+                                                                                         std::is_nothrow_copy_constructible_v< value_type > );
+        constexpr static_vector & operator= ( static_vector       && _other_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
+                                                                                         std::is_nothrow_move_constructible_v< value_type > );
+
+        constexpr       reference operator[] ( size_type const _index_ )       noexcept { return data_[ _index_ ].val; }
+        constexpr const_reference operator[] ( size_type const _index_ ) const noexcept { return data_[ _index_ ].val; }
+
+        NPL_NODISCARD constexpr       reference at ( size_type const _index_ )       noexcept;
+        NPL_NODISCARD constexpr const_reference at ( size_type const _index_ ) const noexcept;
+
+        constexpr       reference front ()       noexcept { return data_.front().val; }
+        constexpr const_reference front () const noexcept { return data_.front().val; }
+        constexpr       reference  back ()       noexcept { return data_. back().val; }
+        constexpr const_reference  back () const noexcept { return data_. back().val; }
+
+        NPL_NODISCARD constexpr const_reference cfront () const noexcept { return front(); }
+        NPL_NODISCARD constexpr const_reference  cback () const noexcept { return  back(); }
+
+        NPL_NODISCARD constexpr       pointer data ()       noexcept { return &data_[ 0 ].val; }
+        NPL_NODISCARD constexpr const_pointer data () const noexcept { return &data_[ 0 ].val; }
+
+        NPL_NODISCARD constexpr       iterator begin ()       noexcept { return       iterator{ data_.begin() }; }
+        NPL_NODISCARD constexpr const_iterator begin () const noexcept { return const_iterator{ data_.begin() }; }
+        NPL_NODISCARD constexpr       iterator   end ()       noexcept { return       iterator{ data_.  end() }; }
+        NPL_NODISCARD constexpr const_iterator   end () const noexcept { return const_iterator{ data_.  end() }; }
+
+        NPL_NODISCARD constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator{ data_.  end() }; }
+        NPL_NODISCARD constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator{ data_.  end() }; }
+        NPL_NODISCARD constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator{ data_.begin() }; }
+        NPL_NODISCARD constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator{ data_.begin() }; }
+
+        NPL_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin(); }
+        NPL_NODISCARD constexpr const_iterator   cend () const noexcept { return   end(); }
+
+        NPL_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin(); }
+        NPL_NODISCARD constexpr const_reverse_iterator   crend () const noexcept { return   rend(); }
+
+        NPL_NODISCARD constexpr size_type     size () const noexcept { return size_          ; }
+        NPL_NODISCARD constexpr size_type capacity () const noexcept { return static_capacity; }
+
+        NPL_NODISCARD constexpr bool empty () const noexcept { return size_ == 0; }
+
+        constexpr void clear () noexcept( std::is_nothrow_destructible_v< value_type > )
+        {
+                if constexpr( !std::is_trivially_destructible_v< value_type > )
+                {
+                        for( auto it( begin() ); it != end(); ++it )
+                        {
+                                mem::destruct_at( it );
+                        }
+                }
+                size_ = 0;
+        }
+
+        constexpr iterator insert ( const_iterator _position_, value_type const &  _val_ ) noexcept( noexcept( value_type( _val_ ) )                    &&
+                                                                                                     std::is_nothrow_move_assignable_v   < value_type > &&
+                                                                                                     std::is_nothrow_move_constructible_v< value_type > );
+        constexpr iterator insert ( const_iterator _position_, value_type       && _val_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
+                                                                                                     std::is_nothrow_move_constructible_v< value_type > );
+
+        constexpr void assign ( size_type const _count_, value_type const & _val_ ) noexcept( noexcept( value_type( _val_ ) ) && noexcept( std::declval< value_type >() = _val_ ) );
+
+        constexpr void resize ( size_type const _count_ ) noexcept( std::is_nothrow_default_constructible_v< value_type > );
+
+/*
+        template< std::input_iterator InputIterator >
+        constexpr void assign ( InputIterator _first_, InputIterator _last_ ) noexcept( ( std::is_trivially_copyable_v< value_type > && std::contiguous_iterator< InputIterator > ) ||
+                                                                                        ( std::is_nothrow_copy_assignable_v< value_type > && std::is_nothrow_copy_constructible_v< value_type > ) );
+*/
+
+        constexpr void assign ( std::initializer_list< value_type > _list_ ) noexcept( std::is_trivially_copyable_v     < value_type > ||
+                                                                                     ( std::is_nothrow_copy_assignable_v< value_type > && std::is_nothrow_copy_constructible_v< value_type > ) );
+
+        constexpr void push_back ( value_type const &  _val_ ) noexcept( noexcept( value_type{           _val_   } ) );
+        constexpr void push_back ( value_type       && _val_ ) noexcept( noexcept( value_type{ NPL_MOVE( _val_ ) } ) );
+
+        template< typename... Args >
+        constexpr reference emplace_back ( Args&&... _args_ ) noexcept( noexcept( value_type{ NPL_FWD( _args_ )... } ) );
+private:
+        _base     data_;
+        size_type size_{ 0 };
+
+        NPL_NODISCARD constexpr bool full () const noexcept
+        { return size() == capacity(); }
+
+/*
+        template< typename InputIterator, typename Assigner >
+        constexpr void assign ( InputIterator _begin_, InputIterator _end_, Assigner && _assigner_ )
+                noexcept( ( std::is_trivially_copyable_v< value_type > && std::contiguous_iterator< InputIterator > ) ||
+                          ( noexcept( value_type{ assigner( _begin_ ) } ) && noexcept( std::declval< reference >() = assigner( _begin_ ) ) ) );
+*/
+};
+
+
+template< typename T, size_t N >
+constexpr static_vector< T, N >::static_vector ( size_type const _count_ ) noexcept( noexcept( value_type{} ) )
+        : size_( _count_ )
+{
+        for( auto it( begin() ); it != end(); ++it )
+        {
+                mem::construct_at< value_type >( it );
+        }
+}
+
+template< typename T, size_t N >
+constexpr static_vector< T, N >::static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) )
+        : size_( _count_ )
+{
+        for( auto it( begin() ); it != end(); ++it )
+        {
+                mem::construct_at( it, _val_ );
+        }
+}
+
+template< typename T, size_t N >
+constexpr static_vector< T, N >::static_vector ( std::initializer_list< value_type > _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > )
+        : size_( _list_.size() )
+{
+        NPL_STATIC_ASSERT( size_ <= capacity(), "static_vector::static_vector: list.size() > capacity()" );
+
+        auto it( begin() );
+
+        for( auto readIter( _list_.begin() ); readIter != _list_.end(); ++readIter, ++it )
+        {
+                mem::construct_at( it, *readIter );
+        }
+}
+
+template< typename T, size_t N >
+constexpr static_vector< T, N >::static_vector ( static_vector const & _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > )
+        : size_( _other_.size_ )
+{
+        for( size_type i = 0; i < size_; ++i )
+        {
+                mem::construct_at( &data_[ i ].val, _other_[ i ] );
+        }
+}
+
+template< typename T, size_t N >
+constexpr static_vector< T, N >::static_vector ( static_vector && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > )
+        : size_( _other_.size_ )
+{
+        for( size_type i = 0; i < size_; ++i )
+        {
+                mem::construct_at( &data_[ i ].val, NPL_MOVE( _other_[ i ] ) );
+        }
+}
+
+template< typename T, size_t N >
+constexpr static_vector< T, N > &
+static_vector< T, N >::operator= ( static_vector const & _other_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > && std::is_nothrow_copy_constructible_v< value_type > )
+{
+        if( &_other_ == this ) return *this;
+
+        this->assign( _other_.begin(), _other_.end(), []( const_iterator iter ) -> const_reference { return *iter; } );
+
+        return *this;
+}
+
+template< typename T, size_t N >
+constexpr static_vector< T, N > &
+static_vector< T, N >::operator= ( static_vector && _other_ ) noexcept( std::is_nothrow_move_assignable_v< value_type > && std::is_nothrow_move_constructible_v< value_type > )
+{
+        if( &_other_ == this ) return *this;
+
+        this->assign( _other_.begin(), _other_.end(), []( iterator iter ) -> value_type && { return NPL_MOVE( *iter ); } );
+
+        return *this;
+}
+
+template< typename T, size_t N >
+constexpr
+typename static_vector< T, N >::reference
+static_vector< T, N >::at ( size_type const _index_ ) noexcept
+{
+        NPL_STATIC_ASSERT( _index_ < size(), "static_vector::at: index out of bounds" );
+
+        return data_[ _index_ ].val;
+}
+
+template< typename T, size_t N >
+constexpr
+typename static_vector< T, N >::const_reference
+static_vector< T, N >::at ( size_type const _index_ ) const noexcept
+{
+        NPL_STATIC_ASSERT( _index_ < size(), "static_vector::at: index out of bounds" );
+
+        return data_[ _index_ ].val;
+}
+
+template< typename T, size_t N >
+constexpr
+typename static_vector< T, N >::iterator
+static_vector< T, N >::insert ( const_iterator _position_, value_type const & _val_ ) noexcept( noexcept( value_type( _val_ ) )                     &&
+                                                                                                 std::is_nothrow_move_assignable_v   < value_type > &&
+                                                                                                 std::is_nothrow_move_constructible_v< value_type > )
+{
+        NPL_STATIC_ASSERT( !full(), "static_vector::insert: vector full" );
+
+        iterator mut_pos{ const_cast< iterator >( _position_ ) };
+
+        std::move_backward( mut_pos, end(), end() + 1 );
+        mem::construct_at ( mut_pos, _val_            );
+        ++size_;
+
+        return mut_pos;
+}
+
+template< typename T, size_t N >
+constexpr
+typename static_vector< T, N >::iterator
+static_vector< T, N >::insert ( const_iterator _position_, value_type && _val_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
+                                                                                           std::is_nothrow_move_constructible_v< value_type > )
+{
+        NPL_STATIC_ASSERT( !full(), "static_vector::insert: vector full" );
+
+        iterator mut_pos{ const_cast< iterator >( _position_ ) };
+
+        std::move_backward( mut_pos, end(), end() + 1  );
+        mem::construct_at ( mut_pos, NPL_MOVE( _val_ ) );
+        ++size_;
+
+        return mut_pos;
+}
+
+template< typename T, size_t N >
+constexpr
+void
+static_vector< T, N >::assign ( size_type const _count_, value_type const & _val_ ) noexcept( noexcept( value_type( _val_ ) ) &&
+                                                                                              noexcept( std::declval< value_type >() = _val_ ) )
+{
+        NPL_STATIC_ASSERT( _count_ <= capacity(), "static_vector::assign: count > capacity" );
+
+        auto const real_count = std::min( size_, _count_ );
+
+        for( size_type i = 0; i < real_count; ++i )
+        {
+                data_[ i ].val = _val_;
+        }
+
+        if( real_count < _count_ )
+        {
+                for( size_type i = real_count; i < _count_; ++i )
+                {
+                        mem::construct_at( &data_[ i ].val, _val_ );
+                }
+        }
+
+        if constexpr( !std::is_trivially_destructible_v< value_type > )
+        {
+                if( real_count < size_ )
+                {
+                        for( size_type i = real_count; i < size_; ++i )
+                        {
+                                mem::destruct_at( &data_[ i ].val );
+                        }
+                }
+        }
+        size_ = _count_;
+}
+
+template< typename T, size_t N >
+constexpr
+void
+static_vector< T, N >::resize ( size_type const _count_ ) noexcept( std::is_nothrow_default_constructible_v< value_type > )
+{
+        NPL_STATIC_ASSERT( _count_ <= capacity(), "static_vector::resize: count > capacity" );
+
+        if constexpr( !std::is_trivially_destructible_v< value_type > )
+        {
+                if( _count_ < size_ )
+                {
+                        for( size_type i = _count_; i < size_; ++i )
+                        {
+                                mem::destruct_at( &data_[ i ].val );
+                        }
+                }
+        }
+        else if( _count_ > size_ )
+        {
+                for( size_type i = size_; i < _count_; ++i )
+                {
+                        mem::construct_at( &data_[ i ].val );
+                }
+        }
+        size_ = _count_;
+}
+
+template< typename T, size_t N >
+constexpr
+void
+static_vector< T, N >::assign ( std::initializer_list< value_type > _list_ ) noexcept( std::is_trivially_copyable_v< value_type > ||
+                                                                                     ( std::is_nothrow_copy_assignable_v< value_type > && std::is_nothrow_copy_constructible_v< value_type > ) )
+{
+        this->assign( _list_.begin(), _list_.end(), []( auto it ) -> const_reference { return *it; } );
+}
+
+template< typename T, size_t N >
+constexpr
+void
+static_vector< T, N >::push_back ( value_type const & _val_ ) noexcept( noexcept( value_type{ _val_ } ) )
+{
+        NPL_STATIC_ASSERT( !full(), "static_vector::push_back: vector full" );
+
+        mem::construct_at( &data_[ size_++ ].val, _val_ );
+}
+
+template< typename T, size_t N >
+constexpr
+void
+static_vector< T, N >::push_back ( value_type && _val_ ) noexcept( noexcept( value_type{ NPL_MOVE( _val_ ) } ) )
+{
+        NPL_STATIC_ASSERT( !full(), "static_vector::push_back: vector full" );
+
+        mem::construct_at( &data_[ size_++ ].val, _val_ );
+}
+
+template< typename T, size_t N >
+template< typename... Args >
+constexpr
+typename static_vector< T, N >::reference
+static_vector< T, N >::emplace_back ( Args&&... _args_ ) noexcept( noexcept( value_type{ NPL_FWD( _args_ )... } ) )
+{
+        NPL_STATIC_ASSERT( !full(), "static_vector::emplace_back: vector full" );
+
+        mem::construct_at( &data_[ size_++ ].val, NPL_FWD( _args_ )... );
+}
+
+
+} // namespace npl
