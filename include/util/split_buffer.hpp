@@ -147,7 +147,7 @@ private:
         {
                 _alloc() = NPL_MOVE( _buffer_._alloc() );
         }
-        void _move_assign_allov ( split_buffer &, std::false_type ) noexcept {}
+        void _move_assign_alloc ( split_buffer &, std::false_type ) noexcept {}
 
         struct _construct_transaction
         {
