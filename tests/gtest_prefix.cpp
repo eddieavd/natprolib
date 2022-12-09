@@ -9,12 +9,12 @@
 
 TEST( PrefixArrayTest, DefaultConstruct )
 {
-        npl::prefix_array<      int >    int_prefix;
-        npl::prefix_array< unsigned >   uint_prefix;
-        npl::prefix_array<    float >  float_prefix;
-        npl::prefix_array<   double > double_prefix;
+        npl::prefix_vector<      int >    int_prefix;
+        npl::prefix_vector< unsigned >   uint_prefix;
+        npl::prefix_vector<    float >  float_prefix;
+        npl::prefix_vector<   double > double_prefix;
 
-        npl::prefix_array< nplib_test::some_addable_data > some_prefix;
+        npl::prefix_vector< nplib_test::some_addable_data > some_prefix;
 
         EXPECT_EQ(    int_prefix._invariants(), true );
         EXPECT_EQ(   uint_prefix._invariants(), true );
@@ -26,7 +26,7 @@ TEST( PrefixArrayTest, DefaultConstruct )
 
 TEST( PrefixArrayTest, ReserveConstruct )
 {
-        npl::prefix_array< int > prefix( CUSTOM_CAPACITY );
+        npl::prefix_vector< int > prefix( CUSTOM_CAPACITY );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       ,               0 );
@@ -35,7 +35,7 @@ TEST( PrefixArrayTest, ReserveConstruct )
 
 TEST( PrefixArrayTest, FillConstruct )
 {
-        npl::prefix_array< int > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       , CUSTOM_CAPACITY );
@@ -43,12 +43,12 @@ TEST( PrefixArrayTest, FillConstruct )
 
 TEST( PrefixArrayTest, PrefixIterConstruct )
 {
-        npl::prefix_array< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
 
-        npl::prefix_array< int > prefix( source.begin(), source.end() );
+        npl::prefix_vector< int > prefix( source.begin(), source.end() );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       , CUSTOM_CAPACITY );
@@ -64,7 +64,7 @@ TEST( PrefixArrayTest, InputIterConstruct )
         input_iter begin( &source[ 0 ] );
         input_iter end  ( &source[ source.size() - 1 ] + 1 );
 
-        npl::prefix_array< int > prefix( begin, end );
+        npl::prefix_vector< int > prefix( begin, end );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       , CUSTOM_CAPACITY );
@@ -75,7 +75,7 @@ TEST( PrefixArrayTest, ForwardIterConstruct )
 {
         std::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix( source.begin(), source.end() );
+        npl::prefix_vector< int > prefix( source.begin(), source.end() );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       , CUSTOM_CAPACITY );
@@ -84,12 +84,12 @@ TEST( PrefixArrayTest, ForwardIterConstruct )
 
 TEST( PrefixArrayTest, CopyConstruct )
 {
-        npl::prefix_array< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
 
-        npl::prefix_array< int > prefix( source );
+        npl::prefix_vector< int > prefix( source );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       , CUSTOM_CAPACITY );
@@ -98,12 +98,12 @@ TEST( PrefixArrayTest, CopyConstruct )
 
 TEST( PrefixArrayTest, MoveConstruct )
 {
-        npl::prefix_array< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
 
-        npl::prefix_array< int > prefix( NPL_MOVE( source ) );
+        npl::prefix_vector< int > prefix( NPL_MOVE( source ) );
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.empty()      ,            true );
@@ -114,7 +114,7 @@ TEST( PrefixArrayTest, MoveConstruct )
 
 TEST( PrefixArrayTest, InitListConstruct )
 {
-        npl::prefix_array< int > prefix( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
         EXPECT_EQ( prefix._invariants(), true );
         EXPECT_EQ( prefix.size()       ,    8 );
@@ -122,8 +122,8 @@ TEST( PrefixArrayTest, InitListConstruct )
 
 TEST( PrefixArrayTest, CopyAssign )
 {
-        npl::prefix_array< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix;
+        npl::prefix_vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix;
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
@@ -137,8 +137,8 @@ TEST( PrefixArrayTest, CopyAssign )
 
 TEST( PrefixArrayTest, MoveAssign )
 {
-        npl::prefix_array< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix;
+        npl::prefix_vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix;
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
@@ -154,7 +154,7 @@ TEST( PrefixArrayTest, MoveAssign )
 
 TEST( PrefixArrayTest, InitListAssign )
 {
-        npl::prefix_array< int > prefix;
+        npl::prefix_vector< int > prefix;
 
         EXPECT_EQ( prefix._invariants(), true );
         EXPECT_EQ( prefix.size()       ,    0 );
@@ -169,13 +169,13 @@ TEST( PrefixArrayTest, SubscriptOperator )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< int > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< int > prefix_copy ( prefix_fill );
-        npl::prefix_array< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< int > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< int > prefix_copy ( prefix_fill );
+        npl::prefix_vector< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< int > prefix_cpass;
+        npl::prefix_vector< int > prefix_cpass;
         prefix_cpass = prefix_fill;
 
         for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
@@ -193,13 +193,13 @@ TEST( PrefixArrayTest, At )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< int > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< int > prefix_copy ( prefix_fill );
-        npl::prefix_array< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< int > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< int > prefix_copy ( prefix_fill );
+        npl::prefix_vector< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< int > prefix_cpass;
+        npl::prefix_vector< int > prefix_cpass;
         prefix_cpass = prefix_fill;
 
         for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
@@ -217,13 +217,13 @@ TEST( PrefixArrayTest, ElementAt )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< int > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< int > prefix_copy ( prefix_fill );
-        npl::prefix_array< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< int > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< int > prefix_copy ( prefix_fill );
+        npl::prefix_vector< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< int > prefix_cpass;
+        npl::prefix_vector< int > prefix_cpass;
         prefix_cpass = prefix_fill;
 
         for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
@@ -241,13 +241,13 @@ TEST( PrefixArrayTest, Range )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< int > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< int > prefix_copy ( prefix_fill );
-        npl::prefix_array< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< int > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< int > prefix_copy ( prefix_fill );
+        npl::prefix_vector< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< int > prefix_cpass;
+        npl::prefix_vector< int > prefix_cpass;
         prefix_cpass = prefix_fill;
 
         for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
@@ -266,7 +266,7 @@ TEST( PrefixArrayTest, Range )
 
 TEST( PrefixArrayTest, Accessors )
 {
-        npl::prefix_array< int > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
         EXPECT_EQ( *prefix.begin()  ,               1 );
         EXPECT_EQ( *prefix.cbegin() ,               1 );
@@ -291,14 +291,14 @@ TEST( PrefixArrayTest, PushBack )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix_def;
-        npl::prefix_array< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< int > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< int > prefix_copy ( prefix_fill );
-        npl::prefix_array< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix_def;
+        npl::prefix_vector< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< int > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< int > prefix_copy ( prefix_fill );
+        npl::prefix_vector< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< int > prefix_cp_assign;
+        npl::prefix_vector< int > prefix_cp_assign;
         prefix_cp_assign = prefix_fill;
 
         for( std::size_t i = 0; i < 1024; ++i )
@@ -323,14 +323,14 @@ TEST( PrefixArrayTest, EmplaceBackBasic )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< int > prefix_def;
-        npl::prefix_array< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< int > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< int > prefix_copy ( prefix_fill );
-        npl::prefix_array< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< int > prefix_def;
+        npl::prefix_vector< int > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< int > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< int > prefix_copy ( prefix_fill );
+        npl::prefix_vector< int > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< int > prefix_cp_assign;
+        npl::prefix_vector< int > prefix_cp_assign;
         prefix_cp_assign = prefix_fill;
 
         for( std::size_t i = 0; i < 1024; ++i )
@@ -355,14 +355,14 @@ TEST( PrefixArrayTest, EmplaceBack )
 {
         std::vector< nplib_test::some_addable_data > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< nplib_test::some_addable_data > prefix_def;
-        npl::prefix_array< nplib_test::some_addable_data > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< nplib_test::some_addable_data > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
-        npl::prefix_array< nplib_test::some_addable_data > prefix_fiter( vec.begin(), vec.end() );
-        npl::prefix_array< nplib_test::some_addable_data > prefix_copy ( prefix_fill );
-        npl::prefix_array< nplib_test::some_addable_data > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_def;
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_piter( prefix_fill.begin(), prefix_fill.end() );
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_fiter( vec.begin(), vec.end() );
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_copy ( prefix_fill );
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
-        npl::prefix_array< nplib_test::some_addable_data > prefix_cp_assign;
+        npl::prefix_vector< nplib_test::some_addable_data > prefix_cp_assign;
         prefix_cp_assign = prefix_fill;
 
         for( std::size_t i = 0; i < 1024; ++i )
@@ -385,11 +385,11 @@ TEST( PrefixArrayTest, EmplaceBack )
 
 TEST( PrefixArrayTest, Swap )
 {
-        npl::prefix_array< int > prefix1( CUSTOM_CAPACITY, CUSTOM_VALUE     );
-        npl::prefix_array< int > prefix2( CUSTOM_CAPACITY, CUSTOM_VALUE + 1 );
+        npl::prefix_vector< int > prefix1( CUSTOM_CAPACITY, CUSTOM_VALUE     );
+        npl::prefix_vector< int > prefix2( CUSTOM_CAPACITY, CUSTOM_VALUE + 1 );
 
-        npl::prefix_array< int > copy1( prefix1 );
-        npl::prefix_array< int > copy2( prefix2 );
+        npl::prefix_vector< int > copy1( prefix1 );
+        npl::prefix_vector< int > copy2( prefix2 );
 
         prefix1.swap( prefix2 );
 
@@ -399,8 +399,8 @@ TEST( PrefixArrayTest, Swap )
 
 TEST( PrefixArrayTest, Clear )
 {
-        npl::prefix_array< int > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int > empty;
+        npl::prefix_vector< int > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > empty;
 
         prefix.clear();
 
@@ -409,9 +409,9 @@ TEST( PrefixArrayTest, Clear )
 
 TEST( PrefixArrayTest, TwoDimensional )
 {
-        npl::prefix_array< int > prefix1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array< npl::prefix_array< int > > prefix2d( CUSTOM_CAPACITY, prefix1d );
+        npl::prefix_vector< npl::prefix_vector< int > > prefix2d( CUSTOM_CAPACITY, prefix1d );
 
         EXPECT_EQ( prefix2d._invariants(),            true );
         EXPECT_EQ( prefix2d.size()       , CUSTOM_CAPACITY );
@@ -429,10 +429,10 @@ TEST( PrefixArrayTest, TwoDimensional )
 
 TEST( PrefixArrayTest, ThreeDimensional )
 {
-        npl::prefix_array< int > prefix1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_vector< int > prefix1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
-        npl::prefix_array prefix2d( CUSTOM_CAPACITY, prefix1d );
-        npl::prefix_array prefix3d( CUSTOM_CAPACITY, prefix2d );
+        npl::prefix_vector prefix2d( CUSTOM_CAPACITY, prefix1d );
+        npl::prefix_vector prefix3d( CUSTOM_CAPACITY, prefix2d );
 
         EXPECT_EQ( prefix3d._invariants(),            true );
         EXPECT_EQ( prefix3d.size()       , CUSTOM_CAPACITY );

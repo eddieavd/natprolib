@@ -20,9 +20,11 @@
 #include <util/mem.hpp>
 #include <util/split_buffer.hpp>
 
+#include <container/array>
 #include <container/vector>
+#include <container/static_vector>
 
-#include <range_queries/prefix_array>
+#include <range_queries/prefix_vector>
 #include <range_queries/fenwick_tree>
 #include <range_queries/segment_tree>
 
