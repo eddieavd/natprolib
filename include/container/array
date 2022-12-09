@@ -25,8 +25,7 @@ struct array
         class _array_iterator
                 : public iterator< C, T_ >
         {
-                friend class  _array_iterator< !C, T_   >;
-                friend struct  array         <  T, Size >;
+                friend class _array_iterator< !C, T_   >;
         public:
                 using _base = iterator< C, T_ >;
 

@@ -48,8 +48,7 @@ protected:
         class _fenwick_tree_iterator
                 : public iterator< C, T_ >
         {
-                friend class _fenwick_tree_iterator< !C, T_            >;
-                friend class _fenwick_tree_base    <     T_, Allocator >;
+                friend class _fenwick_tree_iterator< !C, T_ >;
         public:
                 using                 _base = iterator< C, T_ >                       ;
                 using         _alloc_traits = std::allocator_traits< Allocator >      ;

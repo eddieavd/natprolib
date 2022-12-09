@@ -50,7 +50,6 @@ protected:
                 : public iterator< C, T_ >
         {
                 friend class _segment_tree_iterator< !C, T_, Allocator_ >;
-                friend class _segment_tree_base    <     T , Allocator  >;
         public:
                 using                 _base = iterator< C, T_ >;
                 using         _alloc_traits = std::allocator_traits< Allocator_ >;

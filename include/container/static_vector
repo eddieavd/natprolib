@@ -61,7 +61,6 @@ protected:
                 using storage_raw_type   = typename storage::value_type::raw ;
                 using storage_value_type = typename storage::value_type      ;
 
-                friend class  static_vector         < storage_raw_type, N    > ;
                 friend class _static_vector_iterator< !C, storage_value_type > ;
         public:
                 using                 _base = iterator< C, T_ >          ;
