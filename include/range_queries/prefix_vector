@@ -2,7 +2,7 @@
 //
 //
 //      natprolib
-//      prefix_array
+//      prefix_vector
 //
 
 #pragma once
@@ -25,10 +25,10 @@ namespace npl
 
 
 template< typename T, typename Allocator >
-class _prefix_array_base;
+class _prefix_vector_base;
 
 template< typename T, typename Allocator >
-class prefix_array;
+class prefix_vector;
 
 
 struct prefix_array_iterator_tag : public random_access_iterator_tag {};
@@ -41,7 +41,7 @@ inline constexpr bool is_prefix_array_iterator_v = is_prefix_array_iterator< T >
 
 
 template< typename T, typename Allocator >
-class _prefix_array_base
+class _prefix_vector_base
         : protected _vector_base< T, Allocator >
 {
 protected:
@@ -64,18 +64,18 @@ protected:
         using const_iterator = _prefix_array_iterator<  true > ;
         using allocator_type = typename _base::allocator_type  ;
 
-        _prefix_array_base (                                 ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
-        _prefix_array_base ( allocator_type const &  _alloc_ )          : _base(           _alloc_   ) {}
-        _prefix_array_base ( allocator_type       && _alloc_ ) noexcept : _base( NPL_MOVE( _alloc_ ) ) {}
+        _prefix_vector_base (                                 ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
+        _prefix_vector_base ( allocator_type const &  _alloc_ )          : _base(           _alloc_   ) {}
+        _prefix_vector_base ( allocator_type       && _alloc_ ) noexcept : _base( NPL_MOVE( _alloc_ ) ) {}
 };
 
 template< typename T, typename Allocator = std::allocator< T > >
-class prefix_array
-        : _prefix_array_base< T, Allocator >
+class prefix_vector
+        : _prefix_vector_base< T, Allocator >
 {
 private:
-        using                   _base = _prefix_array_base< T, Allocator > ;
-        using                   _self =  prefix_array                      ;
+        using                   _base = _prefix_vector_base< T, Allocator > ;
+        using                   _self =  prefix_vector                      ;
         using _default_allocator_type = std::allocator< T >                ;
 public:
         using      value_type = T                               ;
@@ -96,18 +96,18 @@ public:
         static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
                         "allocator_type::value_type != prefix_array::value_type" );
 
-        prefix_array () noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) {}
+        prefix_vector () noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) {}
 
-        explicit prefix_array ( allocator_type const & _alloc_ ) noexcept : _base( _alloc_ ) {}
+        explicit prefix_vector ( allocator_type const & _alloc_ ) noexcept : _base( _alloc_ ) {}
 
-        explicit prefix_array ( size_type const _count_                                 );
-        explicit prefix_array ( size_type const _count_, allocator_type const & _alloc_ );
+        explicit prefix_vector ( size_type const _count_                                 );
+        explicit prefix_vector ( size_type const _count_, allocator_type const & _alloc_ );
 
-        prefix_array ( size_type const _count_, value_type const & _val_                                 );
-        prefix_array ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ );
+        prefix_vector ( size_type const _count_, value_type const & _val_                                 );
+        prefix_vector ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ );
 
         template< typename PrefixIterator >
-        prefix_array ( PrefixIterator _first_,
+        prefix_vector ( PrefixIterator _first_,
                         typename std::enable_if_t<
                                                         is_prefix_array_iterator_v< PrefixIterator > &&
                                                         std::is_constructible_v
@@ -119,7 +119,7 @@ public:
                                                 > _last_ );
 
         template< typename PrefixIterator >
-        prefix_array ( PrefixIterator _first_, PrefixIterator _last_, allocator_type const & _alloc_,
+        prefix_vector ( PrefixIterator _first_, PrefixIterator _last_, allocator_type const & _alloc_,
                         typename std::enable_if_t<
                                                         is_prefix_array_iterator_v< PrefixIterator > &&
                                                         std::is_constructible_v
@@ -129,7 +129,7 @@ public:
                                                         > > * = 0 );
 
         template< typename InputIterator >
-        prefix_array ( InputIterator _first_,
+        prefix_vector ( InputIterator _first_,
                         typename std::enable_if_t<
                                                          is_cpp17_input_iterator_v  < InputIterator > &&
                                                         !is_cpp17_forward_iterator_v< InputIterator > &&
@@ -142,7 +142,7 @@ public:
                                                          InputIterator
                                                 > _last_ );
         template< typename InputIterator >
-        prefix_array ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
+        prefix_vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                         typename std::enable_if_t<
                                                          is_cpp17_input_iterator_v  < InputIterator > &&
                                                         !is_cpp17_forward_iterator_v< InputIterator > &&
@@ -154,7 +154,7 @@ public:
                                                          > > * = 0 );
 
         template< typename ForwardIterator >
-        prefix_array ( ForwardIterator _first_,
+        prefix_vector ( ForwardIterator _first_,
                         typename std::enable_if_t<
                                                          is_cpp17_forward_iterator_v< ForwardIterator > &&
                                                         !is_prefix_array_iterator_v < ForwardIterator > &&
@@ -167,7 +167,7 @@ public:
                                                 > _last_ );
 
         template< typename ForwardIterator >
-        prefix_array ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
+        prefix_vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                         typename std::enable_if_t<
                                                          is_cpp17_forward_iterator_v< ForwardIterator > &&
                                                         !is_prefix_array_iterator_v < ForwardIterator > &&
@@ -177,26 +177,26 @@ public:
                                                                 typename std::iterator_traits< ForwardIterator >::reference
                                                         > > * = 0 );
 
-        ~prefix_array ()
+        ~prefix_vector ()
         {
                 _annotate_delete();
         }
 
-        prefix_array ( prefix_array const & _other_                                              );
-        prefix_array ( prefix_array const & _other_, _identity< allocator_type > const & _alloc_ );
+        prefix_vector ( prefix_vector const & _other_                                              );
+        prefix_vector ( prefix_vector const & _other_, _identity< allocator_type > const & _alloc_ );
 
-        prefix_array & operator= ( prefix_array const & _other_ );
+        prefix_vector & operator= ( prefix_vector const & _other_ );
 
-        prefix_array ( prefix_array && _other_                                              ) noexcept;
-        prefix_array ( prefix_array && _other_, _identity< allocator_type > const & _alloc_ );
+        prefix_vector ( prefix_vector && _other_                                              ) noexcept;
+        prefix_vector ( prefix_vector && _other_, _identity< allocator_type > const & _alloc_ );
 
-        prefix_array & operator= ( prefix_array && _other_ )
+        prefix_vector & operator= ( prefix_vector && _other_ )
                 noexcept( ( noexcept_move_assign_container_v< allocator_type, _alloc_traits > ) );
 
-        prefix_array ( std::initializer_list< value_type > _list_                                 );
-        prefix_array ( std::initializer_list< value_type > _list_, allocator_type const & _alloc_ );
+        prefix_vector ( std::initializer_list< value_type > _list_                                 );
+        prefix_vector ( std::initializer_list< value_type > _list_, allocator_type const & _alloc_ );
 
-        prefix_array & operator= ( std::initializer_list< value_type > _list_ )
+        prefix_vector & operator= ( std::initializer_list< value_type > _list_ )
         { assign( _list_.begin(), _list_.end() ); return *this; }
 
         template< typename PrefixIterator >
@@ -297,12 +297,12 @@ public:
         NPL_ALWAYS_INLINE       reference operator[] ( size_type const _index_ )       noexcept;
         NPL_ALWAYS_INLINE const_reference operator[] ( size_type const _index_ ) const noexcept;
 
-        bool   operator== ( prefix_array< T, Allocator > const & _rhs_ ) const noexcept;
-        bool   operator!= ( prefix_array< T, Allocator > const & _rhs_ ) const noexcept;
-        auto   operator+  ( prefix_array< T, Allocator > const & _rhs_ ) const         ;
-        auto & operator+= ( prefix_array< T, Allocator > const & _rhs_ )       noexcept;
-        auto   operator-  ( prefix_array< T, Allocator > const & _rhs_ ) const         ;
-        auto & operator-= ( prefix_array< T, Allocator > const & _rhs_ )       noexcept;
+        bool   operator== ( prefix_vector< T, Allocator > const & _rhs_ ) const noexcept;
+        bool   operator!= ( prefix_vector< T, Allocator > const & _rhs_ ) const noexcept;
+        auto   operator+  ( prefix_vector< T, Allocator > const & _rhs_ ) const         ;
+        auto & operator+= ( prefix_vector< T, Allocator > const & _rhs_ )       noexcept;
+        auto   operator-  ( prefix_vector< T, Allocator > const & _rhs_ ) const         ;
+        auto & operator-= ( prefix_vector< T, Allocator > const & _rhs_ )       noexcept;
 
         // replace the following with some type of range class with both begin and end
 
@@ -572,7 +572,7 @@ public:
         void resize ( size_type const _count_, const_reference _val_ );
 #endif
 
-        void swap ( prefix_array & ) noexcept;
+        void swap ( prefix_vector & ) noexcept;
 
         void clear () noexcept
         {
@@ -632,8 +632,8 @@ private:
 
         void _move_range ( pointer _from_s_, pointer _from_e_, pointer _to_ );
 
-        void _move_assign ( prefix_array & _other_, std::true_type  ) noexcept( std::is_nothrow_move_assignable_v< allocator_type > );
-        void _move_assign ( prefix_array & _other_, std::false_type ) noexcept( _alloc_traits::is_always_equal::value );
+        void _move_assign ( prefix_vector & _other_, std::true_type  ) noexcept( std::is_nothrow_move_assignable_v< allocator_type > );
+        void _move_assign ( prefix_vector & _other_, std::false_type ) noexcept( _alloc_traits::is_always_equal::value );
 
         void _destruct_at_end ( pointer _new_last_ ) noexcept
         {
@@ -689,7 +689,7 @@ private:
 
         struct _construct_transaction
         {
-                explicit _construct_transaction ( prefix_array & _prefix_, size_type const _count_ )
+                explicit _construct_transaction ( prefix_vector & _prefix_, size_type const _count_ )
                         : prefix_  ( _prefix_ ),
                           position_( _prefix_.end_ ),
                           new_end_ ( _prefix_.end_ + _count_ )
@@ -710,7 +710,7 @@ private:
 #endif
                 }
 
-                prefix_array &      prefix_  ;
+                prefix_vector &      prefix_  ;
                 pointer             position_;
                 const_pointer const new_end_ ;
 
@@ -734,36 +734,36 @@ template< typename InputIterator,
           typename Alloc = std::allocator< _iter_value_type< InputIterator > >,
           typename       = std::enable_if< _is_allocator< Alloc >::value >
           >
-prefix_array ( InputIterator, InputIterator )
-        -> prefix_array< _iter_value_type< InputIterator >, Alloc >;
+prefix_vector ( InputIterator, InputIterator )
+        -> prefix_vector< _iter_value_type< InputIterator >, Alloc >;
 
 template< typename InputIterator,
           typename Alloc,
           typename = std::enable_if< _is_allocator< Alloc >::value >
           >
-prefix_array ( InputIterator, InputIterator, Alloc )
-        -> prefix_array< _iter_value_type< InputIterator >, Alloc >;
+prefix_vector ( InputIterator, InputIterator, Alloc )
+        -> prefix_vector< _iter_value_type< InputIterator >, Alloc >;
 
 template< typename T,
           typename Alloc  = std::allocator< T >,
           typename        = std::enable_if< _is_allocator< Alloc >::value >,
           typename Traits = std::allocator_traits< Alloc >
           >
-prefix_array ( typename Traits::size_type const, T )
-        -> prefix_array< T, Alloc >;
+prefix_vector ( typename Traits::size_type const, T )
+        -> prefix_vector< T, Alloc >;
 
 template< typename T,
           typename Alloc,
           typename        = std::enable_if< _is_allocator< Alloc >::value >,
           typename Traits = std::allocator_traits< Alloc >
           >
-prefix_array ( typename Traits::size_type const, T, Alloc )
-        -> prefix_array< T, Alloc >;
+prefix_vector ( typename Traits::size_type const, T, Alloc )
+        -> prefix_vector< T, Alloc >;
 
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_ )
+prefix_vector< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_ )
 {
         _annotate_delete();
 
@@ -779,8 +779,8 @@ prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_ty
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::pointer
-prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_, pointer _ptr_ )
+typename prefix_vector< T, Allocator >::pointer
+prefix_vector< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, allocator_type & > & _buffer_, pointer _ptr_ )
 {
         _annotate_delete();
 
@@ -802,7 +802,7 @@ prefix_array< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_ty
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_vallocate ( size_type const _count_ )
+prefix_vector< T, Allocator >::_vallocate ( size_type const _count_ )
 {
         NPL_ASSERT( _count_ <= max_size(), "prefix_array::_vallocate: size > max_size" );
 
@@ -814,7 +814,7 @@ prefix_array< T, Allocator >::_vallocate ( size_type const _count_ )
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_vdeallocate () noexcept
+prefix_vector< T, Allocator >::_vdeallocate () noexcept
 {
         if( this->begin_ != nullptr )
         {
@@ -825,16 +825,16 @@ prefix_array< T, Allocator >::_vdeallocate () noexcept
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::size_type
-prefix_array< T, Allocator >::max_size () const noexcept
+typename prefix_vector< T, Allocator >::size_type
+prefix_vector< T, Allocator >::max_size () const noexcept
 {
         return std::min< size_type >( _alloc_traits::max_size( this->_alloc() ), std::numeric_limits< difference_type >::max() );
 }
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::size_type
-prefix_array< T, Allocator >::_recommend ( size_type const _new_size_ ) const noexcept
+typename prefix_vector< T, Allocator >::size_type
+prefix_vector< T, Allocator >::_recommend ( size_type const _new_size_ ) const noexcept
 {
         size_type const ms = max_size();
 
@@ -852,7 +852,7 @@ prefix_array< T, Allocator >::_recommend ( size_type const _new_size_ ) const no
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_construct_at_end ( size_type const _count_ )
+prefix_vector< T, Allocator >::_construct_at_end ( size_type const _count_ )
 {
         _construct_transaction tx( *this, _count_ );
 
@@ -866,7 +866,7 @@ prefix_array< T, Allocator >::_construct_at_end ( size_type const _count_ )
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_construct_at_end ( size_type const _count_, const_reference _val_ )
+prefix_vector< T, Allocator >::_construct_at_end ( size_type const _count_, const_reference _val_ )
 {
         _construct_transaction tx( *this, _count_ );
 
@@ -885,7 +885,7 @@ typename std::enable_if_t
         is_prefix_array_iterator_v< PrefixIterator >,
         void
 >
-prefix_array< T, Allocator >::_construct_at_end ( PrefixIterator _first_, PrefixIterator _last_, size_type const _count_ )
+prefix_vector< T, Allocator >::_construct_at_end ( PrefixIterator _first_, PrefixIterator _last_, size_type const _count_ )
 {
         _construct_transaction tx( *this, _count_ );
 
@@ -900,7 +900,7 @@ typename std::enable_if_t
         !is_prefix_array_iterator_v < ForwardIterator >,
          void
 >
-prefix_array< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
+prefix_vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
 {
         _construct_transaction tx( *this, _count_ );
 
@@ -921,7 +921,7 @@ prefix_array< T, Allocator >::_construct_at_end ( ForwardIterator _first_, Forwa
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_append ( size_type const _count_ )
+prefix_vector< T, Allocator >::_append ( size_type const _count_ )
 {
         if( static_cast< size_type >( this->end_cap_ - this->end_ ) >= _count_ )
         {
@@ -938,7 +938,7 @@ prefix_array< T, Allocator >::_append ( size_type const _count_ )
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_append ( size_type const _count_, const_reference _val_ )
+prefix_vector< T, Allocator >::_append ( size_type const _count_, const_reference _val_ )
 {
         if( static_cast< size_type >( this->end_cap_ - this->end_ ) >= _count_ )
         {
@@ -955,7 +955,7 @@ prefix_array< T, Allocator >::_append ( size_type const _count_, const_reference
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_update_back () noexcept
+prefix_vector< T, Allocator >::_update_back () noexcept
 {
         if( size() < 2 )
         {
@@ -967,7 +967,7 @@ prefix_array< T, Allocator >::_update_back () noexcept
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_update_element ( size_type const _position_ ) noexcept
+prefix_vector< T, Allocator >::_update_element ( size_type const _position_ ) noexcept
 {
         if( size() < 2 || _position_ == 0 )
         {
@@ -978,7 +978,7 @@ prefix_array< T, Allocator >::_update_element ( size_type const _position_ ) noe
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( size_type const _count_ )
+prefix_vector< T, Allocator >::prefix_vector ( size_type const _count_ )
 {
         if( _count_ > 0 )
         {
@@ -987,7 +987,7 @@ prefix_array< T, Allocator >::prefix_array ( size_type const _count_ )
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( size_type const _count_, allocator_type const & _alloc_ )
+prefix_vector< T, Allocator >::prefix_vector ( size_type const _count_, allocator_type const & _alloc_ )
         : _base( _alloc_ )
 {
         if( _count_ > 0 )
@@ -997,7 +997,7 @@ prefix_array< T, Allocator >::prefix_array ( size_type const _count_, allocator_
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( size_type const _count_, value_type const & _val_ )
+prefix_vector< T, Allocator >::prefix_vector ( size_type const _count_, value_type const & _val_ )
 {
         if( _count_ > 0 )
         {
@@ -1012,7 +1012,7 @@ prefix_array< T, Allocator >::prefix_array ( size_type const _count_, value_type
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ )
+prefix_vector< T, Allocator >::prefix_vector ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ )
         : _base( _alloc_ )
 {
         if( _count_ > 0 )
@@ -1029,7 +1029,7 @@ prefix_array< T, Allocator >::prefix_array ( size_type const _count_, value_type
 
 template< typename T, typename Allocator >
 template< typename PrefixIterator >
-prefix_array< T, Allocator >::prefix_array ( PrefixIterator _first_,
+prefix_vector< T, Allocator >::prefix_vector ( PrefixIterator _first_,
                 typename std::enable_if_t
                 <
                         is_prefix_array_iterator_v< PrefixIterator > &&
@@ -1051,7 +1051,7 @@ prefix_array< T, Allocator >::prefix_array ( PrefixIterator _first_,
 
 template< typename T, typename Allocator >
 template< typename PrefixIterator >
-prefix_array< T, Allocator >::prefix_array ( PrefixIterator _first_, PrefixIterator _last_, allocator_type const & _alloc_,
+prefix_vector< T, Allocator >::prefix_vector ( PrefixIterator _first_, PrefixIterator _last_, allocator_type const & _alloc_,
                 std::enable_if_t
                 <
                         is_prefix_array_iterator_v< PrefixIterator > &&
@@ -1074,7 +1074,7 @@ prefix_array< T, Allocator >::prefix_array ( PrefixIterator _first_, PrefixItera
 
 template< typename T, typename Allocator >
 template< typename InputIterator >
-prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
+prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_,
                 typename std::enable_if_t
                 <
                          is_cpp17_input_iterator_v  < InputIterator > &&
@@ -1095,7 +1095,7 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_,
 
 template< typename T, typename Allocator >
 template< typename InputIterator >
-prefix_array< T, Allocator >::prefix_array ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
+prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                 typename std::enable_if_t
                 <
                          is_cpp17_input_iterator_v  < InputIterator > &&
@@ -1117,7 +1117,7 @@ prefix_array< T, Allocator >::prefix_array ( InputIterator _first_, InputIterato
 
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
-prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_,
+prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_,
                 typename std::enable_if_t
                 <
                          is_cpp17_forward_iterator_v< ForwardIterator > &&
@@ -1145,7 +1145,7 @@ prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_,
 
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
-prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
+prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                 std::enable_if_t
                 <
                         is_cpp17_forward_iterator_v< ForwardIterator > &&
@@ -1173,7 +1173,7 @@ prefix_array< T, Allocator >::prefix_array ( ForwardIterator _first_, ForwardIte
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( prefix_array const & _other_ )
+prefix_vector< T, Allocator >::prefix_vector ( prefix_vector const & _other_ )
         : _base( _alloc_traits::select_on_container_copy_construction( _other_._alloc() ) )
 {
         size_type count = _other_.size();
@@ -1186,7 +1186,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array const & _other_ )
 }
 
 template< typename T, typename Allocator >
-prefix_array< T, Allocator >::prefix_array ( prefix_array const & _other_, _identity< allocator_type > const & _alloc_ )
+prefix_vector< T, Allocator >::prefix_vector ( prefix_vector const & _other_, _identity< allocator_type > const & _alloc_ )
         : _base( _alloc_ )
 {
         size_type count = _other_.size();
@@ -1200,7 +1200,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array const & _other_, _iden
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator >::prefix_array ( prefix_array && _other_ ) noexcept
+prefix_vector< T, Allocator >::prefix_vector ( prefix_vector && _other_ ) noexcept
         : _base( NPL_MOVE( _other_._alloc() ) )
 {
         this->begin_   = _other_.begin_  ;
@@ -1212,7 +1212,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array && _other_ ) noexcept
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator >::prefix_array ( prefix_array && _other_, _identity< allocator_type > const & _alloc_ )
+prefix_vector< T, Allocator >::prefix_vector ( prefix_vector && _other_, _identity< allocator_type > const & _alloc_ )
         : _base( _alloc_ )
 {
         if( _alloc_ == _other_._alloc() )
@@ -1232,7 +1232,7 @@ prefix_array< T, Allocator >::prefix_array ( prefix_array && _other_, _identity<
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator >::prefix_array ( std::initializer_list< value_type > _list_ )
+prefix_vector< T, Allocator >::prefix_vector ( std::initializer_list< value_type > _list_ )
 {
         if( _list_.size() > 0 )
         {
@@ -1248,7 +1248,7 @@ prefix_array< T, Allocator >::prefix_array ( std::initializer_list< value_type >
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator >::prefix_array ( std::initializer_list< value_type > _list_, allocator_type const & _alloc_ )
+prefix_vector< T, Allocator >::prefix_vector ( std::initializer_list< value_type > _list_, allocator_type const & _alloc_ )
         : _base( _alloc_ )
 {
         if( _list_.size() > 0 )
@@ -1267,8 +1267,8 @@ prefix_array< T, Allocator >::prefix_array ( std::initializer_list< value_type >
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator > &
-prefix_array< T, Allocator >::operator= ( prefix_array && _other_ )
+prefix_vector< T, Allocator > &
+prefix_vector< T, Allocator >::operator= ( prefix_vector && _other_ )
         noexcept( ( noexcept_move_assign_container_v< Allocator, _alloc_traits > ) )
 {
         _move_assign( _other_, std::integral_constant< bool,
@@ -1278,7 +1278,7 @@ prefix_array< T, Allocator >::operator= ( prefix_array && _other_ )
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_move_assign ( prefix_array & _other_, std::false_type )
+prefix_vector< T, Allocator >::_move_assign ( prefix_vector & _other_, std::false_type )
         noexcept( _alloc_traits::is_always_equal::value )
 {
         if( _base::_alloc() != _other_._alloc() )
@@ -1294,7 +1294,7 @@ prefix_array< T, Allocator >::_move_assign ( prefix_array & _other_, std::false_
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::_move_assign ( prefix_array & _other_, std::true_type )
+prefix_vector< T, Allocator >::_move_assign ( prefix_vector & _other_, std::true_type )
         noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
 {
         _vdeallocate();
@@ -1309,8 +1309,8 @@ prefix_array< T, Allocator >::_move_assign ( prefix_array & _other_, std::true_t
 
 template< typename T, typename Allocator >
 inline
-prefix_array< T, Allocator > &
-prefix_array< T, Allocator >::operator= ( prefix_array const & _other_ )
+prefix_vector< T, Allocator > &
+prefix_vector< T, Allocator >::operator= ( prefix_vector const & _other_ )
 {
         if( this != &_other_ )
         {
@@ -1332,7 +1332,7 @@ typename std::enable_if_t
         >,
         void
 >
-prefix_array< T, Allocator >::assign ( PrefixIterator _first_, PrefixIterator _last_ )
+prefix_vector< T, Allocator >::assign ( PrefixIterator _first_, PrefixIterator _last_ )
 {
         size_type new_size = static_cast< size_type >( std::distance( _first_, _last_ ) );
 
@@ -1381,7 +1381,7 @@ typename std::enable_if_t
          >,
          void
 >
-prefix_array< T, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
+prefix_vector< T, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
 {
         clear();
         for( ; _first_ != _last_; ++_first_ )
@@ -1441,48 +1441,48 @@ void prefix_array< T, Allocator >::assign ( size_type const _count_, const_refer
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::iterator
-prefix_array< T, Allocator >::_make_iter ( pointer _ptr_ ) noexcept
+typename prefix_vector< T, Allocator >::iterator
+prefix_vector< T, Allocator >::_make_iter ( pointer _ptr_ ) noexcept
 {
         return iterator( _ptr_ );
 }
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::const_iterator
-prefix_array< T, Allocator >::_make_iter ( pointer const _ptr_ ) const noexcept
+typename prefix_vector< T, Allocator >::const_iterator
+prefix_vector< T, Allocator >::_make_iter ( pointer const _ptr_ ) const noexcept
 {
         return const_iterator( _ptr_ );
 }
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::iterator
-prefix_array< T, Allocator >::begin () noexcept
+typename prefix_vector< T, Allocator >::iterator
+prefix_vector< T, Allocator >::begin () noexcept
 {
         return _make_iter( this->begin_ );
 }
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::const_iterator
-prefix_array< T, Allocator >::begin () const noexcept
+typename prefix_vector< T, Allocator >::const_iterator
+prefix_vector< T, Allocator >::begin () const noexcept
 {
         return _make_iter( this->begin_ );
 }
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::iterator
-prefix_array< T, Allocator >::end () noexcept
+typename prefix_vector< T, Allocator >::iterator
+prefix_vector< T, Allocator >::end () noexcept
 {
         return _make_iter( this->end_ );
 }
 
 template< typename T, typename Allocator >
 inline
-typename prefix_array< T, Allocator >::const_iterator
-prefix_array< T, Allocator >::end () const noexcept
+typename prefix_vector< T, Allocator >::const_iterator
+prefix_vector< T, Allocator >::end () const noexcept
 {
         return _make_iter( this->end_ );
 }
@@ -1490,8 +1490,8 @@ prefix_array< T, Allocator >::end () const noexcept
 template< typename T, typename Allocator >
 inline
 NPL_ALWAYS_INLINE
-typename prefix_array< T, Allocator >::reference
-prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) noexcept
+typename prefix_vector< T, Allocator >::reference
+prefix_vector< T, Allocator >::operator[] ( size_type const _index_ ) noexcept
 {
         NPL_ASSERT( _index_ < size(), "prefix_array::operator[]: index out of bounds" );
 
@@ -1501,8 +1501,8 @@ prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) noexcept
 template< typename T, typename Allocator >
 inline
 NPL_ALWAYS_INLINE
-typename prefix_array< T, Allocator >::const_reference
-prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) const noexcept
+typename prefix_vector< T, Allocator >::const_reference
+prefix_vector< T, Allocator >::operator[] ( size_type const _index_ ) const noexcept
 {
         NPL_ASSERT( _index_ < size(), "prefix_array::operator[]: index out of bounds" );
 
@@ -1512,7 +1512,7 @@ prefix_array< T, Allocator >::operator[] ( size_type const _index_ ) const noexc
 template< typename T, typename Allocator >
 inline
 auto &
-prefix_array< T, Allocator >::operator+= ( prefix_array< T, Allocator > const & _other_ ) noexcept
+prefix_vector< T, Allocator >::operator+= ( prefix_vector< T, Allocator > const & _other_ ) noexcept
 {
         size_type common = std::min< size_type >( size(), _other_.size() );
 
@@ -1546,9 +1546,9 @@ prefix_array< T, Allocator >::operator+= ( prefix_array< T, Allocator > const & 
 template< typename T, typename Allocator >
 inline
 auto
-prefix_array< T, Allocator >::operator+ ( prefix_array< T, Allocator > const & _other_ ) const
+prefix_vector< T, Allocator >::operator+ ( prefix_vector< T, Allocator > const & _other_ ) const
 {
-        prefix_array< T, Allocator > res( *this );
+        prefix_vector< T, Allocator > res( *this );
 
         res += _other_;
 
@@ -1558,7 +1558,7 @@ prefix_array< T, Allocator >::operator+ ( prefix_array< T, Allocator > const & _
 template< typename T, typename Allocator >
 inline
 auto &
-prefix_array< T, Allocator >::operator-= ( prefix_array< T, Allocator > const & _other_ ) noexcept
+prefix_vector< T, Allocator >::operator-= ( prefix_vector< T, Allocator > const & _other_ ) noexcept
 {
         size_type common = std::min< size_type >( size(), _other_.size() );
 
@@ -1592,9 +1592,9 @@ prefix_array< T, Allocator >::operator-= ( prefix_array< T, Allocator > const & 
 template< typename T, typename Allocator >
 inline
 auto
-prefix_array< T, Allocator >::operator- ( prefix_array< T, Allocator > const & _other_ ) const
+prefix_vector< T, Allocator >::operator- ( prefix_vector< T, Allocator > const & _other_ ) const
 {
-        prefix_array< T, Allocator > res( *this );
+        prefix_vector< T, Allocator > res( *this );
 
         res -= _other_;
 
@@ -1603,7 +1603,7 @@ prefix_array< T, Allocator >::operator- ( prefix_array< T, Allocator > const & _
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::operator== ( prefix_array< T, Allocator > const & _other_ ) const noexcept
+prefix_vector< T, Allocator >::operator== ( prefix_vector< T, Allocator > const & _other_ ) const noexcept
 {
         if( size() != _other_.size() )
         {
@@ -1622,7 +1622,7 @@ prefix_array< T, Allocator >::operator== ( prefix_array< T, Allocator > const & 
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::operator!= ( prefix_array< T, Allocator > const & _other_ ) const noexcept
+prefix_vector< T, Allocator >::operator!= ( prefix_vector< T, Allocator > const & _other_ ) const noexcept
 {
         return !operator==( _other_ );
 }
@@ -1639,7 +1639,7 @@ typename std::enable_if_t
         >,
         bool
 >
-prefix_array< T, Allocator >::operator== ( PrefixIterator _first_ ) const noexcept
+prefix_vector< T, Allocator >::operator== ( PrefixIterator _first_ ) const noexcept
 {
         for( auto begin = this->begin(); begin != this->end(); ++begin, ++_first_ )
         {
@@ -1665,7 +1665,7 @@ typename std::enable_if_t
          >,
          bool
 >
-prefix_array< T, Allocator >::operator== ( InputIterator _first_ ) const noexcept
+prefix_vector< T, Allocator >::operator== ( InputIterator _first_ ) const noexcept
 {
         for( size_type i = 0; i < size(); ++i, ++_first_ )
         {
@@ -1690,7 +1690,7 @@ typename std::enable_if_t
          >,
          bool
 >
-prefix_array< T, Allocator >::operator== ( ForwardIterator _first_ ) const noexcept
+prefix_vector< T, Allocator >::operator== ( ForwardIterator _first_ ) const noexcept
 {
         for( size_type i = 0; i < this->size(); ++i, ++_first_ )
         {
@@ -1703,8 +1703,8 @@ prefix_array< T, Allocator >::operator== ( ForwardIterator _first_ ) const noexc
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::reference
-prefix_array< T, Allocator >::at ( size_type const _index_ ) noexcept
+typename prefix_vector< T, Allocator >::reference
+prefix_vector< T, Allocator >::at ( size_type const _index_ ) noexcept
 {
         NPL_ASSERT( _index_ < size(), "prefix_array::at: index out of bounds" );
 
@@ -1712,8 +1712,8 @@ prefix_array< T, Allocator >::at ( size_type const _index_ ) noexcept
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::const_reference
-prefix_array< T, Allocator >::at ( size_type const _index_ ) const noexcept
+typename prefix_vector< T, Allocator >::const_reference
+prefix_vector< T, Allocator >::at ( size_type const _index_ ) const noexcept
 {
         NPL_ASSERT( _index_ < size(), "prefix_array::at: index out of bounds" );
 
@@ -1721,15 +1721,15 @@ prefix_array< T, Allocator >::at ( size_type const _index_ ) const noexcept
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::value_type
-prefix_array< T, Allocator >::element_at ( size_type const _index_ ) const noexcept
+typename prefix_vector< T, Allocator >::value_type
+prefix_vector< T, Allocator >::element_at ( size_type const _index_ ) const noexcept
 {
         return range( _index_, _index_ );
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::value_type
-prefix_array< T, Allocator >::range () const noexcept
+typename prefix_vector< T, Allocator >::value_type
+prefix_vector< T, Allocator >::range () const noexcept
 {
         NPL_ASSERT( !empty(), "prefix_array::range: called on empty prefix array" );
 
@@ -1737,8 +1737,8 @@ prefix_array< T, Allocator >::range () const noexcept
 }
 
 template< typename T, typename Allocator >
-typename prefix_array< T, Allocator >::value_type
-prefix_array< T, Allocator >::range ( size_type const _x_, size_type const _y_ ) const noexcept
+typename prefix_vector< T, Allocator >::value_type
+prefix_vector< T, Allocator >::range ( size_type const _x_, size_type const _y_ ) const noexcept
 {
         NPL_ASSERT( !empty()                 , "prefix_array::range: called on empty prefix_array" );
         NPL_ASSERT( _x_ <= _y_ && _y_ < size(), "prefix_array::range: index out of bounds"          );
@@ -1750,7 +1750,7 @@ prefix_array< T, Allocator >::range ( size_type const _x_, size_type const _y_ )
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::reserve ( size_type const _size_ )
+prefix_vector< T, Allocator >::reserve ( size_type const _size_ )
 {
         if( _size_ > capacity() )
         {
@@ -1762,7 +1762,7 @@ prefix_array< T, Allocator >::reserve ( size_type const _size_ )
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::shrink_to_fit () noexcept
+prefix_vector< T, Allocator >::shrink_to_fit () noexcept
 {
         if( capacity() > size() )
         {
@@ -1775,7 +1775,7 @@ prefix_array< T, Allocator >::shrink_to_fit () noexcept
 template< typename T, typename Allocator >
 template< typename U >
 void
-prefix_array< T, Allocator >::_push_back_slow_path ( U && _val_ )
+prefix_vector< T, Allocator >::_push_back_slow_path ( U && _val_ )
 {
         allocator_type & alloc = this->_alloc();
 
@@ -1790,7 +1790,7 @@ prefix_array< T, Allocator >::_push_back_slow_path ( U && _val_ )
 template< typename T, typename Allocator >
 inline
 void
-prefix_array< T, Allocator >::push_back ( const_reference _val_ )
+prefix_vector< T, Allocator >::push_back ( const_reference _val_ )
 {
         if( this->end_ != this->end_cap_ )
         {
@@ -1806,7 +1806,7 @@ prefix_array< T, Allocator >::push_back ( const_reference _val_ )
 template< typename T, typename Allocator >
 inline
 void
-prefix_array< T, Allocator >::push_back ( value_type && _val_ )
+prefix_vector< T, Allocator >::push_back ( value_type && _val_ )
 {
         if( this->end_ != this->end_cap_ )
         {
@@ -1822,7 +1822,7 @@ prefix_array< T, Allocator >::push_back ( value_type && _val_ )
 template< typename T, typename Allocator >
 template< typename... Args >
 void
-prefix_array< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
+prefix_vector< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 {
         allocator_type & alloc = this->_alloc();
 
@@ -1837,8 +1837,8 @@ prefix_array< T, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
 template< typename T, typename Allocator >
 template< typename... Args >
 inline
-typename prefix_array< T, Allocator >::reference
-prefix_array< T, Allocator >::emplace_back ( Args&&... _args_ )
+typename prefix_vector< T, Allocator >::reference
+prefix_vector< T, Allocator >::emplace_back ( Args&&... _args_ )
 {
         if( this->end_ != this->end_cap_ )
         {
@@ -1856,7 +1856,7 @@ prefix_array< T, Allocator >::emplace_back ( Args&&... _args_ )
 template< typename T, typename Allocator >
 inline
 void
-prefix_array< T, Allocator >::pop_back ()
+prefix_vector< T, Allocator >::pop_back ()
 {
         NPL_ASSERT( !empty(), "prefix_array::pop_back: called on empty prefix array" );
 
@@ -1899,7 +1899,7 @@ prefix_array< T, Allocator >::resize ( size_type const _size_, const_reference _
 
 template< typename T, typename Allocator >
 void
-prefix_array< T, Allocator >::swap ( prefix_array & _other_ ) noexcept
+prefix_vector< T, Allocator >::swap ( prefix_vector & _other_ ) noexcept
 {
         NPL_ASSERT( _alloc_traits::propagate_on_container_swap::value || this->_alloc() == _other_._alloc(),
                         "prefix_array::swap: if lhs.alloc != rhs.alloc, alloc_type needs to propagate on swap" );
@@ -1915,18 +1915,18 @@ prefix_array< T, Allocator >::swap ( prefix_array & _other_ ) noexcept
 template< typename T, typename Allocator >
 inline
 void
-prefix_array< T, Allocator >::_invalidate_all_iterators ()
+prefix_vector< T, Allocator >::_invalidate_all_iterators ()
 {}
 
 template< typename T, typename Allocator >
 inline
 void
-prefix_array< T, Allocator >::_invalidate_iterators_past ( [[ maybe_unused ]] pointer _new_last_ )
+prefix_vector< T, Allocator >::_invalidate_iterators_past ( [[ maybe_unused ]] pointer _new_last_ )
 {}
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::_invariants () const
+prefix_vector< T, Allocator >::_invariants () const
 {
         if( this->begin_ == nullptr )
         {
@@ -1955,21 +1955,21 @@ prefix_array< T, Allocator >::_invariants () const
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::_dereferenceable ( const_iterator const * _i_ ) const
+prefix_vector< T, Allocator >::_dereferenceable ( const_iterator const * _i_ ) const
 {
         return this->begin_ <= _i_->base() && _i_->base() < this->end_;
 }
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::_decrementable ( const_iterator const * _i_ ) const
+prefix_vector< T, Allocator >::_decrementable ( const_iterator const * _i_ ) const
 {
         return this->begin_ < _i_->base() && _i_->base() <= this->end_;
 }
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
+prefix_vector< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
 {
         const_pointer p = _i_->base() + _n_;
         return this->begin_ <= p && p <= this->end_;
@@ -1977,7 +1977,7 @@ prefix_array< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdif
 
 template< typename T, typename Allocator >
 bool
-prefix_array< T, Allocator >::_subscriptable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
+prefix_vector< T, Allocator >::_subscriptable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
 {
         const_pointer p = _i_->base() + _n_;
         return this->begin_ <= p && p < this->end_;

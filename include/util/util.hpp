@@ -95,6 +95,9 @@
 #       ifndef NPL_NODISCARD
 #       define NPL_NODISCARD [[ nodiscard ]]
 #       endif
+#       ifndef NPL_DEPRECATED
+#       define NPL_DEPRECATED [[ deprecated ]]
+#       endif
 #       ifndef NPL_LIKELY
 #       define NPL_LIKELY __attribute__(( likely ))
 #       endif
@@ -116,6 +119,9 @@
 #       endif
 #       ifndef NPL_NODISCARD
 #       define NPL_NODISCARD
+#       endif
+#       ifndef NPL_DEPRECATED
+#       define NPL_DEPRECATED
 #       endif
 #       ifndef NPL_LIKELY
 #       define NPL_LIKELY
