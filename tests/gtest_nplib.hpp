@@ -28,6 +28,9 @@
 #include <range_queries/fenwick_tree>
 #include <range_queries/segment_tree>
 
+#include <range_queries/prefix_array>
+
+
 #define CUSTOM_CAPACITY 8
 #define CUSTOM_VALUE    1
 

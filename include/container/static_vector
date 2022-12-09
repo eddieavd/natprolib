@@ -62,9 +62,11 @@ protected:
                 using storage_value_type = typename storage::value_type      ;
 
                 friend class _static_vector_iterator< !C, storage_value_type > ;
+                friend class  static_vector         < storage_raw_type, N    > ;
         public:
+                using value_type = std::conditional_t< C, storage_raw_type const, storage_raw_type >;
+
                 using                 _base = iterator< C, T_ >          ;
-                using            value_type = storage_raw_type           ;
                 using               pointer = value_type       *         ;
                 using         const_pointer = value_type const *         ;
                 using             reference = value_type       &         ;
@@ -132,6 +134,9 @@ public:
         constexpr static_vector & operator= ( static_vector       && _other_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
                                                                                          std::is_nothrow_move_constructible_v< value_type > );
 
+        constexpr bool operator== ( static_vector const & _other_ ) const noexcept;
+        constexpr bool operator!= ( static_vector const & _other_ ) const noexcept;
+
         constexpr       reference operator[] ( size_type const _index_ )       noexcept { return data_[ _index_ ].val_; }
         constexpr const_reference operator[] ( size_type const _index_ ) const noexcept { return data_[ _index_ ].val_; }
 
@@ -154,10 +159,10 @@ public:
         NPL_NODISCARD constexpr       iterator   end ()       noexcept { return       iterator{ data_.  end().raw() }; }
         NPL_NODISCARD constexpr const_iterator   end () const noexcept { return const_iterator{ data_.  end().raw() }; }
 
-        NPL_NODISCARD constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator{ data_.  end().raw() }; }
-        NPL_NODISCARD constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator{ data_.  end().raw() }; }
-        NPL_NODISCARD constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator{ data_.begin().raw() }; }
-        NPL_NODISCARD constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator{ data_.begin().raw() }; }
+        NPL_NODISCARD constexpr       reverse_iterator rbegin ()       noexcept { return       reverse_iterator{ data_.  end() }; }
+        NPL_NODISCARD constexpr const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator{ data_.  end() }; }
+        NPL_NODISCARD constexpr       reverse_iterator   rend ()       noexcept { return       reverse_iterator{ data_.begin() }; }
+        NPL_NODISCARD constexpr const_reverse_iterator   rend () const noexcept { return const_reverse_iterator{ data_.begin() }; }
 
         NPL_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin(); }
         NPL_NODISCARD constexpr const_iterator   cend () const noexcept { return   end(); }
@@ -300,6 +305,33 @@ static_vector< T, N >::operator= ( static_vector && _other_ ) noexcept( std::is_
         this->assign( _other_.begin(), _other_.end(), []( iterator iter ) -> value_type && { return NPL_MOVE( *iter ); } );
 
         return *this;
+}
+
+template< typename T, size_t N >
+constexpr bool
+static_vector< T, N >::operator== ( static_vector const & _other_ ) const noexcept
+{
+        if( size_ != _other_.size_ )
+        {
+                return false;
+        }
+
+        for( size_type i = 0; i < size_; ++i )
+        {
+                if( at( i ) != _other_.at( i ) )
+                {
+                        return false;
+                }
+        }
+
+        return true;
+}
+
+template< typename T, size_t N >
+constexpr bool
+static_vector< T, N >::operator!= ( static_vector const & _other_ ) const noexcept
+{
+        return !operator==( _other_ );
 }
 
 template< typename T, size_t N >

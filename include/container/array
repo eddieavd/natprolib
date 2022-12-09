@@ -50,6 +50,11 @@ struct array
 
         constexpr array () noexcept {}
 
+        constexpr array ( value_type const & _val_ ) noexcept
+        {
+                fill( _val_ );
+        }
+
         constexpr array ( array< T, Size > const & _other_ ) noexcept
         {
                 fill( _other_.begin(), _other_.end() );
