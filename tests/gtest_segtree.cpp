@@ -7,7 +7,7 @@
 #include "gtest_segtree.hpp"
 
 
-TEST( SegtreeTest, DefaultConstruct )
+TEST( SegmentTreeTest, DefaultConstruct )
 {
         npl::segment_tree<      int >    int_seg;
         npl::segment_tree< unsigned >   uint_seg;
@@ -20,7 +20,7 @@ TEST( SegtreeTest, DefaultConstruct )
         EXPECT_EQ( double_seg._invariants(), true );
 }
 
-TEST( SegtreeTest, ReserveConstruct )
+TEST( SegmentTreeTest, ReserveConstruct )
 {
         npl::segment_tree< int > seg( CUSTOM_CAPACITY );
 
@@ -29,7 +29,7 @@ TEST( SegtreeTest, ReserveConstruct )
         EXPECT_EQ( seg.capacity()   , 2 * CUSTOM_CAPACITY );
 }
 
-TEST( SegtreeTest, FillConstruct )
+TEST( SegmentTreeTest, FillConstruct )
 {
         npl::segment_tree< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -37,7 +37,7 @@ TEST( SegtreeTest, FillConstruct )
         EXPECT_EQ( seg.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( SegtreeTest, SegtreeIterConstruct )
+TEST( SegmentTreeTest, SegtreeIterConstruct )
 {
         npl::segment_tree< int > seg1( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -51,7 +51,7 @@ TEST( SegtreeTest, SegtreeIterConstruct )
 }
 
 /*
-TEST( SegtreeTest, InputIterConstruct )
+TEST( SegmentTreeTest, InputIterConstruct )
 {
         std::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -67,7 +67,7 @@ TEST( SegtreeTest, InputIterConstruct )
 }
 */
 
-TEST( SegtreeTest, ForwardIterConstruct )
+TEST( SegmentTreeTest, ForwardIterConstruct )
 {
         std::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -77,7 +77,7 @@ TEST( SegtreeTest, ForwardIterConstruct )
         EXPECT_EQ( seg.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( SegtreeTest, CopyConstruct )
+TEST( SegmentTreeTest, CopyConstruct )
 {
         npl::segment_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -91,7 +91,7 @@ TEST( SegtreeTest, CopyConstruct )
         EXPECT_EQ( seg              ,          source );
 }
 
-TEST( SegtreeTest, MoveConstruct )
+TEST( SegmentTreeTest, MoveConstruct )
 {
         npl::segment_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -107,7 +107,7 @@ TEST( SegtreeTest, MoveConstruct )
         EXPECT_EQ( seg.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( SegtreeTest, InitListConstruct )
+TEST( SegmentTreeTest, InitListConstruct )
 {
         npl::segment_tree< int > seg( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -115,7 +115,7 @@ TEST( SegtreeTest, InitListConstruct )
         EXPECT_EQ( seg.size()       ,    8 );
 }
 
-TEST( SegtreeTest, CopyAssign )
+TEST( SegmentTreeTest, CopyAssign )
 {
         npl::segment_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int > seg;
@@ -130,7 +130,7 @@ TEST( SegtreeTest, CopyAssign )
         EXPECT_EQ( seg              ,          source );
 }
 
-TEST( SegtreeTest, MoveAssign )
+TEST( SegmentTreeTest, MoveAssign )
 {
         npl::segment_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int > seg;
@@ -147,7 +147,7 @@ TEST( SegtreeTest, MoveAssign )
         EXPECT_EQ( seg.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( SegtreeTest, InitListAssign )
+TEST( SegmentTreeTest, InitListAssign )
 {
         npl::segment_tree< int > seg;
 
@@ -161,13 +161,13 @@ TEST( SegtreeTest, InitListAssign )
 }
 
 /*
-TEST( SegtreeTest, Assign ) // add to other containers as well, tests all assign(...)s
+TEST( SegmentTreeTest, Assign ) // add to other containers as well, tests all assign(...)s
 {
 
 }
 */
 
-TEST( SegtreeTest, SubscriptOperator )
+TEST( SegmentTreeTest, SubscriptOperator )
 {
         std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -191,7 +191,7 @@ TEST( SegtreeTest, SubscriptOperator )
         }
 }
 
-TEST( SegtreeTest, At )
+TEST( SegmentTreeTest, At )
 {
         std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -215,7 +215,7 @@ TEST( SegtreeTest, At )
         }
 }
 
-TEST( SegtreeTest, ElementAt )
+TEST( SegmentTreeTest, ElementAt )
 {
         std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -240,7 +240,7 @@ TEST( SegtreeTest, ElementAt )
 
 }
 
-TEST( SegtreeTest, Range )
+TEST( SegmentTreeTest, Range )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -268,13 +268,13 @@ TEST( SegtreeTest, Range )
 }
 
 /*
-TEST( SegtreeTest, ParentBuilders )
+TEST( SegmentTreeTest, ParentBuilders )
 {
         EXPECT_EQ( true, false );
 }
 */
 
-TEST( SegtreeTest, Accessors )
+TEST( SegmentTreeTest, Accessors )
 {
         npl::segment_tree< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -298,7 +298,7 @@ TEST( SegtreeTest, Accessors )
 }
 
 /*
-TEST( SegtreeTest, PushBack )
+TEST( SegmentTreeTest, PushBack )
 {
         std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -332,7 +332,7 @@ TEST( SegtreeTest, PushBack )
         }
 }
 
-TEST( SegtreeTest, EmplaceBackBasic )
+TEST( SegmentTreeTest, EmplaceBackBasic )
 {
         std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -366,7 +366,7 @@ TEST( SegtreeTest, EmplaceBackBasic )
         }
 }
 
-TEST( SegtreeTest, EmplaceBack )
+TEST( SegmentTreeTest, EmplaceBack )
 {
         std::vector< nplib_test::some_addable_data > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -399,7 +399,7 @@ TEST( SegtreeTest, EmplaceBack )
 }
 */
 
-TEST( SegtreeTest, Swap )
+TEST( SegmentTreeTest, Swap )
 {
         npl::segment_tree< int > vec1( CUSTOM_CAPACITY, CUSTOM_VALUE     );
         npl::segment_tree< int > vec2( CUSTOM_CAPACITY, CUSTOM_VALUE + 1 );
@@ -413,7 +413,7 @@ TEST( SegtreeTest, Swap )
         EXPECT_EQ( vec2, copy1 );
 }
 
-TEST( SegtreeTest, Clear )
+TEST( SegmentTreeTest, Clear )
 {
         npl::segment_tree< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int > empty;
@@ -423,7 +423,7 @@ TEST( SegtreeTest, Clear )
         EXPECT_EQ( seg, empty );
 }
 
-TEST( SegtreeTest, TwoDimensional )
+TEST( SegmentTreeTest, TwoDimensional )
 {
         npl::segment_tree< int > seg1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -443,7 +443,7 @@ TEST( SegtreeTest, TwoDimensional )
         }
 }
 
-TEST( SegtreeTest, ThreeDimensional )
+TEST( SegmentTreeTest, ThreeDimensional )
 {
         npl::segment_tree< int > seg1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
