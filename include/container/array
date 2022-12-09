@@ -2,7 +2,7 @@
 //
 //
 //      natprolib
-//      array.hpp
+//      array
 //
 
 #pragma once
@@ -30,7 +30,7 @@ struct array
         public:
                 using _base = iterator< C, T_ >;
 
-                explicit _array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+                explicit constexpr _array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
 
         using           _self = array;

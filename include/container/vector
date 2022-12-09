@@ -61,7 +61,7 @@ protected:
                 using       difference_type = typename _alloc_traits::difference_type ;
                 using npl_iterator_category = vector_iterator_tag                     ;
 
-                explicit _vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+                explicit constexpr _vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
 
         using      value_type = T                                       ;

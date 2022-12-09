@@ -57,7 +57,7 @@ protected:
                 using       difference_type = typename _alloc_traits::difference_type ;
                 using npl_iterator_category = prefix_array_iterator_tag               ;
 
-                explicit _prefix_array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+                explicit constexpr _prefix_array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
 
         using          _base = _vector_base< T, Allocator >    ;
