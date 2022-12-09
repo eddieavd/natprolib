@@ -81,7 +81,7 @@ protected:
 
                 constexpr const_pointer raw () const noexcept
                 { return &this->ptr_->val_; }
-        private:
+        protected:
                 explicit constexpr _static_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
 public:
@@ -115,9 +115,10 @@ public:
         constexpr static_vector ( size_type const _count_                        ) noexcept( noexcept( value_type{       } ) );
         constexpr static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) );
 
-        constexpr static_vector ( static_vector                       const &  _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > );
-        constexpr static_vector ( static_vector                             && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > );
-        constexpr static_vector ( std::initializer_list< value_type >          _list_  ) noexcept( std::is_nothrow_copy_assignable_v   < value_type > );
+        constexpr static_vector ( static_vector const &  _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > );
+        constexpr static_vector ( static_vector       && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > );
+
+        constexpr static_vector ( std::initializer_list< value_type > _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > );
 
         constexpr ~static_vector () noexcept requires( std::is_trivially_destructible_v< value_type > ) = default;
 
