@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include "util.hpp"
 #include "traits.hpp"
 #include "iterator.hpp"
@@ -18,9 +20,6 @@ namespace npl
 namespace mem
 {
 
-
-struct _default_init_tag {};
-struct   _value_init_tag {};
 
 template< typename T >
 constexpr T* to_address ( T * _ptr_ ) noexcept
