@@ -36,8 +36,24 @@
 #       endif
 #endif
 
-#ifndef NPL_STATIC_ASSERT
-#define NPL_STATIC_ASSERT(cond, msg) static_assert( cond, msg )
+
+#ifndef NPL_CONSTEXPR_ASSERT
+#define NPL_CONSTEXPR_ASSERT(expr, ...)                                                                     \
+        _Pragma( "GCC diagnostic push" )                                                                     \
+        _Pragma( "GCC diagnostic ignored \"-Wunused-but-set-variable\"" )                                     \
+                do                                                                                             \
+                {                                                                                               \
+                        if( std::is_constant_evaluated() )                                                       \
+                        {                                                                                         \
+                                int test = 1;                                                                      \
+                                test /= ( expr );          /* UB in constexpr context causes compile error */       \
+                        }                                                                                            \
+                        else                                                                                          \
+                        {                                                                                              \
+                                NPL_ASSERT( expr, __VA_ARGS__ );                                                        \
+                        }                                                                                                \
+                } while( 0 )                                                                                              \
+        _Pragma( "GCC diagnostic pop" )
 #endif
 
 

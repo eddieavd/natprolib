@@ -2,7 +2,7 @@
 //
 //
 //      natprolib
-//      static_vector.hpp
+//      static_vector
 //
 
 #pragma once
@@ -36,7 +36,7 @@ inline constexpr bool is_static_vector_iterator_v = is_static_vector_iterator< T
 template< typename T, size_t N >
 class static_vector
 {
-private:
+protected:
         union storage_t
         {
                 using raw   = T    ;
@@ -45,7 +45,8 @@ private:
                 raw   val_   ;
                 dummy align_ ;
 
-                constexpr storage_t () noexcept : align_{ 0 } {}
+                         constexpr storage_t (         ) noexcept : align_{ 0 } {}
+                explicit constexpr storage_t ( raw val ) noexcept : val_{ val } {}
 
                 constexpr operator T () const noexcept
                 { return val_; }
@@ -82,7 +83,7 @@ private:
                 constexpr const_pointer raw () const noexcept
                 { return &this->ptr_->val_; }
         private:
-                explicit _static_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+                explicit constexpr _static_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
 public:
         using        _base = storage       ;
@@ -114,10 +115,10 @@ public:
 
         constexpr static_vector ( size_type const _count_                        ) noexcept( noexcept( value_type{       } ) );
         constexpr static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) );
-        constexpr static_vector ( std::initializer_list< value_type >     _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > );
 
-        constexpr static_vector ( static_vector const &  _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > );
-        constexpr static_vector ( static_vector       && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > );
+        constexpr static_vector ( static_vector                       const &  _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > );
+        constexpr static_vector ( static_vector                             && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > );
+        constexpr static_vector ( std::initializer_list< value_type >          _list_  ) noexcept( std::is_nothrow_copy_assignable_v   < value_type > );
 
         constexpr ~static_vector () noexcept requires( std::is_trivially_destructible_v< value_type > ) = default;
 
@@ -131,22 +132,22 @@ public:
         constexpr static_vector & operator= ( static_vector       && _other_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
                                                                                          std::is_nothrow_move_constructible_v< value_type > );
 
-        constexpr       reference operator[] ( size_type const _index_ )       noexcept { return data_[ _index_ ].val; }
-        constexpr const_reference operator[] ( size_type const _index_ ) const noexcept { return data_[ _index_ ].val; }
+        constexpr       reference operator[] ( size_type const _index_ )       noexcept { return data_[ _index_ ].val_; }
+        constexpr const_reference operator[] ( size_type const _index_ ) const noexcept { return data_[ _index_ ].val_; }
 
-        NPL_NODISCARD constexpr       reference at ( size_type const _index_ )       noexcept;
-        NPL_NODISCARD constexpr const_reference at ( size_type const _index_ ) const noexcept;
+        NPL_NODISCARD NPL_ALWAYS_INLINE constexpr       reference at ( size_type const _index_ )       noexcept;
+        NPL_NODISCARD NPL_ALWAYS_INLINE constexpr const_reference at ( size_type const _index_ ) const noexcept;
 
-        constexpr       reference front ()       noexcept { return data_.front().val; }
-        constexpr const_reference front () const noexcept { return data_.front().val; }
-        constexpr       reference  back ()       noexcept { return data_. back().val; }
-        constexpr const_reference  back () const noexcept { return data_. back().val; }
+        NPL_ALWAYS_INLINE NPL_FLATTEN constexpr       reference front ()       noexcept { return data_.front().val_; }
+        NPL_ALWAYS_INLINE NPL_FLATTEN constexpr const_reference front () const noexcept { return data_.front().val_; }
+        NPL_ALWAYS_INLINE NPL_FLATTEN constexpr       reference  back ()       noexcept { return data_. back().val_; }
+        NPL_ALWAYS_INLINE NPL_FLATTEN constexpr const_reference  back () const noexcept { return data_. back().val_; }
 
-        NPL_NODISCARD constexpr const_reference cfront () const noexcept { return front(); }
-        NPL_NODISCARD constexpr const_reference  cback () const noexcept { return  back(); }
+        NPL_NODISCARD NPL_ALWAYS_INLINE NPL_FLATTEN constexpr const_reference cfront () const noexcept { return front(); }
+        NPL_NODISCARD NPL_ALWAYS_INLINE NPL_FLATTEN constexpr const_reference  cback () const noexcept { return  back(); }
 
-        NPL_NODISCARD constexpr       pointer data ()       noexcept { return &data_[ 0 ].val; }
-        NPL_NODISCARD constexpr const_pointer data () const noexcept { return &data_[ 0 ].val; }
+        NPL_NODISCARD constexpr       pointer data ()       noexcept { return &data_[ 0 ].val_; }
+        NPL_NODISCARD constexpr const_pointer data () const noexcept { return &data_[ 0 ].val_; }
 
         NPL_NODISCARD constexpr       iterator begin ()       noexcept { return       iterator{ data_.begin().raw() }; }
         NPL_NODISCARD constexpr const_iterator begin () const noexcept { return const_iterator{ data_.begin().raw() }; }
@@ -205,7 +206,7 @@ public:
 
         template< typename... Args >
         constexpr reference emplace_back ( Args&&... _args_ ) noexcept( noexcept( value_type{ NPL_FWD( _args_ )... } ) );
-private:
+protected:
         _base     data_;
         size_type size_{ 0 };
 
@@ -225,6 +226,8 @@ template< typename T, size_t N >
 constexpr static_vector< T, N >::static_vector ( size_type const _count_ ) noexcept( noexcept( value_type{} ) )
         : size_( _count_ )
 {
+        NPL_CONSTEXPR_ASSERT( size_ <= N, "static_vector::static_vector: count > capacity" );
+
         for( auto it( begin() ); it != end(); ++it )
         {
                 mem::construct_at< value_type >( it );
@@ -235,6 +238,8 @@ template< typename T, size_t N >
 constexpr static_vector< T, N >::static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) )
         : size_( _count_ )
 {
+        NPL_CONSTEXPR_ASSERT( size_ <= N, "static_vector::static_vector: count > capacity" );
+
         for( auto it( begin() ); it != end(); ++it )
         {
                 mem::construct_at( it, _val_ );
@@ -245,7 +250,7 @@ template< typename T, size_t N >
 constexpr static_vector< T, N >::static_vector ( std::initializer_list< value_type > _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > )
         : size_( _list_.size() )
 {
-        NPL_STATIC_ASSERT( size_ <= capacity(), "static_vector::static_vector: list.size() > capacity()" );
+        NPL_CONSTEXPR_ASSERT( size_ <= N, "static_vector::static_vector: list.size > capacity" );
 
         auto it( begin() );
 
@@ -261,7 +266,7 @@ constexpr static_vector< T, N >::static_vector ( static_vector const & _other_ )
 {
         for( size_type i = 0; i < size_; ++i )
         {
-                mem::construct_at( &data_[ i ].val, _other_[ i ] );
+                mem::construct_at( &data_[ i ].val_, _other_[ i ] );
         }
 }
 
@@ -271,7 +276,7 @@ constexpr static_vector< T, N >::static_vector ( static_vector && _other_ ) noex
 {
         for( size_type i = 0; i < size_; ++i )
         {
-                mem::construct_at( &data_[ i ].val, NPL_MOVE( _other_[ i ] ) );
+                mem::construct_at( &data_[ i ].val_, NPL_MOVE( _other_[ i ] ) );
         }
 }
 
@@ -302,9 +307,9 @@ constexpr
 typename static_vector< T, N >::reference
 static_vector< T, N >::at ( size_type const _index_ ) noexcept
 {
-        NPL_STATIC_ASSERT( _index_ < size(), "static_vector::at: index out of bounds" );
+        NPL_CONSTEXPR_ASSERT( _index_ < size_, "static_vector::at: index out of bounds" );
 
-        return data_[ _index_ ].val;
+        return data_[ _index_ ].val_;
 }
 
 template< typename T, size_t N >
@@ -312,9 +317,9 @@ constexpr
 typename static_vector< T, N >::const_reference
 static_vector< T, N >::at ( size_type const _index_ ) const noexcept
 {
-        NPL_STATIC_ASSERT( _index_ < size(), "static_vector::at: index out of bounds" );
+        NPL_CONSTEXPR_ASSERT( _index_ < size_, "static_vector::at: index out of bounds" );
 
-        return data_[ _index_ ].val;
+        return data_[ _index_ ].val_;
 }
 
 template< typename T, size_t N >
@@ -324,7 +329,7 @@ static_vector< T, N >::insert ( const_iterator _position_, value_type const & _v
                                                                                                  std::is_nothrow_move_assignable_v   < value_type > &&
                                                                                                  std::is_nothrow_move_constructible_v< value_type > )
 {
-        NPL_STATIC_ASSERT( !full(), "static_vector::insert: vector full" );
+        NPL_CONSTEXPR_ASSERT( !full(), "static_vector::insert: called on full vector" );
 
         iterator mut_pos{ const_cast< iterator >( _position_ ) };
 
@@ -341,7 +346,7 @@ typename static_vector< T, N >::iterator
 static_vector< T, N >::insert ( const_iterator _position_, value_type && _val_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
                                                                                            std::is_nothrow_move_constructible_v< value_type > )
 {
-        NPL_STATIC_ASSERT( !full(), "static_vector::insert: vector full" );
+        NPL_CONSTEXPR_ASSERT( !full(), "static_vector::insert: called on full vector" );
 
         iterator mut_pos{ const_cast< iterator >( _position_ ) };
 
@@ -358,20 +363,20 @@ void
 static_vector< T, N >::assign ( size_type const _count_, value_type const & _val_ ) noexcept( noexcept( value_type( _val_ ) ) &&
                                                                                               noexcept( std::declval< value_type >() = _val_ ) )
 {
-        NPL_STATIC_ASSERT( _count_ <= capacity(), "static_vector::assign: count > capacity" );
+        NPL_CONSTEXPR_ASSERT( _count_ <= N, "static_vector::assign: count > capacity" );
 
         auto const real_count = std::min( size_, _count_ );
 
         for( size_type i = 0; i < real_count; ++i )
         {
-                data_[ i ].val = _val_;
+                data_[ i ].val_ = _val_;
         }
 
         if( real_count < _count_ )
         {
                 for( size_type i = real_count; i < _count_; ++i )
                 {
-                        mem::construct_at( &data_[ i ].val, _val_ );
+                        mem::construct_at( &data_[ i ].val_, _val_ );
                 }
         }
 
@@ -381,7 +386,7 @@ static_vector< T, N >::assign ( size_type const _count_, value_type const & _val
                 {
                         for( size_type i = real_count; i < size_; ++i )
                         {
-                                mem::destruct_at( &data_[ i ].val );
+                                mem::destruct_at( &data_[ i ].val_ );
                         }
                 }
         }
@@ -393,7 +398,7 @@ constexpr
 void
 static_vector< T, N >::resize ( size_type const _count_ ) noexcept( std::is_nothrow_default_constructible_v< value_type > )
 {
-        NPL_STATIC_ASSERT( _count_ <= capacity(), "static_vector::resize: count > capacity" );
+        NPL_CONSTEXPR_ASSERT( _count_ <= N, "static_vector::resize: count > capacity" );
 
         if constexpr( !std::is_trivially_destructible_v< value_type > )
         {
@@ -401,7 +406,7 @@ static_vector< T, N >::resize ( size_type const _count_ ) noexcept( std::is_noth
                 {
                         for( size_type i = _count_; i < size_; ++i )
                         {
-                                mem::destruct_at( &data_[ i ].val );
+                                mem::destruct_at( &data_[ i ].val_ );
                         }
                 }
         }
@@ -409,7 +414,7 @@ static_vector< T, N >::resize ( size_type const _count_ ) noexcept( std::is_noth
         {
                 for( size_type i = size_; i < _count_; ++i )
                 {
-                        mem::construct_at( &data_[ i ].val );
+                        mem::construct_at( &data_[ i ].val_ );
                 }
         }
         size_ = _count_;
@@ -429,9 +434,9 @@ constexpr
 void
 static_vector< T, N >::push_back ( value_type const & _val_ ) noexcept( noexcept( value_type{ _val_ } ) )
 {
-        NPL_STATIC_ASSERT( !full(), "static_vector::push_back: vector full" );
+        NPL_CONSTEXPR_ASSERT( !full(), "static_vector::push_back: called on full vector" );
 
-        mem::construct_at( &data_[ size_++ ].val, _val_ );
+        mem::construct_at( &data_[ size_++ ].val_, _val_ );
 }
 
 template< typename T, size_t N >
@@ -439,9 +444,9 @@ constexpr
 void
 static_vector< T, N >::push_back ( value_type && _val_ ) noexcept( noexcept( value_type{ NPL_MOVE( _val_ ) } ) )
 {
-        NPL_STATIC_ASSERT( !full(), "static_vector::push_back: vector full" );
+        NPL_CONSTEXPR_ASSERT( !full(), "static_vector::push_back: called on full vector" );
 
-        mem::construct_at( &data_[ size_++ ].val, _val_ );
+        mem::construct_at( &data_[ size_++ ].val_, _val_ );
 }
 
 template< typename T, size_t N >
@@ -450,9 +455,11 @@ constexpr
 typename static_vector< T, N >::reference
 static_vector< T, N >::emplace_back ( Args&&... _args_ ) noexcept( noexcept( value_type{ NPL_FWD( _args_ )... } ) )
 {
-        NPL_STATIC_ASSERT( !full(), "static_vector::emplace_back: vector full" );
+        NPL_CONSTEXPR_ASSERT( !full(), "static_vector::push_back: called on full vector" );
 
-        mem::construct_at( &data_[ size_++ ].val, NPL_FWD( _args_ )... );
+        data_[ size_++ ].val_ = NPL_MOVE( T( NPL_FWD( _args_ )... ) );
+
+        return at( size_ - 1 );
 }
 
 
