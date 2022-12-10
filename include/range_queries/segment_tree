@@ -1888,14 +1888,12 @@ segment_tree< T, PB, Allocator >::push_back ( value_type && _val_ )
                 _construct_one_at_end( NPL_MOVE( _val_ ) );
                 _update( real_size() - size() - 1, back() );
         }
-
 }
 
-/*
 template< typename T, auto PB, typename Allocator >
 template< typename... Args >
 void
-segment_tree< T, PB, Allocator >::_emplace_back_slow_path ( Args&&... _args_ )
+segment_tree< T, PB, Allocator >::_emplace_back_slow_path ( [[ maybe_unused ]] Args&&... _args_ )
 {
 
 }
@@ -1906,18 +1904,14 @@ inline
 typename segment_tree< T, PB, Allocator >::reference
 segment_tree< T, PB, Allocator >::emplace_back ( Args&&... _args_ )
 {
-        if( this->end_ != this->end_cap_ )
+        if( real_size() < capacity() )
         {
-                _update( size(), NPL_FWD( _args_ )... );
-        }
-        else
-        {
-
+                _construct_one_at_end( NPL_FWD( _args_ )... );
+                _update( real_size() - size() - 1, back() );
         }
 
-        return this->back();
+        return back();
 }
-*/
 
 #if 0
 template< typename T, auto PB, typename Allocator >
