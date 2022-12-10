@@ -143,6 +143,34 @@ public:
         NPL_NODISCARD NPL_ALWAYS_INLINE constexpr       reference at ( size_type const _index_ )       noexcept;
         NPL_NODISCARD NPL_ALWAYS_INLINE constexpr const_reference at ( size_type const _index_ ) const noexcept;
 
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        constexpr
+        enable_2d_container_base_t< U > &
+        at ( size_type const _x_, size_type const _y_ ) noexcept
+        { return at( _x_ ).at( _y_ ); }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        constexpr
+        enable_2d_container_base_t< U > const &
+        at ( size_type const _x_, size_type const _y_ ) const noexcept
+        { return at( _x_ ).at( _y_ ); }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        constexpr
+        enable_3d_container_base_t< U > &
+        at ( size_type const _x_, size_type const _y_, size_type const _z_ ) noexcept
+        { return at( _x_ ).at( _y_, _z_ ); }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        constexpr
+        enable_3d_container_base_t< U > const &
+        at ( size_type const _x_, size_type const _y_, size_type const _z_ ) const noexcept
+        { return at( _x_ ).at( _y_, _z_ ); }
+
         NPL_ALWAYS_INLINE NPL_FLATTEN constexpr       reference front ()       noexcept { return data_.front().val_; }
         NPL_ALWAYS_INLINE NPL_FLATTEN constexpr const_reference front () const noexcept { return data_.front().val_; }
         NPL_ALWAYS_INLINE NPL_FLATTEN constexpr       reference  back ()       noexcept { return data_. back().val_; }
