@@ -20,11 +20,14 @@
 #include <util/mem.hpp>
 #include <util/split_buffer.hpp>
 
+#include <container/array>
 #include <container/vector>
+#include <container/static_vector>
 
-#include <range_queries/prefix_array>
+#include <range_queries/prefix_vector>
 #include <range_queries/fenwick_tree>
 #include <range_queries/segment_tree>
+
 
 #define CUSTOM_CAPACITY 8
 #define CUSTOM_VALUE    1
@@ -67,20 +70,20 @@ struct some_addable_data
         }
 };
 
-template< typename T, bool C, typename Allocator >
+template< typename T, bool C >
 class iterator
-        : public npl::iterator< T, C, Allocator >
+        : public npl::iterator< C, T >
 {
-        using _base = npl::iterator< T, C, Allocator >;
+        using _base = npl::iterator< C, T >;
 public:
         iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
 };
 
 template< typename T, bool C, typename Allocator >
 class input_iterator
-        : public npl::iterator< T, C, Allocator >
+        : public npl::iterator< C, T >
 {
-        using _base = npl::iterator< T, C, Allocator >;
+        using _base = npl::iterator< C, T >;
 public:
         using iterator_category = std::input_iterator_tag;
 

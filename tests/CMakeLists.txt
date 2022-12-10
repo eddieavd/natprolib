@@ -13,6 +13,7 @@ add_executable(
         gtest_nplib
         gtest_nplib.cpp
         gtest_vector.cpp
+        gtest_static_vector.cpp
         gtest_prefix.cpp
         gtest_fenwick.cpp
         gtest_segtree.cpp

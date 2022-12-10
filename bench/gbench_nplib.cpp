@@ -29,7 +29,7 @@ BENCHMARK( bm_copy_container< npl::vector      < int > > )->RangeMultiplier( 2 )
 
 BENCHMARK( bm_push_back< std::vector      < int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 8 )->Unit( benchmark::kMicrosecond );
 BENCHMARK( bm_push_back< npl::vector      < int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 8 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back< npl::prefix_array< int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 8 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back< npl::prefix_vector< int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 8 )->Unit( benchmark::kMicrosecond );
 BENCHMARK( bm_push_back< npl::fenwick_tree< int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 8 )->Unit( benchmark::kMicrosecond );
 
 /*

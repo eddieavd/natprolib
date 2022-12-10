@@ -37,6 +37,23 @@
 #endif
 
 
+#ifndef NPL_CONSTEXPR_ASSERT
+#define NPL_CONSTEXPR_ASSERT(expr, ...)                                                                       \
+                do                                                                                             \
+                {                                                                                               \
+                        if( std::is_constant_evaluated() )                                                       \
+                        {                                                                                         \
+                                int test = 1;                                                                      \
+                                test /= ( expr );          /* UB in constexpr context causes compile error */       \
+                        }                                                                                            \
+                        else                                                                                          \
+                        {                                                                                              \
+                                NPL_ASSERT( expr, __VA_ARGS__ );                                                        \
+                        }                                                                                                \
+                } while( 0 )
+#endif
+
+
 #ifdef __GNUC__
 #       ifndef NPL_USE_ATTRIBUTES
 #       define NPL_USE_ATTRIBUTES
@@ -75,6 +92,9 @@
 #       ifndef NPL_NODISCARD
 #       define NPL_NODISCARD [[ nodiscard ]]
 #       endif
+#       ifndef NPL_DEPRECATED
+#       define NPL_DEPRECATED [[ deprecated ]]
+#       endif
 #       ifndef NPL_LIKELY
 #       define NPL_LIKELY __attribute__(( likely ))
 #       endif
@@ -96,6 +116,9 @@
 #       endif
 #       ifndef NPL_NODISCARD
 #       define NPL_NODISCARD
+#       endif
+#       ifndef NPL_DEPRECATED
+#       define NPL_DEPRECATED
 #       endif
 #       ifndef NPL_LIKELY
 #       define NPL_LIKELY
