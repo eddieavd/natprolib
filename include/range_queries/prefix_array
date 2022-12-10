@@ -12,7 +12,7 @@
 #include <util/util.hpp>
 #include <container/static_vector>
 
-#pragma clang diagnostic error "-Wdeprecated-declarations"
+#pragma GCC diagnostic error "-Wdeprecated-declarations"
 
 
 namespace npl
