@@ -131,6 +131,30 @@ TEST( StaticPrefixTest, ElementAt )
         static_assert( prefix_array_test_element_at() );
 }
 
+consteval bool prefix_array_test_range () noexcept
+{
+        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
+        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+
+        for( size_t i = 0; i < CUSTOM_CAPACITY; ++i )
+        {
+                for( size_t j = i; j < CUSTOM_CAPACITY; ++j )
+                {
+                        if( prefix_fill.range( i, j ) != j - i + 1 ) return false;
+                        if( prefix_copy.range( i, j ) != j - i + 1 ) return false;
+                        if( prefix_init.range( i, j ) != j - i + 1 ) return false;
+                }
+        }
+
+        return true;
+}
+
+TEST( StaticPrefixTest, Range )
+{
+        static_assert( prefix_array_test_range() );
+}
+
 consteval bool prefix_array_test_accessors () noexcept
 {
         npl::prefix_array< int, CUSTOM_CAPACITY > prefix( CUSTOM_CAPACITY, CUSTOM_VALUE );
