@@ -67,9 +67,9 @@ TEST( StaticPrefixTest, InitListConstruct )
 
 consteval bool prefix_array_test_subscript_operator () noexcept
 {
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
         for( size_t i = 0; i < CUSTOM_CAPACITY; ++i )
         {
@@ -89,9 +89,9 @@ TEST( StaticPrefixTest, SubscriptOperator )
 
 consteval bool prefix_array_test_at () noexcept
 {
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
         for( size_t i = 0; i < CUSTOM_CAPACITY; ++i )
         {
@@ -133,9 +133,9 @@ TEST( StaticPrefixTest, ElementAt )
 
 consteval bool prefix_array_test_range () noexcept
 {
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
-        npl::prefix_array< int, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_copy ( prefix_fill );
+        npl::prefix_array< size_t, CUSTOM_CAPACITY > prefix_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
         for( size_t i = 0; i < CUSTOM_CAPACITY; ++i )
         {
