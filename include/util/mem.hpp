@@ -46,6 +46,9 @@ constexpr auto construct_at ( Iter _it_, Args&&... _args_ ) -> _iter_value_type<
         return std::construct_at( _it_.raw(), _args_... );
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 template< typename T >
 inline
 constexpr void destruct_at ( T * _ptr_ )
@@ -54,6 +57,8 @@ constexpr void destruct_at ( T * _ptr_ )
 
         _ptr_->~T();
 }
+
+#pragma GCC diagnostic pop
 
 template< typename Alloc >
 void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, std::true_type ) noexcept

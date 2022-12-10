@@ -227,6 +227,10 @@ protected:
 };
 
 
+// cause gcc wont let me put this in a macro
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 template< typename T, size_t N >
 constexpr static_vector< T, N >::static_vector ( size_type const _count_ ) noexcept( noexcept( value_type{} ) )
         : size_( _count_ )
@@ -264,6 +268,9 @@ constexpr static_vector< T, N >::static_vector ( std::initializer_list< value_ty
                 mem::construct_at( it, *readIter );
         }
 }
+
+#pragma GCC diagnostic pop
+
 
 template< typename T, size_t N >
 constexpr static_vector< T, N >::static_vector ( static_vector const & _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > )
@@ -333,6 +340,9 @@ static_vector< T, N >::operator!= ( static_vector const & _other_ ) const noexce
 {
         return !operator==( _other_ );
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 template< typename T, size_t N >
 constexpr
@@ -493,6 +503,8 @@ static_vector< T, N >::emplace_back ( Args&&... _args_ ) noexcept( noexcept( val
 
         return at( size_ - 1 );
 }
+
+#pragma GCC diagnostic pop
 
 
 } // namespace npl

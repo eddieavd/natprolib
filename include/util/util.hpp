@@ -38,9 +38,7 @@
 
 
 #ifndef NPL_CONSTEXPR_ASSERT
-#define NPL_CONSTEXPR_ASSERT(expr, ...)                                                                     \
-        _Pragma( "GCC diagnostic push" )                                                                     \
-        _Pragma( "GCC diagnostic ignored \"-Wunused-but-set-variable\"" )                                     \
+#define NPL_CONSTEXPR_ASSERT(expr, ...)                                                                       \
                 do                                                                                             \
                 {                                                                                               \
                         if( std::is_constant_evaluated() )                                                       \
@@ -52,8 +50,7 @@
                         {                                                                                              \
                                 NPL_ASSERT( expr, __VA_ARGS__ );                                                        \
                         }                                                                                                \
-                } while( 0 )                                                                                              \
-        _Pragma( "GCC diagnostic pop" )
+                } while( 0 )
 #endif
 
 
