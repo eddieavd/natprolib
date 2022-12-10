@@ -245,7 +245,7 @@ consteval bool static_vector_test_two_dimensional () noexcept
 
                 for( size_t j = 0; j < vec2d.at( i ).size(); ++j )
                 {
-                        if( vec2d.at( i ).at( j ) != vec1d.at( j ) ) return false;
+                        if( vec2d.at( i, j ) != vec1d.at( j ) ) return false;
                 }
         }
         return true;
@@ -272,11 +272,11 @@ consteval bool static_vector_test_three_dimensional () noexcept
 
                 for( size_t j = 0; j < CUSTOM_CAPACITY; ++j )
                 {
-                        if( vec3d.at( i ).at( j ) != vec2d.at( j ) ) return false;
+                        if( vec3d.at( i, j ) != vec2d.at( j ) ) return false;
 
                         for( size_t k = 0; k < CUSTOM_CAPACITY; ++k )
                         {
-                                if( vec3d.at( i ).at( j ).at( k ) != vec2d.at( j ).at( k ) ) return false;
+                                if( vec3d.at( i, j, k ) != vec2d.at( j, k ) ) return false;
                         }
                 }
         }
