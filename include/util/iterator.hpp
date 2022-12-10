@@ -100,56 +100,56 @@ struct iterator_traits< T* >
 };
 
 
-template< typename T, bool C, typename Allocator >
+template< bool C, typename T >
 class iterator
 {
-        friend class iterator< T, !C, Allocator >;
+        friend class iterator< !C, T >;
 public:
+        using                 _self = iterator;
         using            value_type = T;
-        using         _alloc_traits = typename std::allocator_traits< Allocator >;
-        using       difference_type = typename _alloc_traits::difference_type;
+        using       difference_type = std::ptrdiff_t;
         using               pointer = std::conditional_t< C, value_type const *, value_type * >;
-        using         const_pointer = pointer;
         using             reference = std::conditional_t< C, value_type const &, value_type & >;
-        using       const_reference = reference;
+        using         const_pointer = value_type const *;
+        using       const_reference = value_type const &;
         using     iterator_category = std::random_access_iterator_tag;
         using npl_iterator_category =      random_access_iterator_tag;
 
-        constexpr pointer     operator-> (     ) const {   return std::addressof( operator*() ); }
-        constexpr reference   operator*  (     ) const {                           return *ptr_; }
-        constexpr iterator  & operator++ (     )       {                   ptr_++; return *this; }
-        constexpr iterator  & operator-- (     )       {                   ptr_--; return *this; }
-        constexpr iterator    operator++ ( int )       { auto it = *this; ++*this; return    it; }
-        constexpr iterator    operator-- ( int )       { auto it = *this; --*this; return    it; }
+        constexpr pointer     operator-> (     ) const noexcept {   return std::addressof( operator*() ); }
+        constexpr reference   operator*  (     ) const noexcept {                           return *ptr_; }
+        constexpr iterator  & operator++ (     )       noexcept {                   ptr_++; return *this; }
+        constexpr iterator  & operator-- (     )       noexcept {                   ptr_--; return *this; }
+        constexpr iterator    operator++ ( int )       noexcept { auto it = *this; ++*this; return    it; }
+        constexpr iterator    operator-- ( int )       noexcept { auto it = *this; --*this; return    it; }
 
         template< bool R >
         constexpr
-        bool operator== ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        bool operator== ( iterator< R, T > const & rhs ) const noexcept
         { return ptr_ == rhs.ptr_; }
 
         template< bool R >
         constexpr
-        bool operator!= ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        bool operator!= ( iterator< R, T > const & rhs ) const noexcept
         { return !operator==( rhs ); }
 
         template< bool R >
         constexpr
-        difference_type operator+ ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        difference_type operator+ ( iterator< R, T > const & rhs ) const noexcept
         { return static_cast< difference_type >( ptr_ + rhs.ptr_ ); }
 
         template< bool R >
         constexpr
-        difference_type operator- ( iterator< T, R, Allocator > const & rhs ) const noexcept
+        difference_type operator- ( iterator< R, T > const & rhs ) const noexcept
         { return static_cast< difference_type >( ptr_ - rhs.ptr_ ); }
 
         template< bool R >
         constexpr
-        iterator & operator+= ( iterator< T, R, Allocator > const & rhs ) noexcept
+        iterator & operator+= ( iterator< R, T > const & rhs ) noexcept
         { ptr_ += rhs.ptr_; return *this; }
 
         template< bool R >
         constexpr
-        iterator & operator-= ( iterator< T, R, Allocator > const & rhs ) noexcept
+        iterator & operator-= ( iterator< R, T > const & rhs ) noexcept
         { ptr_ -= rhs.ptr_; return *this; }
 
         constexpr
@@ -169,14 +169,35 @@ public:
         { return iterator( ptr_ - _offset_ ); }
 
         constexpr
-        operator iterator< T, true, Allocator > () const noexcept
-        { return iterator< T, true, Allocator >{ ptr_ }; }
+        operator iterator< true, T > () const noexcept
+        { return iterator< true, T >{ ptr_ }; }
+
+        /*
+        constexpr
+        std::enable_if_t
+        <
+                is_ptr_to_const_v< pointer >,
+                pointer
+        >
+        raw () const noexcept
+        { return ptr_; }
+
+        constexpr
+        std::enable_if_t
+        <
+                !is_ptr_to_const_v< pointer >,
+                pointer
+        >
+        raw () noexcept
+        { return ptr_; }
+        */
+
+        constexpr pointer raw () noexcept
+        { return ptr_; }
 
         constexpr const_pointer raw () const noexcept
         { return ptr_; }
 
-        constexpr pointer raw () noexcept
-        { return ptr_; }
 protected:
         pointer ptr_;
 
@@ -196,11 +217,11 @@ public:
         using       const_reference = reference;
         using     iterator_category = typename _base::iterator_category;
 
-        constexpr reference       operator*  (     ) const { auto it = iter_;          return *--it; }
-        constexpr reverse_iter  & operator++ (     )       {                 iter_-- ; return *this; }
-        constexpr reverse_iter  & operator-- (     )       {                 iter_++ ; return *this; }
-        constexpr reverse_iter    operator++ ( int )       { auto it = *this; --*this; return    it; }
-        constexpr reverse_iter    operator-- ( int )       { auto it = *this; ++*this; return    it; }
+        constexpr reference       operator*  (     ) const noexcept { auto it = iter_;          return *--it; }
+        constexpr reverse_iter  & operator++ (     )       noexcept {                 iter_-- ; return *this; }
+        constexpr reverse_iter  & operator-- (     )       noexcept {                 iter_++ ; return *this; }
+        constexpr reverse_iter    operator++ ( int )       noexcept { auto it = *this; --*this; return    it; }
+        constexpr reverse_iter    operator-- ( int )       noexcept { auto it = *this; ++*this; return    it; }
 
         constexpr bool operator== ( reverse_iter const & _other_ ) const noexcept
         { return iter_ == _other_.iter_; }

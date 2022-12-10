@@ -7,7 +7,7 @@
 #include "gtest_fenwick.hpp"
 
 
-TEST( FtreeTest, DefaultConstruct )
+TEST( FenwickTreeTest, DefaultConstruct )
 {
         npl::fenwick_tree<      int >    int_ftree;
         npl::fenwick_tree< unsigned >   uint_ftree;
@@ -24,7 +24,7 @@ TEST( FtreeTest, DefaultConstruct )
         EXPECT_EQ( some_ftree._invariants(), true );
 }
 
-TEST( FtreeTest, ReserveConstruct )
+TEST( FenwickTreeTest, ReserveConstruct )
 {
         npl::fenwick_tree< int > ftree( CUSTOM_CAPACITY );
 
@@ -33,7 +33,7 @@ TEST( FtreeTest, ReserveConstruct )
         EXPECT_EQ( ftree.capacity()   , CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, FillConstruct )
+TEST( FenwickTreeTest, FillConstruct )
 {
         npl::fenwick_tree< int > ftree( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -41,7 +41,7 @@ TEST( FtreeTest, FillConstruct )
         EXPECT_EQ( ftree.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, FtreeIterConstruct )
+TEST( FenwickTreeTest, FtreeIterConstruct )
 {
         npl::fenwick_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -55,7 +55,7 @@ TEST( FtreeTest, FtreeIterConstruct )
         EXPECT_EQ( ftree              ,          source );
 }
 
-TEST( FtreeTest, InputIterConstruct )
+TEST( FenwickTreeTest, InputIterConstruct )
 {
         std::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -70,7 +70,7 @@ TEST( FtreeTest, InputIterConstruct )
         EXPECT_EQ( ftree.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, ForwardIterConstruct )
+TEST( FenwickTreeTest, ForwardIterConstruct )
 {
         std::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -80,7 +80,7 @@ TEST( FtreeTest, ForwardIterConstruct )
         EXPECT_EQ( ftree.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, CopyConstruct )
+TEST( FenwickTreeTest, CopyConstruct )
 {
         npl::fenwick_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -94,7 +94,7 @@ TEST( FtreeTest, CopyConstruct )
         EXPECT_EQ( ftree              ,          source );
 }
 
-TEST( FtreeTest, MoveConstruct )
+TEST( FenwickTreeTest, MoveConstruct )
 {
         npl::fenwick_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -110,7 +110,7 @@ TEST( FtreeTest, MoveConstruct )
         EXPECT_EQ( ftree.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, InitListConstruct )
+TEST( FenwickTreeTest, InitListConstruct )
 {
         npl::fenwick_tree< int > ftree( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -118,7 +118,7 @@ TEST( FtreeTest, InitListConstruct )
         EXPECT_EQ( ftree.size()       ,    8 );
 }
 
-TEST( FtreeTest, CopyAssign )
+TEST( FenwickTreeTest, CopyAssign )
 {
         npl::fenwick_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::fenwick_tree< int > ftree;
@@ -133,7 +133,7 @@ TEST( FtreeTest, CopyAssign )
         EXPECT_EQ( ftree              ,          source );
 }
 
-TEST( FtreeTest, MoveAssign )
+TEST( FenwickTreeTest, MoveAssign )
 {
         npl::fenwick_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::fenwick_tree< int > ftree;
@@ -150,7 +150,7 @@ TEST( FtreeTest, MoveAssign )
         EXPECT_EQ( ftree.size()       , CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, InitListAssign )
+TEST( FenwickTreeTest, InitListAssign )
 {
         npl::fenwick_tree< int > ftree;
 
@@ -163,7 +163,7 @@ TEST( FtreeTest, InitListAssign )
         EXPECT_EQ( ftree.size()       ,    8 );
 }
 
-TEST( FtreeTest, SubscriptOperator )
+TEST( FenwickTreeTest, SubscriptOperator )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -187,7 +187,7 @@ TEST( FtreeTest, SubscriptOperator )
         }
 }
 
-TEST( FtreeTest, At )
+TEST( FenwickTreeTest, At )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -211,7 +211,7 @@ TEST( FtreeTest, At )
         }
 }
 
-TEST( FtreeTest, ElementAt )
+TEST( FenwickTreeTest, ElementAt )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -235,7 +235,7 @@ TEST( FtreeTest, ElementAt )
         }
 }
 
-TEST( FtreeTest, Range )
+TEST( FenwickTreeTest, Range )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -262,7 +262,7 @@ TEST( FtreeTest, Range )
         }
 }
 
-TEST( FtreeTest, Accessors )
+TEST( FenwickTreeTest, Accessors )
 {
         npl::fenwick_tree< int > ftree( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -285,7 +285,7 @@ TEST( FtreeTest, Accessors )
         EXPECT_EQ( *( ftree.data() + ftree.size() - 1 ), CUSTOM_CAPACITY );
 }
 
-TEST( FtreeTest, PushBack )
+TEST( FenwickTreeTest, PushBack )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -317,7 +317,7 @@ TEST( FtreeTest, PushBack )
         }
 }
 
-TEST( FtreeTest, EmplaceBackBasic )
+TEST( FenwickTreeTest, EmplaceBackBasic )
 {
         std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -349,7 +349,7 @@ TEST( FtreeTest, EmplaceBackBasic )
         }
 }
 
-TEST( FtreeTest, EmplaceBack )
+TEST( FenwickTreeTest, EmplaceBack )
 {
         std::vector< nplib_test::some_addable_data > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -381,7 +381,7 @@ TEST( FtreeTest, EmplaceBack )
         }
 }
 
-TEST( FtreeTest, Swap )
+TEST( FenwickTreeTest, Swap )
 {
         npl::fenwick_tree< int > ftree1( CUSTOM_CAPACITY, CUSTOM_VALUE     );
         npl::fenwick_tree< int > ftree2( CUSTOM_CAPACITY, CUSTOM_VALUE + 1 );
@@ -395,7 +395,7 @@ TEST( FtreeTest, Swap )
         EXPECT_EQ( ftree2, copy1 );
 }
 
-TEST( FtreeTest, Clear )
+TEST( FenwickTreeTest, Clear )
 {
         npl::fenwick_tree< int > ftree( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::fenwick_tree< int > empty;
@@ -405,7 +405,7 @@ TEST( FtreeTest, Clear )
         EXPECT_EQ( ftree, empty );
 }
 
-TEST( FtreeTest, TwoDimensional )
+TEST( FenwickTreeTest, TwoDimensional )
 {
         npl::fenwick_tree< int > ftree1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
@@ -426,7 +426,7 @@ TEST( FtreeTest, TwoDimensional )
 }
 
 /*
-TEST( FtreeTest, ThreeDimensional )
+TEST( FenwickTreeTest, ThreeDimensional )
 {
         npl::fenwick_tree< int > ftree1d( CUSTOM_CAPACITY, CUSTOM_VALUE );
 

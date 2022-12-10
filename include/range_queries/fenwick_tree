@@ -38,29 +38,30 @@ struct is_fenwick_tree_iterator : public has_same_npl_iterator_category< iterato
 template< typename T >
 inline constexpr bool is_fenwick_tree_iterator_v = is_fenwick_tree_iterator< T >::value;
 
-template< typename T, bool C, typename Allocator >
-class _fenwick_tree_iterator
-        : public iterator< T, C, Allocator >
-{
-        friend class _fenwick_tree_iterator< T, !C, Allocator >;
-        friend class _fenwick_tree_base    < T,     Allocator >;
-        friend class  fenwick_tree         < T,     Allocator >;
-public:
-        using                 _base = iterator< T, C, Allocator >;
-        using npl_iterator_category = fenwick_tree_iterator_tag;
-private:
-        explicit _fenwick_tree_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
-};
 
 template< typename T, typename Allocator >
 class _fenwick_tree_base
         : protected _vector_base< T, Allocator >
 {
 protected:
-        using          _base = _vector_base< T, Allocator >;
-        using       iterator = _fenwick_tree_iterator< T, false, Allocator >;
-        using const_iterator = _fenwick_tree_iterator< T,  true, Allocator >;
-        using allocator_type = typename _base::allocator_type;
+        template< bool C, typename T_ = T >
+        class _fenwick_tree_iterator
+                : public iterator< C, T_ >
+        {
+                friend class _fenwick_tree_iterator< !C, T_ >;
+        public:
+                using                 _base = iterator< C, T_ >                       ;
+                using         _alloc_traits = std::allocator_traits< Allocator >      ;
+                using       difference_type = typename _alloc_traits::difference_type ;
+                using npl_iterator_category = fenwick_tree_iterator_tag               ;
+
+                explicit constexpr _fenwick_tree_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
+        };
+
+        using          _base = _vector_base< T, Allocator >    ;
+        using       iterator = _fenwick_tree_iterator< false > ;
+        using const_iterator = _fenwick_tree_iterator<  true > ;
+        using allocator_type = typename _base::allocator_type  ;
 
         _fenwick_tree_base (                                 ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
         _fenwick_tree_base ( allocator_type const &  _alloc_ ) :          _base(           _alloc_   ) {}
@@ -72,24 +73,24 @@ class fenwick_tree
         : _fenwick_tree_base< T, Allocator >
 {
 private:
-        using                   _base = _fenwick_tree_base< T, Allocator >;
-        using                   _self =  fenwick_tree;
-        using _default_allocator_type = std::allocator< T >;
+        using                   _base = _fenwick_tree_base< T, Allocator > ;
+        using                   _self =  fenwick_tree                      ;
+        using _default_allocator_type = std::allocator< T >                ;
 public:
-        using      value_type = T;
-        using  allocator_type = Allocator;
-        using   _alloc_traits = typename _base::_alloc_traits;
-        using       reference = typename _base::reference;
-        using const_reference = typename _base::const_reference;
-        using       size_type = typename _base::size_type;
-        using difference_type = typename _base::difference_type;
-        using         pointer = typename _base::pointer;
-        using   const_pointer = typename _base::const_pointer;
+        using      value_type = T                               ;
+        using  allocator_type = Allocator                       ;
+        using   _alloc_traits = typename _base::_alloc_traits   ;
+        using       reference = typename _base::reference       ;
+        using const_reference = typename _base::const_reference ;
+        using       size_type = typename _base::size_type       ;
+        using difference_type = typename _base::difference_type ;
+        using         pointer = typename _base::pointer         ;
+        using   const_pointer = typename _base::const_pointer   ;
 
-        using               iterator = typename _base::iterator;
-        using         const_iterator = typename _base::const_iterator;
-        using       reverse_iterator = reverse_iter<       iterator >;
-        using const_reverse_iterator = reverse_iter< const_iterator >;
+        using               iterator = typename _base::iterator       ;
+        using         const_iterator = typename _base::const_iterator ;
+        using       reverse_iterator = reverse_iter<       iterator > ;
+        using const_reverse_iterator = reverse_iter< const_iterator > ;
 
         static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
                         "allocator_type::value_type != fenwick_tree::value_type" );
