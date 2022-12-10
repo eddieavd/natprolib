@@ -458,14 +458,14 @@ public:
         {
                 NPL_ASSERT( !empty(), "segment_tree::back: called on empty segment tree" );
 
-                return this->begin_[ capacity() - 1 ];
+                return this->begin_[ real_size() - 1 ];
         }
 
         const_reference back () const noexcept
         {
                 NPL_ASSERT( !empty(), "segment_tree::back: called on empty segment tree" );
 
-                return this->begin_[ capacity() - 1 ];
+                return this->begin_[ real_size() - 1 ];
         }
 
         const_reference cback () const noexcept
@@ -911,9 +911,22 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_rebuild_tree () noexcept
 {
-        for( auto i = ( size() ) - 1; i > 0; --i )
+        size_type elems = std::distance( begin(), end() );
+
+        for( auto i = size() - 1; i > 0; --i )
         {
-                this->begin_[ i ] = parent_builder_( this->begin_[ 2 * i ], this->begin_[ 2 * i + 1 ] );
+                if( i + 1 > elems && i > elems )
+                {
+                        this->begin_[ i ] = value_type{};
+                }
+                else if( i + 1 > elems )
+                {
+                        this->begin_[ i ] = this->begin_[ 2 * i ];
+                }
+                else
+                {
+                        this->begin_[ i ] = parent_builder_( this->begin_[ 2 * i ], this->begin_[ 2 * i + 1 ] );
+                }
         }
 }
 
@@ -1120,7 +1133,7 @@ segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_ )
                 auto new_cap  = 2 * new_size;
 
                 _vallocate( new_cap );
-                _construct_at_end( new_size );
+                _construct_at_end( _count_ );
         }
 }
 
@@ -1134,7 +1147,7 @@ segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_, alloca
                 auto new_cap  = 2 * new_size;
 
                 _vallocate( new_cap );
-                _construct_at_end( new_size );
+                _construct_at_end( _count_ );
         }
 }
 
@@ -1149,7 +1162,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_, value_
                 _vallocate( new_cap );
                 _construct_at_end( new_size );
                 _construct_at_end( _count_, _val_ );
-                _construct_at_end( new_size - _count_ );
                 _rebuild_tree();
         }
 }
@@ -1166,7 +1178,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( size_type const _count_, value_
                 _vallocate( new_cap );
                 _construct_at_end( new_size );
                 _construct_at_end( _count_, _val_ );
-                _construct_at_end( new_size - _count_ );
                 _rebuild_tree();
         }
 }
@@ -1192,7 +1203,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( SegtreeIterator _first_,
         _vallocate( new_cap );
         _construct_at_end( new_size );
         _construct_at_end( _first_, _last_, count );
-        _construct_at_end( new_size - count );
         _rebuild_tree();
 }
 
@@ -1217,7 +1227,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( SegtreeIterator _first_, Segtre
         _vallocate( new_cap );
         _construct_at_end( new_size );
         _construct_at_end( _first_, _last_, count );
-        _construct_at_end( new_size - count );
         _rebuild_tree();
 }
 
@@ -1289,7 +1298,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_,
         _vallocate( new_cap );
         _construct_at_end( new_size );
         _construct_at_end( _first_, _last_, count );
-        _construct_at_end( new_size - count );
         _rebuild_tree();
 }
 
@@ -1315,7 +1323,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_, Forwar
         _vallocate( new_cap );
         _construct_at_end( new_size );
         _construct_at_end( _first_, _last_, count );
-        _construct_at_end( new_size - count );
         _rebuild_tree();
 }
 
@@ -1397,7 +1404,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( std::initializer_list< value_ty
                 _vallocate( new_cap );
                 _construct_at_end( new_size );
                 _construct_at_end( _list_.begin(), _list_.end(), _list_.size() );
-                _construct_at_end( new_size - _list_.size() );
                 _rebuild_tree();
         }
 }
@@ -1414,7 +1420,6 @@ segment_tree< T, PB, Allocator >::segment_tree ( std::initializer_list< value_ty
 
                 _vallocate( new_cap );
                 _construct_at_end( _list_.begin(), _list_.end(), _list_.size() );
-                _construct_at_end( new_size - _list_.size() );
                 _rebuild_tree();
         }
 }
@@ -1436,6 +1441,7 @@ void
 segment_tree< T, PB, Allocator >::_move_assign ( segment_tree & _other_, std::false_type )
         noexcept( _alloc_traits::is_always_equal::value )
 {
+
         if( _base::_alloc() != _other_._alloc() )
         {
                 using mit = std::move_iterator< iterator >;
@@ -1522,7 +1528,6 @@ segment_tree< T, PB, Allocator >::assign ( SegtreeIterator _first_, SegtreeItera
                 _vallocate( new_cap );
                 _construct_at_end( new_size );
                 _construct_at_end( _first_, _last_, count );
-                _construct_at_end( new_size - count );
         }
         _rebuild_tree();
         _invalidate_all_iterators();
@@ -1581,7 +1586,6 @@ segment_tree< T, PB, Allocator >::assign ( ForwardIterator _first_, ForwardItera
                 _vallocate( new_cap );
                 _construct_at_end( new_size );
                 _construct_at_end( _first_, _last_, count );
-                _construct_at_end( new_size - count );
                 _rebuild_tree();
         }
         else
@@ -1589,7 +1593,6 @@ segment_tree< T, PB, Allocator >::assign ( ForwardIterator _first_, ForwardItera
                 this->_destruct_at_end( this->begin_ + size() );
 
                 _construct_at_end( _first_, _last_, count );
-                _construct_at_end( new_size - count );
                 _rebuild_tree();
         }
 }
@@ -1853,11 +1856,12 @@ segment_tree< T, PB, Allocator >::shrink_to_fit () noexcept
 {
 
 }
+#endif
 
 template< typename T, auto PB, typename Allocator >
 template< typename U >
 void
-segment_tree< T, PB, Allocator >::_push_back_slow_path ( U && _val_ )
+segment_tree< T, PB, Allocator >::_push_back_slow_path ( [[ maybe_unused ]] U && _val_ )
 {
 
 }
@@ -1867,7 +1871,11 @@ inline
 void
 segment_tree< T, PB, Allocator >::push_back ( const_reference _val_ )
 {
-
+        if( real_size() < capacity() )
+        {
+                _construct_one_at_end( _val_ );
+                _update( real_size() - size() - 1, _val_ );
+        }
 }
 
 template< typename T, auto PB, typename Allocator >
@@ -1875,9 +1883,15 @@ inline
 void
 segment_tree< T, PB, Allocator >::push_back ( value_type && _val_ )
 {
+        if( real_size() < capacity() )
+        {
+                _construct_one_at_end( NPL_MOVE( _val_ ) );
+                _update( real_size() - size() - 1, back() );
+        }
 
 }
 
+/*
 template< typename T, auto PB, typename Allocator >
 template< typename... Args >
 void
@@ -1903,7 +1917,9 @@ segment_tree< T, PB, Allocator >::emplace_back ( Args&&... _args_ )
 
         return this->back();
 }
+*/
 
+#if 0
 template< typename T, auto PB, typename Allocator >
 inline
 void
