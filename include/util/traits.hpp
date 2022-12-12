@@ -159,7 +159,7 @@ template< typename T >
 struct _has_range<
                         T,
                         typename _void_t< typename T::value_type >::type,
-                        typename _void_t< decltype( std::declval< T& >().range() ) >::type
+                        typename _void_t< decltype( std::declval< T& >().range( size_t(), size_t() ) ) >::type
                  >
                  : std::true_type {};
 

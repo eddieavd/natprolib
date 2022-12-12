@@ -147,6 +147,10 @@ consteval bool prefix_array_test_range () noexcept
                 }
         }
 
+        if( prefix_fill.range() != CUSTOM_CAPACITY ) return false;
+        if( prefix_copy.range() != CUSTOM_CAPACITY ) return false;
+        if( prefix_init.range() != CUSTOM_CAPACITY ) return false;
+
         return true;
 }
 
@@ -294,6 +298,10 @@ consteval bool prefix_array_test_two_dimensional () noexcept
                         if( vec2d.element_at( i, j ) != vec1d.element_at( j ) ) return false;
                 }
         }
+
+        if( vec1d.range() != CUSTOM_CAPACITY                   ) return false;
+        if( vec2d.range() != CUSTOM_CAPACITY * CUSTOM_CAPACITY ) return false;
+
         return true;
 }
 
@@ -326,6 +334,11 @@ consteval bool prefix_array_test_three_dimensional () noexcept
                         }
                 }
         }
+
+        if( vec1d.range() != CUSTOM_CAPACITY                                     ) return false;
+        if( vec2d.range() != CUSTOM_CAPACITY * CUSTOM_CAPACITY                   ) return false;
+        if( vec3d.range() != CUSTOM_CAPACITY * CUSTOM_CAPACITY * CUSTOM_CAPACITY ) return false;
+
         return true;
 }
 
