@@ -146,6 +146,8 @@ public:
         NPL_ALWAYS_INLINE NPL_FLATTEN
         constexpr auto range () const noexcept
         {
+                NPL_CONSTEXPR_ASSERT( !this->empty(), "prefix_array::range: called on empty prefix_array" );
+
                 if constexpr( is_2d_range_container_v< U > )
                 {
                         return this->at( this->size() - 1 ).range();

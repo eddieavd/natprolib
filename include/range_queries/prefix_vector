@@ -438,6 +438,8 @@ public:
         NPL_ALWAYS_INLINE NPL_FLATTEN
         auto range () const noexcept
         {
+                NPL_ASSERT( !empty(), "prefix_vector::range: called on empty prefix_vector" );
+
                 if constexpr( is_2d_range_container_v< U > )
                 {
                         return at( size() - 1 ).range();
