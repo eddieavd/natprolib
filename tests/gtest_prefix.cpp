@@ -262,6 +262,13 @@ TEST( PrefixVectorTest, Range )
                         EXPECT_EQ( prefix_cpass.range( i, j ), j - i + 1 );
                 }
         }
+
+        EXPECT_EQ( prefix_fill .range(), CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix_piter.range(), CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix_fiter.range(), CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix_copy .range(), CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix_init .range(), CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix_cpass.range(), CUSTOM_CAPACITY );
 }
 
 TEST( PrefixVectorTest, Accessors )
@@ -425,6 +432,9 @@ TEST( PrefixVectorTest, TwoDimensional )
                         EXPECT_EQ( prefix2d.element_at( i, j ), prefix1d.element_at( j ) );
                 }
         }
+
+        EXPECT_EQ( prefix1d.range(),                   CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix2d.range(), CUSTOM_CAPACITY * CUSTOM_CAPACITY );
 }
 
 TEST( PrefixVectorTest, ThreeDimensional )
@@ -451,4 +461,8 @@ TEST( PrefixVectorTest, ThreeDimensional )
                         }
                 }
         }
+
+        EXPECT_EQ( prefix1d.range(),                                     CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix2d.range(),                   CUSTOM_CAPACITY * CUSTOM_CAPACITY );
+        EXPECT_EQ( prefix3d.range(), CUSTOM_CAPACITY * CUSTOM_CAPACITY * CUSTOM_CAPACITY );
 }
