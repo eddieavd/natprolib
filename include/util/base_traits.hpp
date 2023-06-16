@@ -378,6 +378,22 @@ template< typename T >
 inline constexpr bool is_referenceable_v = is_referenceable< T >::value ;
 
 //=====================================================================
+//      remove_reference
+//=====================================================================
+
+template< typename T >
+struct remove_reference : type_identity< T > {} ;
+
+template< typename T >
+struct remove_reference< T & > : type_identity< T > {} ;
+
+template< typename T >
+struct remove_reference< T && > : type_identity< T > {} ;
+
+template< typename T >
+using remove_reference_t = typename remove_reference< T >::type ;
+
+//=====================================================================
 //      add_lvalue_reference
 //=====================================================================
 
@@ -751,6 +767,34 @@ inline constexpr bool is_move_assignable_v = is_move_assignable< T >::value ;
 */
 
 //=====================================================================
+//      nothrow_assignability
+//=====================================================================
+
+#if __has_builtin(__is_nothrow_assignable)
+
+template< typename T, typename... Args >
+struct is_nothrow_assignable : bool_constant< __is_nothrow_assignable( T, Args... ) > {} ;
+
+#else
+
+#endif
+
+template< typename T, typename... Args >
+inline constexpr bool is_nothrow_assignable_v = is_nothrow_assignable< T, Args... >::value ;
+
+template< typename T >
+struct is_nothrow_move_assignable : is_nothrow_assignable< T, add_rvalue_reference_t< T > > {} ;
+
+template< typename T >
+inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable< T >::value ;
+
+template< typename T >
+struct is_nothrow_copy_assignable : is_nothrow_assignable< T, add_lvalue_reference_t< T > > {} ;
+
+template< typename T >
+inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable< T >::value ;
+
+//=====================================================================
 //      remove_pointer
 //=====================================================================
 
@@ -874,6 +918,43 @@ template< typename T, typename... Args >
 inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible< T, Args... >::value ;
 
 //=====================================================================
+//      is_destructible
+//=====================================================================
+
+//=====================================================================
+//      is_nothrow_destructible
+//=====================================================================
+
+//=====================================================================
+//      is_trivially_destructible
+//=====================================================================
+
+#if __has_builtin(__is_trivially_destructible)
+
+template< typename T >
+struct is_trivially_destructible : bool_constant< __is_trivially_destructible( T ) > {} ;
+
+#else
+
+#endif
+
+template< typename T >
+inline constexpr bool is_trivially_destructible_v = is_trivially_destructible< T >::value ;
+
+//=====================================================================
+//      is_swappable
+//=====================================================================
+
+//=====================================================================
+//      is_nothrow_swappable
+//=====================================================================
+
+//=====================================================================
+//      is_trivially_swappable
+//=====================================================================
+
+
+//=====================================================================
 //      is_copy_constructible
 //=====================================================================
 
@@ -922,6 +1003,16 @@ struct is_trivially_move_constructible : is_trivially_constructible< T, add_rval
 
 template< typename T >
 inline constexpr bool is_trivially_move_constructible_v = is_trivially_move_constructible< T >::value ;
+
+//=====================================================================
+//      is_nothrow_default_constructible
+//=====================================================================
+
+template< typename T >
+struct is_nothrow_default_constructible : is_nothrow_constructible< T > {} ;
+
+template< typename T >
+inline constexpr bool is_nothrow_default_constructible_v = is_nothrow_default_constructible< T >::value ;
 
 //=====================================================================
 //      is_nothrow_copy_constructible

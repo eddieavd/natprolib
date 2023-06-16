@@ -26,7 +26,7 @@ private:
 public:
         using      value_type = T;
         using  allocator_type = Allocator;
-        using       _alloc_rr = typename std::remove_reference_t< allocator_type >;
+        using       _alloc_rr = remove_reference_t< allocator_type >;
         using   _alloc_traits = std::allocator_traits< _alloc_rr >;
         using       reference = value_type &;
         using const_reference = value_type const &;
@@ -43,15 +43,15 @@ public:
         pointer        end_cap_;
         allocator_type alloc_  ;
 
-        using _alloc_ref       = std::add_lvalue_reference_t< allocator_type >;
-        using _alloc_const_ref = std::add_lvalue_reference_t< allocator_type >;
+        using _alloc_ref       = add_lvalue_reference_t< allocator_type >;
+        using _alloc_const_ref = add_lvalue_reference_t< allocator_type >;
 
         _alloc_rr       & _alloc   ()       noexcept { return alloc_  ; }
         _alloc_rr const & _alloc   () const noexcept { return alloc_  ; }
         pointer         & _end_cap ()       noexcept { return end_cap_; }
         pointer   const & _end_cap () const noexcept { return end_cap_; }
 
-        split_buffer () noexcept( std::is_nothrow_default_constructible_v< allocator_type > );
+        split_buffer () noexcept( is_nothrow_default_constructible_v< allocator_type > );
 
         explicit split_buffer ( _alloc_rr       & _alloc_ );
         explicit split_buffer ( _alloc_rr const & _alloc_ );
@@ -61,12 +61,12 @@ public:
         ~split_buffer ();
 
         split_buffer ( split_buffer && _other_ )
-                noexcept( std::is_nothrow_move_constructible_v< allocator_type > );
+                noexcept( is_nothrow_move_constructible_v< allocator_type > );
         split_buffer ( split_buffer && _other_, _alloc_rr const & _alloc_ );
 
         split_buffer & operator= ( split_buffer && _other_ )
                 noexcept( ( _alloc_traits::propagate_on_container_move_assignment::value &&
-                                        std::is_nothrow_move_assignable_v< allocator_type > ) ||
+                                        is_nothrow_move_assignable_v< allocator_type > ) ||
                                 !_alloc_traits::propagate_on_container_move_assignment::value );
 
               iterator begin ()       noexcept { return begin_; }
@@ -107,7 +107,7 @@ public:
         void _construct_at_end ( size_type const _count_, const_reference _val_ );
 
         template< typename InputIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                  is_cpp17_input_iterator_v  < InputIterator > &&
                 !is_cpp17_forward_iterator_v< InputIterator >,
@@ -116,7 +116,7 @@ public:
         _construct_at_end ( InputIterator _first_, InputIterator _last_ );
 
         template< typename ForwardIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                 is_cpp17_forward_iterator_v< ForwardIterator >,
                 void
@@ -124,16 +124,16 @@ public:
         _construct_at_end( ForwardIterator _first_, ForwardIterator _last_ );
 
         void _destruct_at_begin ( pointer _new_begin_ )
-        { _destruct_at_begin( _new_begin_, std::is_trivially_destructible< value_type >() ); }
+        { _destruct_at_begin( _new_begin_, is_trivially_destructible< value_type >() ); }
 
-        void _destruct_at_begin ( pointer _new_begin_, std::false_type );
-        void _destruct_at_begin ( pointer _new_begin_, std::true_type  );
+        void _destruct_at_begin ( pointer _new_begin_, false_type );
+        void _destruct_at_begin ( pointer _new_begin_,  true_type );
 
         void _destruct_at_end ( pointer _new_last_ ) noexcept
-        { _destruct_at_end( _new_last_, std::is_trivially_destructible< value_type >() ); }
+        { _destruct_at_end( _new_last_, is_trivially_destructible< value_type >() ); }
 
-        void _destruct_at_end ( pointer _new_last_, std::false_type ) noexcept;
-        void _destruct_at_end ( pointer _new_last_, std::true_type  ) noexcept;
+        void _destruct_at_end ( pointer _new_last_, false_type ) noexcept;
+        void _destruct_at_end ( pointer _new_last_,  true_type ) noexcept;
 
         void swap ( split_buffer & _other_ )
                 noexcept( !_alloc_traits::propagate_on_container_swap::value ||
@@ -142,12 +142,12 @@ public:
         bool _invariants () const;
 
 private:
-        void _move_assign_alloc ( split_buffer & _buffer_, std::true_type )
-                noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
+        void _move_assign_alloc ( split_buffer & _buffer_, true_type )
+                noexcept( is_nothrow_move_assignable_v< allocator_type > )
         {
                 _alloc() = NPL_MOVE( _buffer_._alloc() );
         }
-        void _move_assign_alloc ( split_buffer &, std::false_type ) noexcept {}
+        void _move_assign_alloc ( split_buffer &, false_type ) noexcept {}
 
         struct _construct_transaction
         {
@@ -230,7 +230,7 @@ split_buffer< T, Allocator >::_construct_at_end ( size_type const _count_, const
 
 template< typename T, typename Allocator >
 template< typename InputIterator >
-typename std::enable_if_t
+enable_if_t
 <
 	 is_cpp17_input_iterator_v  < InputIterator > &&
 	!is_cpp17_forward_iterator_v< InputIterator >,
@@ -263,7 +263,7 @@ split_buffer< T, Allocator >::_construct_at_end ( InputIterator _first_, InputIt
 
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
-typename std::enable_if_t
+enable_if_t
 <
         is_cpp17_forward_iterator_v< ForwardIterator >,
         void
@@ -281,7 +281,7 @@ split_buffer< T, Allocator >::_construct_at_end ( ForwardIterator _first_, Forwa
 template< typename T, typename Allocator >
 inline
 void
-split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, std::false_type )
+split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, false_type )
 {
         while( begin_ != _new_begin_ )
         {
@@ -292,7 +292,7 @@ split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, std::fal
 template< typename T, typename Allocator >
 inline
 void
-split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, std::true_type )
+split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, true_type )
 {
         begin_ = _new_begin_;
 }
@@ -300,7 +300,7 @@ split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, std::tru
 template< typename T, typename Allocator >
 inline
 void
-split_buffer< T, Allocator >::_destruct_at_end ( pointer _new_last_, std::false_type ) noexcept
+split_buffer< T, Allocator >::_destruct_at_end ( pointer _new_last_, false_type ) noexcept
 {
         while( end_ != _new_last_ )
         {
@@ -311,7 +311,7 @@ split_buffer< T, Allocator >::_destruct_at_end ( pointer _new_last_, std::false_
 template< typename T, typename Allocator >
 inline
 void
-split_buffer< T, Allocator >::_destruct_at_end ( pointer _new_last_, std::true_type ) noexcept
+split_buffer< T, Allocator >::_destruct_at_end ( pointer _new_last_, true_type ) noexcept
 {
         end_ = _new_last_;
 }
@@ -328,7 +328,7 @@ split_buffer< T, Allocator >::split_buffer ( size_type const _capacity_, size_ty
 template< typename T, typename Allocator >
 inline
 split_buffer< T, Allocator >::split_buffer ()
-        noexcept( std::is_nothrow_default_constructible_v< allocator_type > )
+        noexcept( is_nothrow_default_constructible_v< allocator_type > )
         : first_( nullptr ), begin_( nullptr ), end_( nullptr ), end_cap_( nullptr ), alloc_()
 {}
 
@@ -356,7 +356,7 @@ split_buffer< T, Allocator >::~split_buffer ()
 
 template< typename T, typename Allocator >
 split_buffer< T, Allocator >::split_buffer ( split_buffer && _other_ )
-        noexcept( std::is_nothrow_move_constructible_v< allocator_type > )
+        noexcept( is_nothrow_move_constructible_v< allocator_type > )
         : first_   ( NPL_MOVE( _other_.first_   ) ),
           begin_   ( NPL_MOVE( _other_.begin_   ) ),
           end_     ( NPL_MOVE( _other_.end_     ) ),
@@ -402,7 +402,7 @@ template< typename T, typename Allocator >
 split_buffer< T, Allocator > &
 split_buffer< T, Allocator >::operator= ( split_buffer && _other_ )
         noexcept( ( _alloc_traits::propagate_on_container_move_assignment::value &&
-                                std::is_nothrow_move_assignable_v< allocator_type > ) ||
+                                is_nothrow_move_assignable_v< allocator_type > ) ||
                         !_alloc_traits::propagate_on_container_move_assignment::value )
 {
         clear();
@@ -413,7 +413,7 @@ split_buffer< T, Allocator >::operator= ( split_buffer && _other_ )
         end_     = _other_.end_    ;
         end_cap_ = _other_.end_cap_;
 
-        _move_assign_alloc( _other_, std::integral_constant< bool, _alloc_traits::propagate_on_container_move_assignment::value >() );
+        _move_assign_alloc( _other_, bool_constant< _alloc_traits::propagate_on_container_move_assignment::value >() );
 
         _other_.first_ = _other_.begin_ = _other_.end_ = _other_.end_cap_ = nullptr;
         return *this;
@@ -486,7 +486,7 @@ split_buffer< T, Allocator >::push_front ( const_reference _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< std::size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, ( cap + 3 ) / 4, _alloc() );
 
@@ -519,7 +519,7 @@ split_buffer< T, Allocator >::push_front ( value_type && _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< std::size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, ( cap + 3 ) / 4, _alloc() );
 
@@ -553,7 +553,7 @@ split_buffer< T, Allocator >::push_back ( const_reference _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< std::size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
@@ -587,7 +587,7 @@ split_buffer< T, Allocator >::push_back ( value_type && _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< std::size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
@@ -621,7 +621,7 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< std::size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
