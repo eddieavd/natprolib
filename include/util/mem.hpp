@@ -24,7 +24,7 @@ namespace mem
 template< typename T >
 constexpr T* to_address ( T * _ptr_ ) noexcept
 {
-        static_assert( !std::is_function_v< T > );
+        static_assert( !is_function_v< T > );
         return _ptr_;
 }
 
@@ -61,7 +61,7 @@ constexpr void destruct_at ( T * _ptr_ )
 #pragma GCC diagnostic pop
 
 template< typename Alloc >
-void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, std::true_type ) noexcept
+void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, true_type ) noexcept
 {
         using std::swap;
         swap( _lhs_, _rhs_ );
@@ -69,13 +69,13 @@ void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, std::true_type ) noexcept
 
 template< typename Alloc >
 inline
-void _swap_allocator ( Alloc &, Alloc &, std::false_type ) noexcept {}
+void _swap_allocator ( Alloc &, Alloc &, false_type ) noexcept {}
 
 template< typename Alloc >
 inline
 void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_ ) noexcept
 {
-        _swap_allocator( _lhs_, _rhs_, std::integral_constant< bool, std::allocator_traits< Alloc >::propagate_on_container_swap::value >() );
+        _swap_allocator( _lhs_, _rhs_, bool_constant< std::allocator_traits< Alloc >::propagate_on_container_swap::value >() );
 }
 
 template< typename InputIterator, typename OutputIterator >
@@ -105,10 +105,10 @@ void _construct_forward_with_exception_guarantees ( Alloc & _alloc_, Ptr _begin1
 }
 
 template< typename Alloc, typename T,
-          typename std::enable_if_t
+          enable_if_t
           <
                 ( is_default_allocator_v< Alloc > || !has_construct_v< Alloc, T*, T > ) &&
-                  std::is_trivially_move_constructible_v< T >
+                  is_trivially_move_constructible_v< T >
           >
 >
 static
@@ -139,10 +139,10 @@ void _construct_backward_with_exception_guarantees ( Alloc & _alloc_, Ptr _begin
 }
 
 template< typename Alloc, typename T,
-          typename = typename std::enable_if_t
+          typename = enable_if_t
           <
                 ( is_default_allocator_v< Alloc > || !has_construct_v< Alloc, T*, T > ) &&
-                  std::is_trivially_move_constructible_v< T >
+                  is_trivially_move_constructible_v< T >
           >
 >
 static
@@ -171,15 +171,15 @@ void _construct_range_forward ( Alloc & _alloc_, Iter _begin1_, Iter _end1_, Ptr
 }
 
 template< typename Alloc, typename SrcT, typename DestT,
-          typename RawSrcT  = typename std::remove_const_t< SrcT >,
-          typename RawDestT = typename std::remove_const_t< DestT >
+          typename RawSrcT  = remove_const_t< SrcT >,
+          typename RawDestT = remove_const_t< DestT >
           >
 inline
 static
-typename std::enable_if_t
+enable_if_t
 <
-        std::is_trivially_move_constructible_v< DestT > &&
-        std::is_same_v< RawSrcT, RawDestT > &&
+        is_trivially_move_constructible_v< DestT > &&
+        is_same_v< RawSrcT, RawDestT > &&
         (  is_default_allocator_v< Alloc > ||
           !has_construct_v< Alloc, DestT*, SrcT& > ),
         void

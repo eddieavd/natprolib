@@ -36,7 +36,7 @@ struct _iterator_traits< Iter, true >
         : _iterator_traits_impl
           <
                 Iter,
-                std::is_convertible_v< typename Iter::npl_iterator_category, random_access_iterator_tag >
+                is_convertible_v< typename Iter::npl_iterator_category, random_access_iterator_tag >
           >
 {};
 
@@ -46,12 +46,12 @@ struct _has_npl_iterator_typedefs
 private:
         struct _two { char _lx; char _lxx; };
         template< typename U > static _two _test( ... );
-        template< typename U > static char _test( typename _void_t< typename U::npl_iterator_category >::type* = 0,
-                                                  typename _void_t< typename U::iterator_category     >::type* = 0,
-                                                  typename _void_t< typename U::difference_type       >::type* = 0,
-                                                  typename _void_t< typename U::value_type            >::type* = 0,
-                                                  typename _void_t< typename U::reference             >::type* = 0,
-                                                  typename _void_t< typename U::pointer               >::type* = 0
+        template< typename U > static char _test( typename void_t< typename U::npl_iterator_category >::type* = 0,
+                                                  typename void_t< typename U::iterator_category     >::type* = 0,
+                                                  typename void_t< typename U::difference_type       >::type* = 0,
+                                                  typename void_t< typename U::value_type            >::type* = 0,
+                                                  typename void_t< typename U::reference             >::type* = 0,
+                                                  typename void_t< typename U::pointer               >::type* = 0
         );
 public:
         static bool const value = sizeof( _test< T >( 0, 0, 0, 0, 0, 0 ) ) == 1;
@@ -73,7 +73,7 @@ struct has_npl_iterator_category
 private:
         struct _two { char _lx; char _lxx; };
         template< typename U > static _two _test( ... );
-        template< typename U > static char _test( typename _void_t< typename U::npl_iterator_category >::type* = 0 );
+        template< typename U > static char _test( typename void_t< typename U::npl_iterator_category >::type* = 0 );
 public:
         static bool const value = sizeof( _test< T >( 0 ) ) == 1;
 };
@@ -83,16 +83,16 @@ inline constexpr bool has_npl_iterator_category_v = has_npl_iterator_category< T
 
 template< typename T, typename U, bool = has_npl_iterator_category< iterator_traits< T > >::value >
 struct has_same_npl_iterator_category
-        : public std::integral_constant< bool, std::is_same_v< typename iterator_traits< T >::npl_iterator_category, U > > {};
+        : public bool_constant< is_same_v< typename iterator_traits< T >::npl_iterator_category, U > > {};
 
 template< typename T, typename U >
-struct has_same_npl_iterator_category< T, U, false > : public std::false_type {};
+struct has_same_npl_iterator_category< T, U, false > : public false_type {};
 
 template< typename T >
 struct iterator_traits< T* >
 {
         using       difference_type = std::ptrdiff_t;
-        using            value_type = std::remove_cv_t< T >;
+        using            value_type = remove_cv_t< T >;
         using               pointer = T *;
         using             reference = T &;
         using     iterator_category = std::random_access_iterator_tag;
@@ -108,8 +108,8 @@ public:
         using                 _self = iterator;
         using            value_type = T;
         using       difference_type = std::ptrdiff_t;
-        using               pointer = std::conditional_t< C, value_type const *, value_type * >;
-        using             reference = std::conditional_t< C, value_type const &, value_type & >;
+        using               pointer = conditional_t< C, value_type const *, value_type * >;
+        using             reference = conditional_t< C, value_type const &, value_type & >;
         using         const_pointer = value_type const *;
         using       const_reference = value_type const &;
         using     iterator_category = std::random_access_iterator_tag;
@@ -174,7 +174,7 @@ public:
 
         /*
         constexpr
-        std::enable_if_t
+        enable_if_t
         <
                 is_ptr_to_const_v< pointer >,
                 pointer
@@ -183,7 +183,7 @@ public:
         { return ptr_; }
 
         constexpr
-        std::enable_if_t
+        enable_if_t
         <
                 !is_ptr_to_const_v< pointer >,
                 pointer
