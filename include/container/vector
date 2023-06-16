@@ -13,6 +13,8 @@
 #include <util/mem.hpp>
 #include <util/util.hpp>
 #include <util/traits.hpp>
+#include <util/alloc_traits.hpp>
+#include <util/iter_traits.hpp>
 #include <util/iterator.hpp>
 #include <util/split_buffer.hpp>
 
