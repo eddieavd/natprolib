@@ -795,6 +795,9 @@ struct is_nothrow_assignable : bool_constant< __is_nothrow_assignable( T, Args..
 
 #else
 
+template< typename T, typename... Args >
+struct is_nothrow_assignable : std::is_nothrow_assignable< T, Args... > {} ;
+
 #endif
 
 template< typename T, typename... Args >
@@ -887,6 +890,9 @@ struct _is_trivially_constructible_impl : bool_constant< __is_trivially_construc
 
 #else
 
+template< typename T, typename... Args >
+struct _is_trivially_constructible_impl : std::is_trivially_constructible< T, Args... > {} ;
+
 #endif
 
 template< typename T, typename... Args >
@@ -953,6 +959,9 @@ template< typename T >
 struct is_trivially_destructible : bool_constant< __is_trivially_destructible( T ) > {} ;
 
 #else
+
+template< typename T >
+struct is_trivially_destructible : std::is_trivially_destructible< T > {} ;
 
 #endif
 
