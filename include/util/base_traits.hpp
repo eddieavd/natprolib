@@ -6,7 +6,7 @@
 
 #pragma once
 
-#if !__has_builtin(__is_final) || !__has_builtin(__is_enum) || !__has_builtin(__is_union)
+#if !__has_builtin(__is_final) || !__has_builtin(__is_enum) || !__has_builtin(__is_union) || !__has_builtin(__is_nothrow_assignable) || !__has_builtin(__is_trivially_destructible)
 #include <type_traits>
 #else
 #endif
