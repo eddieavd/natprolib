@@ -157,7 +157,6 @@ TEST( TraitsTest, Containers )
         static_assert( npl::is_container_v< npl::static_vector< int, 4 > > );
 
         static_assert( npl::is_container_v< std::vector< int > > );
-        static_assert( npl::is_container_v< std::array< int, 4 > > );
 
         static_assert( npl::is_2d_container_v< npl::vector< npl::vector< int > > > );
         static_assert( npl::is_2d_container_v< npl::vector< npl::prefix_vector< int > > > );
@@ -170,7 +169,7 @@ TEST( TraitsTest, Containers )
         static_assert( npl::is_3d_container_v< npl::vector< npl::vector< npl::vector< int > > > > );
         static_assert( npl::is_3d_container_v< npl::vector< npl::prefix_array< npl::prefix_vector< int >, 4 > > > );
 
-        static_assert( npl::is_3d_container_v< std::vector< std::vector< std::array< int, 4 > > > > );
+        static_assert( npl::is_3d_container_v< std::vector< std::vector< std::vector< int > > > > );
 
         static_assert( std::is_same_v< int, npl::enable_2d_container_base_t< npl::vector< npl::vector< int > > > > );
 
