@@ -63,7 +63,7 @@ protected:
         using const_iterator = _fenwick_tree_iterator<  true > ;
         using allocator_type = typename _base::allocator_type  ;
 
-        _fenwick_tree_base (                                 ) noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
+        _fenwick_tree_base (                                 ) noexcept( is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
         _fenwick_tree_base ( allocator_type const &  _alloc_ ) :          _base(           _alloc_   ) {}
         _fenwick_tree_base ( allocator_type       && _alloc_ ) noexcept : _base( NPL_MOVE( _alloc_ ) ) {}
 };
@@ -92,10 +92,10 @@ public:
         using       reverse_iterator = reverse_iter<       iterator > ;
         using const_reverse_iterator = reverse_iter< const_iterator > ;
 
-        static_assert( ( std::is_same_v< typename allocator_type::value_type, value_type > ),
+        static_assert( ( is_same_v< typename allocator_type::value_type, value_type > ),
                         "allocator_type::value_type != fenwick_tree::value_type" );
 
-        fenwick_tree () noexcept( std::is_nothrow_default_constructible_v< allocator_type > ) {}
+        fenwick_tree () noexcept( is_nothrow_default_constructible_v< allocator_type > ) {}
 
         explicit fenwick_tree ( allocator_type const & _alloc_ ) noexcept : _base( _alloc_ ) {}
 
@@ -107,10 +107,10 @@ public:
 
         template< typename FtreeIterator >
         fenwick_tree ( FtreeIterator _first_,
-                        typename std::enable_if_t
+                        enable_if_t
                         <
                                 is_fenwick_tree_iterator_v< FtreeIterator > &&
-                                std::is_constructible_v
+                                is_constructible_v
                                 <
                                         value_type,
                                         typename std::iterator_traits< FtreeIterator >::reference
@@ -120,10 +120,10 @@ public:
 
         template< typename FtreeIterator >
         fenwick_tree ( FtreeIterator _first_, FtreeIterator _last_, allocator_type const & _alloc_,
-                        typename std::enable_if_t
+                        enable_if_t
                         <
                                 is_fenwick_tree_iterator_v< FtreeIterator > &&
-                                std::is_constructible_v
+                                is_constructible_v
                                 <
                                         value_type,
                                         typename std::iterator_traits< FtreeIterator >::reference
@@ -132,12 +132,12 @@ public:
 
         template< typename InputIterator >
         fenwick_tree ( InputIterator _first_,
-                        typename std::enable_if_t
+                        enable_if_t
                         <
                                  is_cpp17_input_iterator_v  < InputIterator > &&
                                 !is_cpp17_forward_iterator_v< InputIterator > &&
                                 !is_fenwick_tree_iterator_v < InputIterator > &&
-                                 std::is_constructible_v
+                                 is_constructible_v
                                  <
                                         value_type,
                                         typename std::iterator_traits< InputIterator >::reference
@@ -147,12 +147,12 @@ public:
 
         template< typename InputIterator >
         fenwick_tree ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
-                        typename std::enable_if_t
+                        enable_if_t
                         <
                                  is_cpp17_input_iterator_v  < InputIterator > &&
                                 !is_cpp17_forward_iterator_v< InputIterator > &&
                                 !is_fenwick_tree_iterator_v < InputIterator > &&
-                                 std::is_constructible_v
+                                 is_constructible_v
                                  <
                                         value_type,
                                         typename std::iterator_traits< InputIterator >::reference
@@ -161,11 +161,11 @@ public:
 
         template< typename ForwardIterator >
         fenwick_tree ( ForwardIterator _first_,
-                        typename std::enable_if_t
+                        enable_if_t
                         <
                                  is_cpp17_forward_iterator_v< ForwardIterator > &&
                                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                                 std::is_constructible_v
+                                 is_constructible_v
                                  <
                                         value_type,
                                         typename std::iterator_traits< ForwardIterator >::reference
@@ -175,11 +175,11 @@ public:
 
         template< typename ForwardIterator >
         fenwick_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
-                        typename std::enable_if_t
+                        enable_if_t
                         <
                                  is_cpp17_forward_iterator_v< ForwardIterator > &&
                                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                                 std::is_constructible_v
+                                 is_constructible_v
                                  <
                                         value_type,
                                         typename std::iterator_traits< ForwardIterator >::reference
@@ -192,12 +192,12 @@ public:
         }
 
         fenwick_tree ( fenwick_tree const & _other_                                              );
-        fenwick_tree ( fenwick_tree const & _other_, _identity< allocator_type > const & _alloc_ );
+        fenwick_tree ( fenwick_tree const & _other_, type_identity< allocator_type > const & _alloc_ );
 
         fenwick_tree & operator= ( fenwick_tree const & _other_ );
 
         fenwick_tree ( fenwick_tree && _other_                                              ) noexcept;
-        fenwick_tree ( fenwick_tree && _other_, _identity< allocator_type > const & _alloc_ );
+        fenwick_tree ( fenwick_tree && _other_, type_identity< allocator_type > const & _alloc_ );
 
         fenwick_tree & operator= ( fenwick_tree && _other_ )
                 noexcept( ( noexcept_move_assign_container_v< allocator_type, _alloc_traits > ) );
@@ -209,10 +209,10 @@ public:
         { assign( _list_.begin(), _list_.end() ); return *this; }
 
         template< typename FtreeIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                 is_fenwick_tree_iterator_v< FtreeIterator > &&
-                std::is_constructible_v
+                is_constructible_v
                 <
                         value_type,
                         typename std::iterator_traits< FtreeIterator >::reference
@@ -222,12 +222,12 @@ public:
         assign ( FtreeIterator _first_, FtreeIterator _last_ );
 
         template< typename InputIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                 !is_fenwick_tree_iterator_v < InputIterator > &&
                 !is_cpp17_forward_iterator_v< InputIterator > &&
                  is_cpp17_input_iterator_v  < InputIterator > &&
-                 std::is_constructible_v
+                 is_constructible_v
                  <
                         value_type,
                         typename std::iterator_traits< InputIterator >::reference
@@ -237,11 +237,11 @@ public:
         assign ( InputIterator _first_, InputIterator _last_ );
 
         template< typename ForwardIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
                  is_cpp17_forward_iterator_v< ForwardIterator > &&
-                 std::is_constructible_v
+                 is_constructible_v
                  <
                         value_type,
                         typename std::iterator_traits< ForwardIterator >::reference
@@ -478,10 +478,10 @@ public:
         iterator insert ( const_iterator _position_, size_type const _count_, const_reference _val_ );
 
         template< typename FtreeIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                 is_fenwick_tree_iterator_v< FtreeIterator > &&
-                std::is_constructible_v
+                is_constructible_v
                 <
                         value_type,
                         typename std::iterator_traits< FtreeIterator >::reference
@@ -491,12 +491,12 @@ public:
         insert ( const_iterator _position_, FtreeIterator _first_, FtreeIterator _last_ );
 
         template< typename InputIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                  is_cpp17_input_iterator_v  < InputIterator > &&
                 !is_cpp17_forward_iterator_v< InputIterator > &&
                 !is_fenwick_tree_iterator_v < InputIterator > &&
-                 std::is_constructible_v
+                 is_constructible_v
                  <
                         value_type,
                         typename std::iterator_traits< InputIterator >::reference
@@ -506,11 +506,11 @@ public:
         insert ( const_iterator _position_, InputIterator _first_, InputIterator _last_ );
 
         template< typename ForwardIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                  is_cpp17_forward_iterator_v< ForwardIterator > &&
                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                 std::is_constructible_v
+                 is_constructible_v
                  <
                         value_type,
                         typename std::iterator_traits< ForwardIterator >::reference
@@ -558,7 +558,7 @@ private:
         void _construct_at_end ( size_type const _count_, const_reference _val_ );
 
         template< typename FtreeIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                 is_fenwick_tree_iterator_v< FtreeIterator >,
                 void
@@ -566,7 +566,7 @@ private:
         _construct_at_end ( FtreeIterator _begin_, FtreeIterator _end_, size_type const _count_ );
 
         template< typename ForwardIterator >
-        typename std::enable_if_t
+        enable_if_t
         <
                  is_cpp17_forward_iterator_v< ForwardIterator > &&
                 !is_fenwick_tree_iterator_v < ForwardIterator >,
@@ -595,8 +595,8 @@ private:
 
         void _move_range ( pointer _from_s_, pointer _from_e_, pointer _to_ );
 
-        void _move_assign ( fenwick_tree & _other_, std::true_type  ) noexcept( std::is_nothrow_move_assignable_v< allocator_type > );
-        void _move_assign ( fenwick_tree & _other_, std::false_type ) noexcept( _alloc_traits::is_always_equal::value );
+        void _move_assign ( fenwick_tree & _other_, true_type  ) noexcept( is_nothrow_move_assignable_v< allocator_type > );
+        void _move_assign ( fenwick_tree & _other_, false_type ) noexcept( _alloc_traits::is_always_equal::value );
 
         void _destruct_at_end ( pointer _new_last_ ) noexcept
         {
@@ -618,7 +618,7 @@ private:
                                               void const * _old_mid_,
                                               void const * _new_mid_ ) const
         {
-                if( _beg_ && std::is_same_v< allocator_type, _default_allocator_type > )
+                if( _beg_ && is_same_v< allocator_type, _default_allocator_type > )
                 {
                         __sanitizer_annotate_contiguous_container( _beg_, _end_, _old_mid_, _new_mid_ );
                 }
@@ -694,14 +694,14 @@ private:
 
 template< typename InputIterator,
           typename Alloc = std::allocator< _iter_value_type< InputIterator > >,
-          typename = std::enable_if< _is_allocator< Alloc >::value >
+          typename = enable_if< is_allocator< Alloc >::value >
           >
 fenwick_tree ( InputIterator, InputIterator )
         -> fenwick_tree< _iter_value_type< InputIterator >, Alloc >;
 
 template< typename InputIterator,
           typename Alloc,
-          typename = std::enable_if< _is_allocator< Alloc >::value >
+          typename = enable_if< is_allocator< Alloc >::value >
           >
 fenwick_tree ( InputIterator, InputIterator, Alloc )
         -> fenwick_tree< _iter_value_type< InputIterator >, Alloc >;
@@ -826,7 +826,7 @@ fenwick_tree< T, Allocator >::_construct_at_end ( size_type const _count_, const
 
 template< typename T, typename Allocator >
 template< typename FtreeIterator >
-typename std::enable_if_t
+enable_if_t
 <
         is_fenwick_tree_iterator_v< FtreeIterator >,
         void
@@ -840,7 +840,7 @@ fenwick_tree< T, Allocator >::_construct_at_end ( FtreeIterator _first_, FtreeIt
 
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
-typename std::enable_if_t
+enable_if_t
 <
          is_cpp17_forward_iterator_v< ForwardIterator > &&
         !is_fenwick_tree_iterator_v < ForwardIterator >,
@@ -1028,10 +1028,10 @@ fenwick_tree< T, Allocator >::fenwick_tree ( size_type const _count_, value_type
 template< typename T, typename Allocator >
 template< typename FtreeIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_,
-                typename std::enable_if_t
+                enable_if_t
                 <
                         is_fenwick_tree_iterator_v< FtreeIterator > &&
-                        std::is_constructible_v
+                        is_constructible_v
                         <
                                 value_type,
                                 typename std::iterator_traits< FtreeIterator >::reference
@@ -1050,10 +1050,10 @@ fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_,
 template< typename T, typename Allocator >
 template< typename FtreeIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_, FtreeIterator _last_, allocator_type const & _alloc_,
-                std::enable_if_t
+                enable_if_t
                 <
                         is_fenwick_tree_iterator_v< FtreeIterator > &&
-                        std::is_constructible_v
+                        is_constructible_v
                         <
                                 value_type,
                                 typename std::iterator_traits< FtreeIterator >::reference
@@ -1073,12 +1073,12 @@ fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_, FtreeIterato
 template< typename T, typename Allocator >
 template< typename InputIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_,
-                typename std::enable_if_t
+                enable_if_t
                 <
                          is_cpp17_input_iterator_v  < InputIterator > &&
                         !is_cpp17_forward_iterator_v< InputIterator > &&
                         !is_fenwick_tree_iterator_v < InputIterator > &&
-                         std::is_constructible_v
+                         is_constructible_v
                          <
                                 value_type,
                                 typename std::iterator_traits< InputIterator >::reference
@@ -1094,12 +1094,12 @@ fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_,
 template< typename T, typename Allocator >
 template< typename InputIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
-                typename std::enable_if_t
+                enable_if_t
                 <
                          is_cpp17_input_iterator_v  < InputIterator > &&
                         !is_cpp17_forward_iterator_v< InputIterator > &&
                         !is_fenwick_tree_iterator_v < InputIterator > &&
-                         std::is_constructible_v
+                         is_constructible_v
                          <
                                 value_type,
                                 typename std::iterator_traits< InputIterator >::reference
@@ -1116,11 +1116,11 @@ fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_, InputIterato
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_,
-                typename std::enable_if_t
+                enable_if_t
                 <
                          is_cpp17_forward_iterator_v< ForwardIterator > &&
                         !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                         std::is_constructible_v
+                         is_constructible_v
                          <
                                 value_type,
                                 typename std::iterator_traits< ForwardIterator >::reference
@@ -1146,11 +1146,11 @@ fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_,
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
-                std::enable_if_t
+                enable_if_t
                 <
                          is_cpp17_forward_iterator_v< ForwardIterator > &&
                         !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                         std::is_constructible_v
+                         is_constructible_v
                          <
                                 value_type,
                                 typename std::iterator_traits< ForwardIterator >::reference
@@ -1188,7 +1188,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree const & _other_ )
 }
 
 template< typename T, typename Allocator >
-fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree const & _other_, _identity< allocator_type > const & _alloc_ )
+fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree const & _other_, type_identity< allocator_type > const & _alloc_ )
         : _base( _alloc_ )
 {
         size_type count = _other_.size();
@@ -1214,7 +1214,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree && _other_ ) noexcept
 
 template< typename T, typename Allocator >
 inline
-fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree && _other_, _identity< allocator_type > const & _alloc_ )
+fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree && _other_, type_identity< allocator_type > const & _alloc_ )
         : _base( _alloc_ )
 {
         if( _alloc_ == _other_._alloc() )
@@ -1275,14 +1275,14 @@ fenwick_tree< T, Allocator > &
 fenwick_tree< T, Allocator >::operator= ( fenwick_tree && _other_ )
         noexcept( ( noexcept_move_assign_container_v< Allocator, _alloc_traits > ) )
 {
-        _move_assign( _other_, std::integral_constant< bool,
+        _move_assign( _other_, bool_constant<
                         _alloc_traits::propagate_on_container_move_assignment::value >() );
         return *this;
 }
 
 template< typename T, typename Allocator >
 void
-fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _other_, std::false_type )
+fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _other_, false_type )
         noexcept( _alloc_traits::is_always_equal::value )
 {
         if( _base::_alloc() != _other_._alloc() )
@@ -1292,14 +1292,14 @@ fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _other_, std::false_
         }
         else
         {
-                _move_assign( _other_, std::true_type() );
+                _move_assign( _other_, true_type() );
         }
 }
 
 template< typename T, typename Allocator >
 void
-fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _other_, std::true_type )
-        noexcept( std::is_nothrow_move_assignable_v< allocator_type > )
+fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _other_, true_type )
+        noexcept( is_nothrow_move_assignable_v< allocator_type > )
 {
         _vdeallocate();
         _base::_move_assign_alloc( _other_ );
@@ -1326,10 +1326,10 @@ fenwick_tree< T, Allocator >::operator= ( fenwick_tree const & _other_ )
 
 template< typename T, typename Allocator >
 template< typename FtreeIterator >
-typename std::enable_if_t
+enable_if_t
 <
         is_fenwick_tree_iterator_v< FtreeIterator > &&
-         std::is_constructible_v
+         is_constructible_v
          <
                 T,
                 typename std::iterator_traits< FtreeIterator >::reference
@@ -1375,12 +1375,12 @@ fenwick_tree< T, Allocator >::assign ( FtreeIterator _first_, FtreeIterator _las
 
 template< typename T, typename Allocator >
 template< typename InputIterator >
-typename std::enable_if_t
+enable_if_t
 <
          !is_fenwick_tree_iterator_v < InputIterator > &&
          !is_cpp17_forward_iterator_v< InputIterator > &&
           is_cpp17_input_iterator_v  < InputIterator > &&
-          std::is_constructible_v
+          is_constructible_v
           <
                 T,
                 typename std::iterator_traits< InputIterator >::reference
@@ -1398,11 +1398,11 @@ fenwick_tree< T, Allocator >::assign ( InputIterator _first_, InputIterator _las
 
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
-typename std::enable_if_t
+enable_if_t
 <
         !is_fenwick_tree_iterator_v < ForwardIterator > &&
          is_cpp17_forward_iterator_v< ForwardIterator > &&
-         std::is_constructible_v
+         is_constructible_v
          <
                 T,
                 typename std::iterator_traits< ForwardIterator >::reference
@@ -1844,7 +1844,7 @@ fenwick_tree< T, Allocator >::swap ( fenwick_tree & _other_ ) noexcept
         std::swap( this->end_cap_, _other_.end_cap_ );
 
         mem::_swap_allocator( this->_alloc(), _other_._alloc(),
-                        std::integral_constant< bool, _alloc_traits::propagate_on_container_swap::value >() );
+                        bool_constant< _alloc_traits::propagate_on_container_swap::value >() );
 }
 
 template< typename T, typename Allocator >

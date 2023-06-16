@@ -217,6 +217,32 @@ struct remove_cv : remove_const< remove_volatile_t< T > > {} ;
 template< typename T >
 using remove_cv_t = typename remove_cv< T >::type ;
 
+//=====================================================================
+//      remove_reference
+//=====================================================================
+
+template< typename T >
+struct remove_reference : type_identity< T > {} ;
+
+template< typename T >
+struct remove_reference< T & > : type_identity< T > {} ;
+
+template< typename T >
+struct remove_reference< T && > : type_identity< T > {} ;
+
+template< typename T >
+using remove_reference_t = typename remove_reference< T >::type ;
+
+//=====================================================================
+//      remove_cvref
+//=====================================================================
+
+template< typename T >
+struct remove_cvref : remove_reference< remove_const_t< remove_volatile_t< T > > > {} ;
+
+template< typename T >
+using remove_cvref_t = typename remove_cvref< T >::type ;
+
 
 //=====================================================================
 //  ┌┐ ┬┌┐┌┌─┐┬─┐┬ ┬
@@ -376,22 +402,6 @@ struct is_referenceable : bool_constant< is_not_same_v< decltype( _is_referencea
 
 template< typename T >
 inline constexpr bool is_referenceable_v = is_referenceable< T >::value ;
-
-//=====================================================================
-//      remove_reference
-//=====================================================================
-
-template< typename T >
-struct remove_reference : type_identity< T > {} ;
-
-template< typename T >
-struct remove_reference< T & > : type_identity< T > {} ;
-
-template< typename T >
-struct remove_reference< T && > : type_identity< T > {} ;
-
-template< typename T >
-using remove_reference_t = typename remove_reference< T >::type ;
 
 //=====================================================================
 //      add_lvalue_reference

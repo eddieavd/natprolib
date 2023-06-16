@@ -72,22 +72,22 @@ public:
         constexpr prefix_array ( size_type const _count_                        ) noexcept( noexcept( value_type{       } ) );
         constexpr prefix_array ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) );
 
-        constexpr prefix_array ( prefix_array const &  _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > );
-        constexpr prefix_array ( prefix_array       && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > );
+        constexpr prefix_array ( prefix_array const &  _other_ ) noexcept( is_nothrow_copy_constructible_v< value_type > );
+        constexpr prefix_array ( prefix_array       && _other_ ) noexcept( is_nothrow_move_constructible_v< value_type > );
 
-        constexpr prefix_array ( std::initializer_list< value_type > _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > );
+        constexpr prefix_array ( std::initializer_list< value_type > _list_ ) noexcept( is_nothrow_copy_assignable_v< value_type > );
 
-        constexpr ~prefix_array () noexcept requires( std::is_trivially_destructible_v< value_type > ) = default;
+        constexpr ~prefix_array () noexcept requires( is_trivially_destructible_v< value_type > ) = default;
 
-        constexpr ~prefix_array () noexcept( std::is_nothrow_destructible_v< value_type > ) requires( !std::is_trivially_destructible_v< value_type > )
+        constexpr ~prefix_array () noexcept( std::is_nothrow_destructible_v< value_type > ) requires( !is_trivially_destructible_v< value_type > )
         {
                 this->clear();
         }
 
-        constexpr prefix_array & operator= ( prefix_array const &  _other_ ) noexcept( std::is_nothrow_copy_assignable_v   < value_type > &&
-                                                                                                     std::is_nothrow_copy_constructible_v< value_type > );
-        constexpr prefix_array & operator= ( prefix_array       && _other_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
-                                                                                                     std::is_nothrow_move_constructible_v< value_type > );
+        constexpr prefix_array & operator= ( prefix_array const &  _other_ ) noexcept( is_nothrow_copy_assignable_v   < value_type > &&
+                                                                                                     is_nothrow_copy_constructible_v< value_type > );
+        constexpr prefix_array & operator= ( prefix_array       && _other_ ) noexcept( is_nothrow_move_assignable_v   < value_type > &&
+                                                                                                     is_nothrow_move_constructible_v< value_type > );
 
         constexpr auto & operator+= ( prefix_array const & _other_ )        noexcept ;
         constexpr auto   operator+  ( prefix_array const & _other_ ) const           ;
@@ -204,7 +204,7 @@ prefix_array< T, N >::prefix_array ( size_type const _count_, const_reference _v
 
 template< typename T, size_t N >
 constexpr
-prefix_array< T, N >::prefix_array ( std::initializer_list< value_type > _list_ ) noexcept( std::is_nothrow_copy_assignable_v< value_type > )
+prefix_array< T, N >::prefix_array ( std::initializer_list< value_type > _list_ ) noexcept( is_nothrow_copy_assignable_v< value_type > )
         : _base()
 {
         auto it( this->begin() );
@@ -221,7 +221,7 @@ prefix_array< T, N >::prefix_array ( std::initializer_list< value_type > _list_ 
 
 template< typename T, size_t N >
 constexpr
-prefix_array< T, N >::prefix_array ( prefix_array const & _other_ ) noexcept( std::is_nothrow_copy_constructible_v< value_type > )
+prefix_array< T, N >::prefix_array ( prefix_array const & _other_ ) noexcept( is_nothrow_copy_constructible_v< value_type > )
         : _base()
 {
         this->size_ = _other_.size_;
@@ -234,7 +234,7 @@ prefix_array< T, N >::prefix_array ( prefix_array const & _other_ ) noexcept( st
 
 template< typename T, size_t N >
 constexpr
-prefix_array< T, N >::prefix_array ( prefix_array && _other_ ) noexcept( std::is_nothrow_move_constructible_v< value_type > )
+prefix_array< T, N >::prefix_array ( prefix_array && _other_ ) noexcept( is_nothrow_move_constructible_v< value_type > )
         : _base()
 {
         this->size_ = _other_.size_;
@@ -247,8 +247,8 @@ prefix_array< T, N >::prefix_array ( prefix_array && _other_ ) noexcept( std::is
 
 template< typename T, size_t N >
 constexpr prefix_array< T, N > &
-prefix_array< T, N >::operator= ( prefix_array const & _other_ ) noexcept( std::is_nothrow_copy_assignable_v   < value_type > &&
-                                                                           std::is_nothrow_copy_constructible_v< value_type > )
+prefix_array< T, N >::operator= ( prefix_array const & _other_ ) noexcept( is_nothrow_copy_assignable_v   < value_type > &&
+                                                                           is_nothrow_copy_constructible_v< value_type > )
 {
         if( &_other_ == this ) return *this;
 
@@ -259,8 +259,8 @@ prefix_array< T, N >::operator= ( prefix_array const & _other_ ) noexcept( std::
 
 template< typename T, size_t N >
 constexpr prefix_array< T, N > &
-prefix_array< T, N >::operator= ( prefix_array && _other_ ) noexcept( std::is_nothrow_move_assignable_v   < value_type > &&
-                                                                      std::is_nothrow_move_constructible_v< value_type > )
+prefix_array< T, N >::operator= ( prefix_array && _other_ ) noexcept( is_nothrow_move_assignable_v   < value_type > &&
+                                                                      is_nothrow_move_constructible_v< value_type > )
 {
         if( &_other_ == this ) return *this;
 
