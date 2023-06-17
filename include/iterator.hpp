@@ -101,14 +101,14 @@ template< typename Iter >
 class reverse_iter
 {
 public:
-        using                 _base = Iter;
-        using            value_type = typename _base::value_type;
-        using       difference_type = typename _base::difference_type;
-        using               pointer = typename _base::pointer;
-        using         const_pointer = pointer;
-        using             reference = typename _base::reference;
-        using       const_reference = reference;
-        using     iterator_category = typename _base::iterator_category;
+        using             _base = Iter;
+        using        value_type = typename _base::value_type;
+        using   difference_type = typename _base::difference_type;
+        using           pointer = typename _base::pointer;
+        using     const_pointer = pointer;
+        using         reference = typename _base::reference;
+        using   const_reference = reference;
+        using iterator_category = typename _base::iterator_category;
 
         constexpr reference       operator*  (     ) const noexcept { auto it = iter_;          return *--it; }
         constexpr reverse_iter  & operator++ (     )       noexcept {                 iter_-- ; return *this; }

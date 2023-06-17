@@ -162,7 +162,7 @@ template< typename Alloc >
 inline
 void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_ ) noexcept
 {
-        _swap_allocator( _lhs_, _rhs_, bool_constant< std::allocator_traits< Alloc >::propagate_on_container_swap::value >() );
+        _swap_allocator( _lhs_, _rhs_, bool_constant< allocator_traits< Alloc >::propagate_on_container_swap::value >() );
 }
 
 template< typename InputIterator, typename OutputIterator >
@@ -183,7 +183,7 @@ void _construct_forward_with_exception_guarantees ( Alloc & _alloc_, Ptr _begin1
 {
         static_assert( is_cpp17_move_insertable_v< Alloc >,
                         "The specified type does not meet the requirements of cpp17_move_insertable" );
-        using _alloc_traits = std::allocator_traits< Alloc >;
+        using _alloc_traits = allocator_traits< Alloc >;
 
         for( ; _begin1_ != _end1_; ++_begin1_, ( void ) ++_begin2_ )
         {
@@ -201,7 +201,7 @@ template< typename Alloc, typename T,
 static
 void _construct_forward_with_exception_guarantees ( Alloc &, T * _begin1_, T * _end1_, T* & _begin2_ )
 {
-        std::ptrdiff_t count = _end1_ - _begin1_;
+        ptrdiff_t count = _end1_ - _begin1_;
 
         if( count > 0 )
         {
@@ -216,7 +216,7 @@ void _construct_backward_with_exception_guarantees ( Alloc & _alloc_, Ptr _begin
 {
         static_assert( is_cpp17_move_insertable_v< Alloc >,
                         "The specified type does not meet the requirements of cpp17_move_insertable" );
-        using _alloc_traits = std::allocator_traits< Alloc >;
+        using _alloc_traits = allocator_traits< Alloc >;
 
         while( _end1_ != _begin1_ )
         {
@@ -235,7 +235,7 @@ template< typename Alloc, typename T,
 static
 void _construct_backward_with_exception_guarantees ( [[ maybe_unused ]] Alloc &, T * _begin1_, T * _end1_, T * & _end2_ )
 {
-        std::ptrdiff_t count = _end1_ - _begin1_;
+        ptrdiff_t count = _end1_ - _begin1_;
         _end2_ -= count;
 
         if( count > 0 )
@@ -249,7 +249,7 @@ inline
 static
 void _construct_range_forward ( Alloc & _alloc_, Iter _begin1_, Iter _end1_, Ptr & _begin2_ )
 {
-        using _alloc_traits = typename std::allocator_traits< Alloc >;
+        using _alloc_traits = allocator_traits< Alloc >;
 
         for( ; _begin1_ != _end1_; ++_begin1_, ( void ) ++_begin2_ )
         {
@@ -273,7 +273,7 @@ enable_if_t
 >
 _construct_range_forward ( [[ maybe_unused ]] Alloc & _alloc_, SrcT * _begin1_, SrcT * _end1_, DestT* & _begin2_ )
 {
-        std::ptrdiff_t _count_ = _end1_ - _begin1_;
+        ptrdiff_t _count_ = _end1_ - _begin1_;
 
         if( _count_ > 0 )
         {

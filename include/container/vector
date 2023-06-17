@@ -50,9 +50,9 @@ template< typename T, typename Allocator >
 class _vector_base
 {
 public:
-        using allocator_type = Allocator                               ;
+        using allocator_type = Allocator                          ;
         using  _alloc_traits = allocator_traits< allocator_type > ;
-        using      size_type = typename _alloc_traits::size_type       ;
+        using      size_type = typename _alloc_traits::size_type  ;
 protected:
         template< bool C, typename T_ = T >
         class _vector_iterator
@@ -61,7 +61,7 @@ protected:
                 friend class _vector_iterator< !C, T_ >;
         public:
                 using             _base = iterator< C, T_ >                       ;
-                using     _alloc_traits = allocator_traits< Allocator >      ;
+                using     _alloc_traits = allocator_traits< Allocator >           ;
                 using   difference_type = typename _alloc_traits::difference_type ;
                 using iterator_category = vector_iterator_tag                     ;
 
