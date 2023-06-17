@@ -95,6 +95,8 @@ TEST( SegmentTreeTest, MoveConstruct )
 {
         npl::segment_tree< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
+        int source_range = source.range();
+
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
 
@@ -102,6 +104,8 @@ TEST( SegmentTreeTest, MoveConstruct )
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.empty()      ,            true );
+
+        EXPECT_EQ( source_range, seg.range() );
 
         EXPECT_EQ( seg._invariants(),            true );
         EXPECT_EQ( seg.size()       , CUSTOM_CAPACITY );

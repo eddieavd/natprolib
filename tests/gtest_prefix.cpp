@@ -100,6 +100,8 @@ TEST( PrefixVectorTest, MoveConstruct )
 {
         npl::prefix_vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
+        int source_range = source.range();
+
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.size()       , CUSTOM_CAPACITY );
 
@@ -107,6 +109,8 @@ TEST( PrefixVectorTest, MoveConstruct )
 
         EXPECT_EQ( source._invariants(),            true );
         EXPECT_EQ( source.empty()      ,            true );
+
+        EXPECT_EQ( source_range, prefix.range() );
 
         EXPECT_EQ( prefix._invariants(),            true );
         EXPECT_EQ( prefix.size()       , CUSTOM_CAPACITY );

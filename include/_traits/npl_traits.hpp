@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "util.hpp"
-#include "base_traits.hpp"
+#include <util.hpp>
+#include <_traits/base_traits.hpp>
 
 #define NPL_MOVE_IF_NOEXCEPT(...) \
         _move_if_noexcept(__VA_ARGS__)

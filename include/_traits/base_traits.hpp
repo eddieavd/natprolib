@@ -396,6 +396,31 @@ template< typename T, typename... Args >
 inline constexpr bool is_one_of_v = is_one_of< T, Args... >::value ;
 
 //=====================================================================
+//      is_valid_expansion
+//=====================================================================
+
+template< template< typename... > typename Templ, typename... Args, typename = Templ< Args... > >
+true_type _sfinae_test_impl ( int ) ;
+template< template< typename... > typename, typename ... >
+false_type _sfinae_test_impl ( ... ) ;
+
+template< template< typename... > typename Templ, typename... Args >
+using is_valid_expansion = decltype( _sfinae_test_impl< Templ, Args... >( 0 ) ) ;
+
+//=====================================================================
+//      is_primary_template
+//=====================================================================
+
+template< typename T >
+using _test_for_primary_template = enable_if_t< is_same_v< T, typename T::_primary_template > > ;
+
+template< typename T >
+using is_primary_template = is_valid_expansion< _test_for_primary_template, T > ;
+
+template< typename T >
+inline constexpr bool is_primary_template_v = is_primary_template< T >::value ;
+
+//=====================================================================
 //      is_referenceable
 //=====================================================================
 
@@ -465,12 +490,29 @@ add_rvalue_reference_t< T > declval () noexcept
         static_assert( always_false< T >, "declval not allowed in evaluated context" );
 }
 
+using ptrdiff_t = decltype( declval< int * >() - declval< int * >() );
 
 //=====================================================================
 //  ┌─┐┬─┐┬┌┬┐┌─┐┬─┐┬ ┬
 //  ├─┘├┬┘││││├─┤├┬┘└┬┘
 //  ┴  ┴└─┴┴ ┴┴ ┴┴└─ ┴
 //=====================================================================
+
+//=====================================================================
+//      is_empty
+//=====================================================================
+
+#if __has_builtin(__is_empty)
+
+template< typename T >
+struct is_empty : bool_constant< __is_empty( T ) > {} ;
+
+#else
+
+#endif
+
+template< typename T >
+inline constexpr bool is_empty_v = is_empty< T >::value ;
 
 //=====================================================================
 //      is_final
@@ -536,6 +578,12 @@ template<> struct is_integral_base<  char16_t > : true_type {} ;
 template<> struct is_integral_base<  char32_t > : true_type {} ;
 template<> struct is_integral_base<      long > : true_type {} ;
 template<> struct is_integral_base< long long > : true_type {} ;
+
+template<> struct is_integral_base< unsigned       int > : true_type {} ;
+template<> struct is_integral_base< unsigned     short > : true_type {} ;
+template<> struct is_integral_base< unsigned      char > : true_type {} ;
+template<> struct is_integral_base< unsigned      long > : true_type {} ;
+template<> struct is_integral_base< unsigned long long > : true_type {} ;
 
 template< typename T >
 struct is_integral : is_integral_base< remove_cv_t< T > > {} ;
@@ -735,6 +783,65 @@ struct is_member_object_pointer : bool_constant< is_member_pointer_v< T > && !is
 
 template< typename T >
 inline constexpr bool is_member_object_pointer_v = is_member_object_pointer< T >::value ;
+
+
+//=====================================================================
+//      convert_to_integral
+//=====================================================================
+
+template< typename T, bool = is_enum_v< T > >
+struct _underlying_type_impl ;
+
+template< typename T >
+struct _underlying_type_impl< T, false > {} ;
+
+template< typename T >
+struct _underlying_type_impl< T, true >
+{
+        using type = __underlying_type( T ) ;
+};
+
+template< typename T >
+struct underlying_type : _underlying_type_impl< T, is_enum_v< T > > {} ;
+
+template< typename T >
+using underlying_type_t = typename underlying_type< T >::type ;
+
+
+template< typename T, bool = is_enum_v< T > >
+struct _sfinae_underlying_type
+{
+        using type = underlying_type_t< T > ;
+        using _promoted_type = decltype( ( ( type ) 1 ) + 0 ) ;
+};
+
+template< typename T >
+struct _sfinae_underlying_type< T, false > {} ;
+
+inline constexpr                int convert_to_integral (                int _val_ ) { return _val_; }
+inline constexpr unsigned           convert_to_integral ( unsigned           _val_ ) { return _val_; }
+inline constexpr               long convert_to_integral (               long _val_ ) { return _val_; }
+inline constexpr unsigned      long convert_to_integral ( unsigned      long _val_ ) { return _val_; }
+inline constexpr          long long convert_to_integral (          long long _val_ ) { return _val_; }
+inline constexpr unsigned long long convert_to_integral ( unsigned long long _val_ ) { return _val_; }
+
+inline constexpr         __int128_t convert_to_integral (         __int128_t _val_ ) { return _val_; }
+inline constexpr        __uint128_t convert_to_integral (        __uint128_t _val_ ) { return _val_; }
+
+// template< typename T >
+// inline constexpr
+// enable_if_t< is_integral_v< T >, T >
+// convert_to_integral ( T _val_ ) { return _val_; }
+
+template< typename F >
+inline constexpr
+enable_if_t< is_floating_point_v< F >, long long >
+convert_to_integral ( F _val_ ) { return _val_; }
+
+template< typename T >
+inline constexpr
+typename _sfinae_underlying_type< T >::_promoted_type
+convert_to_integral ( T _val_ ) { return _val_; }
 
 
 //=====================================================================

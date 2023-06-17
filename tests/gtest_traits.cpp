@@ -27,6 +27,10 @@ TEST( TraitsTest, Identity )
 
 TEST( TraitsTest, Constants )
 {
+        static_assert( std::is_same_v< std::   size_t, npl::   size_t > );
+        static_assert( std::is_same_v< std::nullptr_t, npl::nullptr_t > );
+        static_assert( std::is_same_v< std::ptrdiff_t, npl::ptrdiff_t > );
+
         static_assert( npl::integral_constant< int, 5 >::value == 5 );
         static_assert( std::is_same_v< npl::integral_constant< int, 5 >::value_type, int > );
 
@@ -117,7 +121,12 @@ TEST( TraitsTest, References )
 
 TEST( TraitsTest, PrimaryTypeCategories )
 {
+        static_assert( npl::is_integral_v< int                > );
+        static_assert( npl::is_integral_v< int const          > );
+        static_assert( npl::is_integral_v< int       volatile > );
+        static_assert( npl::is_integral_v< int const volatile > );
 
+        static_assert( npl::is_integral_v< unsigned long > );
 }
 
 TEST( TraitsTest, Declval )

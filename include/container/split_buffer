@@ -1,16 +1,17 @@
+// vim: set ft=cpp:
 //
 //
 //      natprolib
-//      split_buffer.hpp
+//      split_buffer
 //
 
 #pragma once
 
 #include <algorithm>
 
-#include "util.hpp"
-#include "traits.hpp"
-#include "mem.hpp"
+#include <util.hpp>
+#include <traits.hpp>
+#include <mem.hpp>
 
 
 namespace npl
@@ -109,8 +110,8 @@ public:
         template< typename InputIterator >
         enable_if_t
         <
-                 is_cpp17_input_iterator_v  < InputIterator > &&
-                !is_cpp17_forward_iterator_v< InputIterator >,
+                 is_input_iterator_v  < InputIterator > &&
+                !is_forward_iterator_v< InputIterator >,
                  void
         >
         _construct_at_end ( InputIterator _first_, InputIterator _last_ );
@@ -118,7 +119,7 @@ public:
         template< typename ForwardIterator >
         enable_if_t
         <
-                is_cpp17_forward_iterator_v< ForwardIterator >,
+                is_forward_iterator_v< ForwardIterator >,
                 void
         >
         _construct_at_end( ForwardIterator _first_, ForwardIterator _last_ );
@@ -232,8 +233,8 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 enable_if_t
 <
-	 is_cpp17_input_iterator_v  < InputIterator > &&
-	!is_cpp17_forward_iterator_v< InputIterator >,
+	 is_input_iterator_v  < InputIterator > &&
+	!is_forward_iterator_v< InputIterator >,
 	 void
 >
 split_buffer< T, Allocator >::_construct_at_end ( InputIterator _first_, InputIterator _last_ )
@@ -265,7 +266,7 @@ template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-        is_cpp17_forward_iterator_v< ForwardIterator >,
+        is_forward_iterator_v< ForwardIterator >,
         void
 >
 split_buffer< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_ )

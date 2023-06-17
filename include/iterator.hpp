@@ -6,98 +6,12 @@
 
 #pragma once
 
-#include "util.hpp"
-#include "traits.hpp"
+#include <util.hpp>
+#include <_iter/iter_traits.hpp>
 
 
 namespace npl
 {
-
-
-struct random_access_iterator_tag {};
-
-template< typename Iter, bool > struct _iterator_traits_impl {};
-
-template< typename Iter >
-struct _iterator_traits_impl< Iter, true >
-{
-        using       difference_type = typename Iter::difference_type;
-        using            value_type = typename Iter::value_type;
-        using               pointer = typename Iter::pointer;
-        using             reference = typename Iter::reference;
-        using     iterator_category = typename Iter::iterator_category;
-        using npl_iterator_category = typename Iter::npl_iterator_category;
-};
-
-template< typename Iter, bool > struct _iterator_traits {};
-
-template< typename Iter >
-struct _iterator_traits< Iter, true >
-        : _iterator_traits_impl
-          <
-                Iter,
-                is_convertible_v< typename Iter::npl_iterator_category, random_access_iterator_tag >
-          >
-{};
-
-template< typename T >
-struct _has_npl_iterator_typedefs
-{
-private:
-        struct _two { char _lx; char _lxx; };
-        template< typename U > static _two _test( ... );
-        template< typename U > static char _test( typename void_t< typename U::npl_iterator_category >::type* = 0,
-                                                  typename void_t< typename U::iterator_category     >::type* = 0,
-                                                  typename void_t< typename U::difference_type       >::type* = 0,
-                                                  typename void_t< typename U::value_type            >::type* = 0,
-                                                  typename void_t< typename U::reference             >::type* = 0,
-                                                  typename void_t< typename U::pointer               >::type* = 0
-        );
-public:
-        static bool const value = sizeof( _test< T >( 0, 0, 0, 0, 0, 0 ) ) == 1;
-};
-
-template< typename Iter >
-inline constexpr bool _has_npl_iterator_typedefs_v = _has_npl_iterator_typedefs< Iter >::value;
-
-template< typename Iter >
-struct iterator_traits
-        : _iterator_traits< Iter, _has_npl_iterator_typedefs_v< Iter > >
-{
-        using _primary_template = iterator_traits;
-};
-
-template< typename T >
-struct has_npl_iterator_category
-{
-private:
-        struct _two { char _lx; char _lxx; };
-        template< typename U > static _two _test( ... );
-        template< typename U > static char _test( typename void_t< typename U::npl_iterator_category >::type* = 0 );
-public:
-        static bool const value = sizeof( _test< T >( 0 ) ) == 1;
-};
-
-template< typename T >
-inline constexpr bool has_npl_iterator_category_v = has_npl_iterator_category< T >::value;
-
-template< typename T, typename U, bool = has_npl_iterator_category< iterator_traits< T > >::value >
-struct has_same_npl_iterator_category
-        : public bool_constant< is_same_v< typename iterator_traits< T >::npl_iterator_category, U > > {};
-
-template< typename T, typename U >
-struct has_same_npl_iterator_category< T, U, false > : public false_type {};
-
-template< typename T >
-struct iterator_traits< T* >
-{
-        using       difference_type = std::ptrdiff_t;
-        using            value_type = remove_cv_t< T >;
-        using               pointer = T *;
-        using             reference = T &;
-        using     iterator_category = std::random_access_iterator_tag;
-        using npl_iterator_category =      random_access_iterator_tag;
-};
 
 
 template< bool C, typename T >
@@ -105,15 +19,14 @@ class iterator
 {
         friend class iterator< !C, T >;
 public:
-        using                 _self = iterator;
-        using            value_type = T;
-        using       difference_type = std::ptrdiff_t;
-        using               pointer = conditional_t< C, value_type const *, value_type * >;
-        using             reference = conditional_t< C, value_type const &, value_type & >;
-        using         const_pointer = value_type const *;
-        using       const_reference = value_type const &;
-        using     iterator_category = std::random_access_iterator_tag;
-        using npl_iterator_category =      random_access_iterator_tag;
+        using             _self = iterator;
+        using        value_type = T;
+        using   difference_type = ptrdiff_t;
+        using           pointer = conditional_t< C, value_type const *, value_type * >;
+        using         reference = conditional_t< C, value_type const &, value_type & >;
+        using     const_pointer = value_type const *;
+        using   const_reference = value_type const &;
+        using iterator_category = random_access_iterator_tag;
 
         constexpr pointer     operator-> (     ) const noexcept {   return std::addressof( operator*() ); }
         constexpr reference   operator*  (     ) const noexcept {                           return *ptr_; }
@@ -171,26 +84,6 @@ public:
         constexpr
         operator iterator< true, T > () const noexcept
         { return iterator< true, T >{ ptr_ }; }
-
-        /*
-        constexpr
-        enable_if_t
-        <
-                is_ptr_to_const_v< pointer >,
-                pointer
-        >
-        raw () const noexcept
-        { return ptr_; }
-
-        constexpr
-        enable_if_t
-        <
-                !is_ptr_to_const_v< pointer >,
-                pointer
-        >
-        raw () noexcept
-        { return ptr_; }
-        */
 
         constexpr pointer raw () noexcept
         { return ptr_; }

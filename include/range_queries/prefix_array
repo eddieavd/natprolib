@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include <util/util.hpp>
+#include <util.hpp>
 #include <container/static_vector>
 
 #pragma GCC diagnostic error "-Wdeprecated-declarations"
@@ -26,7 +26,7 @@ class prefix_array;
 struct prefix_array_iterator_tag : public random_access_iterator_tag {};
 
 template< typename T >
-struct is_prefix_array_iterator : public has_same_npl_iterator_category< iterator_traits< T >, prefix_array_iterator_tag > {};
+struct is_prefix_array_iterator : public has_same_iterator_category< iterator_traits< T >, prefix_array_iterator_tag > {};
 
 template< typename T >
 inline constexpr bool is_prefix_array_iterator_v = is_prefix_array_iterator< T >::value;
@@ -42,8 +42,8 @@ class prefix_array
         {
                 friend class _prefix_array_iterator< !C, T_ >;
         public:
-                using                 _base = typename static_vector< T, N >::template _static_vector_iterator< C, T_ >;
-                using npl_iterator_category = prefix_array_iterator_tag;
+                using             _base = typename static_vector< T, N >::template _static_vector_iterator< C, T_ >;
+                using iterator_category = prefix_array_iterator_tag;
         private:
                 explicit constexpr _prefix_array_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };

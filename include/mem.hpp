@@ -8,11 +8,14 @@
 
 #include <cstring>
 
-#include "util.hpp"
-#include "traits.hpp"
-#include "alloc_traits.hpp"
-#include "iter_traits.hpp"
-#include "iterator.hpp"
+#include <util.hpp>
+#include <_alloc/alloc_traits.hpp>
+#include <_iter/iter_traits.hpp>
+#include <_traits/npl_traits.hpp>
+#include <iterator.hpp>
+
+
+#define NPL_HAS_NO_SIZED_DEALLOCATION
 
 
 namespace npl
@@ -62,6 +65,87 @@ constexpr void destruct_at ( T * _ptr_ )
 
 #pragma GCC diagnostic pop
 
+inline constexpr bool _is_overaligned_for_new ( size_t _align_ ) noexcept
+{
+        return _align_ > std::alignment_of< std::max_align_t >::value ;
+}
+
+template< typename... Args >
+void * _libnpl_operator_new ( Args... _args_ )
+{
+#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
+        return __builtin_operator_new( _args_... );
+#else
+        return ::operator new( _args_... );
+#endif
+}
+
+template< typename... Args >
+void _libnpl_operator_delete ( Args... _args_ )
+{
+#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
+        __builtin_operator_delete( _args_... );
+#else
+        ::operator delete( _args_... );
+#endif
+}
+
+inline void * _libnpl_allocate ( size_t _size_, [[ maybe_unused ]] size_t _align_ )
+{
+#ifndef NPL_HAS_NO_ALIGNED_ALLOCATION
+        if( _is_overaligned_for_new( _align_ ) )
+        {
+                std::align_val_t const align_val = static_cast< std::align_val_t >( _align_ );
+                return _libnpl_operator_new( _size_, align_val );
+        }
+#endif
+        return _libnpl_operator_new( _size_ );
+}
+
+template< typename... Args >
+inline void _do_deallocate_handle_size ( void * _ptr_, [[ maybe_unused ]] size_t _size_, Args... _args_ )
+{
+#ifdef NPL_HAS_NO_SIZED_DEALLOCATION
+        return _libnpl_operator_delete( _ptr_, _args_... );
+#else
+        return _libnpl_operator_delete( _ptr_, _size_, _args_... );
+#endif
+}
+
+inline void _libnpl_deallocate ( void * _ptr_, size_t _size_, [[ maybe_unused ]] size_t _align_ )
+{
+#if defined( NPL_HAS_NO_ALIGNED_ALLOCATION )
+        return _do_deallocate_handle_size( _ptr_, _size_ );
+#else
+        if( _is_overaligned_for_new( _align_ ) )
+        {
+                std::align_val_t const align_val = static_cast< std::align_val_t >( _align_ );
+                return _do_deallocate_handle_size( _ptr_, _size_, align_val );
+        }
+        else
+        {
+                return _do_deallocate_handle_size( _ptr_, _size_ );
+        }
+#endif
+}
+
+inline void _libnpl_deallocate_unsized ( void * _ptr_, [[ maybe_unused ]] size_t _align_ )
+{
+#if defined( NPL_HAS_NO_ALIGNED_ALLOCATION )
+        return _libnpl_operator_delete( _ptr_ );
+#else
+        if( _is_overaligned_for_new( _align_ ) )
+        {
+                std::align_val_t const align_val = static_cast< std::align_val_t >( _align_ );
+                return _libnpl_operator_delete( _ptr_, align_val );
+        }
+        else
+        {
+                return _libnpl_operator_delete( _ptr_ );
+        }
+#endif
+}
+
 template< typename Alloc >
 void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, true_type ) noexcept
 {
@@ -109,7 +193,7 @@ void _construct_forward_with_exception_guarantees ( Alloc & _alloc_, Ptr _begin1
 template< typename Alloc, typename T,
           enable_if_t
           <
-                ( is_default_allocator_v< Alloc > || !has_construct_v< Alloc, T*, T > ) &&
+                ( is_default_allocator_v< Alloc > || !_has_construct_v< Alloc, T*, T > ) &&
                   is_trivially_move_constructible_v< T >
           >
 >
@@ -143,7 +227,7 @@ void _construct_backward_with_exception_guarantees ( Alloc & _alloc_, Ptr _begin
 template< typename Alloc, typename T,
           typename = enable_if_t
           <
-                ( is_default_allocator_v< Alloc > || !has_construct_v< Alloc, T*, T > ) &&
+                ( is_default_allocator_v< Alloc > || !_has_construct_v< Alloc, T*, T > ) &&
                   is_trivially_move_constructible_v< T >
           >
 >
@@ -183,7 +267,7 @@ enable_if_t
         is_trivially_move_constructible_v< DestT > &&
         is_same_v< RawSrcT, RawDestT > &&
         (  is_default_allocator_v< Alloc > ||
-          !has_construct_v< Alloc, DestT*, SrcT& > ),
+          !_has_construct_v< Alloc, DestT*, SrcT& > ),
         void
 >
 _construct_range_forward ( [[ maybe_unused ]] Alloc & _alloc_, SrcT * _begin1_, SrcT * _end1_, DestT* & _begin2_ )

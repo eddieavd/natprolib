@@ -9,9 +9,9 @@
 
 #include <algorithm>
 
-#include <util/util.hpp>
-#include <util/traits.hpp>
-#include <util/iterator.hpp>
+#include <util.hpp>
+#include <traits.hpp>
+#include <iterator.hpp>
 
 
 namespace npl
