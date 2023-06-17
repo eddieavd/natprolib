@@ -15,19 +15,8 @@ namespace npl
 {
 
 
-template< bool Condition, typename T >
-struct _non_trivial_if {} ;
-
-template< typename T >
-struct _non_trivial_if< true, T >
-{
-        inline constexpr _non_trivial_if () noexcept {}
-};
-
-
 template< typename T >
 class allocator
-        : private _non_trivial_if< !is_void_v< T >, allocator< T > >
 {
         static_assert( !is_volatile_v< T >, "npl::allocator does not support volatile types" );
 public:
@@ -101,7 +90,6 @@ public:
 
 template< typename T >
 class allocator< T const >
-        : private _non_trivial_if< !is_void_v< T >, allocator< T const > >
 {
         static_assert( !is_volatile_v< T >, "npl::allocator does not support volatile types" );
 public:
