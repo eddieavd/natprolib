@@ -53,7 +53,7 @@ protected:
                 friend class _fenwick_tree_iterator< !C, T_ >;
         public:
                 using             _base = iterator< C, T_ >                       ;
-                using     _alloc_traits = std::allocator_traits< Allocator >      ;
+                using     _alloc_traits = allocator_traits< Allocator >      ;
                 using   difference_type = typename _alloc_traits::difference_type ;
                 using iterator_category = fenwick_tree_iterator_tag               ;
 
@@ -70,14 +70,14 @@ protected:
         _fenwick_tree_base ( allocator_type       && _alloc_ ) noexcept : _base( NPL_MOVE( _alloc_ ) ) {}
 };
 
-template< typename T, typename Allocator = std::allocator< T > >
+template< typename T, typename Allocator = default_allocator_t< T > >
 class fenwick_tree
         : _fenwick_tree_base< T, Allocator >
 {
 private:
         using                   _base = _fenwick_tree_base< T, Allocator > ;
         using                   _self =  fenwick_tree                      ;
-        using _default_allocator_type = std::allocator< T >                ;
+        using _default_allocator_type = default_allocator_t< T >           ;
 public:
         using      value_type = T                               ;
         using  allocator_type = Allocator                       ;
@@ -115,7 +115,7 @@ public:
                                 is_constructible_v
                                 <
                                         value_type,
-                                        typename std::iterator_traits< FtreeIterator >::reference
+                                        typename iterator_traits< FtreeIterator >::reference
                                 >,
                                 FtreeIterator
                         > _last_ );
@@ -128,7 +128,7 @@ public:
                                 is_constructible_v
                                 <
                                         value_type,
-                                        typename std::iterator_traits< FtreeIterator >::reference
+                                        typename iterator_traits< FtreeIterator >::reference
                                 >
                         > * = 0 );
 
@@ -142,7 +142,7 @@ public:
                                  is_constructible_v
                                  <
                                         value_type,
-                                        typename std::iterator_traits< InputIterator >::reference
+                                        typename iterator_traits< InputIterator >::reference
                                  >,
                                  InputIterator
                         > _last_ );
@@ -157,7 +157,7 @@ public:
                                  is_constructible_v
                                  <
                                         value_type,
-                                        typename std::iterator_traits< InputIterator >::reference
+                                        typename iterator_traits< InputIterator >::reference
                                  >
                         > * = 0 );
 
@@ -170,7 +170,7 @@ public:
                                  is_constructible_v
                                  <
                                         value_type,
-                                        typename std::iterator_traits< ForwardIterator >::reference
+                                        typename iterator_traits< ForwardIterator >::reference
                                  >,
                                  ForwardIterator
                         > _last_ );
@@ -184,7 +184,7 @@ public:
                                  is_constructible_v
                                  <
                                         value_type,
-                                        typename std::iterator_traits< ForwardIterator >::reference
+                                        typename iterator_traits< ForwardIterator >::reference
                                  >
                         > * = 0 );
 
@@ -217,7 +217,7 @@ public:
                 is_constructible_v
                 <
                         value_type,
-                        typename std::iterator_traits< FtreeIterator >::reference
+                        typename iterator_traits< FtreeIterator >::reference
                 >,
                 void
         >
@@ -232,7 +232,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< InputIterator >::reference
+                        typename iterator_traits< InputIterator >::reference
                  >,
                  void
         >
@@ -246,7 +246,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< ForwardIterator >::reference
+                        typename iterator_traits< ForwardIterator >::reference
                  >,
                  void
         >
@@ -486,7 +486,7 @@ public:
                 is_constructible_v
                 <
                         value_type,
-                        typename std::iterator_traits< FtreeIterator >::reference
+                        typename iterator_traits< FtreeIterator >::reference
                 >,
                 iterator
         >
@@ -501,7 +501,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< InputIterator >::reference
+                        typename iterator_traits< InputIterator >::reference
                  >,
                  iterator
         >
@@ -515,7 +515,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< ForwardIterator >::reference
+                        typename iterator_traits< ForwardIterator >::reference
                  >,
                  iterator
         >
@@ -542,10 +542,10 @@ public:
 
         bool _invariants () const;
 
-        bool _dereferenceable ( const_iterator const * _i_                     ) const;
-        bool _decrementable   ( const_iterator const * _i_                     ) const;
-        bool _addable         ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
-        bool _subscriptable   ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
+        bool _dereferenceable ( const_iterator const * _i_                ) const;
+        bool _decrementable   ( const_iterator const * _i_                ) const;
+        bool _addable         ( const_iterator const * _i_, ptrdiff_t _n_ ) const;
+        bool _subscriptable   ( const_iterator const * _i_, ptrdiff_t _n_ ) const;
 
 private:
         void _invalidate_all_iterators ();
@@ -695,7 +695,7 @@ private:
 };
 
 template< typename InputIterator,
-          typename Alloc = std::allocator< _iter_value_type< InputIterator > >,
+          typename Alloc = allocator< _iter_value_type< InputIterator > >,
           typename = enable_if< is_allocator< Alloc >::value >
           >
 fenwick_tree ( InputIterator, InputIterator )
@@ -850,7 +850,7 @@ enable_if_t
 >
 fenwick_tree< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
 {
-        NPL_ASSERT( static_cast< size_type >( std::distance( _first_, _last_ ) ) >= _count_, "fenwick_tree::_construct_at_end: range too small" );
+        NPL_ASSERT( static_cast< size_type >( distance( _first_, _last_ ) ) >= _count_, "fenwick_tree::_construct_at_end: range too small" );
 
         _construct_transaction tx( *this, _count_ );
 
@@ -1036,11 +1036,11 @@ fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_,
                         is_constructible_v
                         <
                                 value_type,
-                                typename std::iterator_traits< FtreeIterator >::reference
+                                typename iterator_traits< FtreeIterator >::reference
                         >,
                 FtreeIterator > _last_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1058,12 +1058,12 @@ fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_, FtreeIterato
                         is_constructible_v
                         <
                                 value_type,
-                                typename std::iterator_traits< FtreeIterator >::reference
+                                typename iterator_traits< FtreeIterator >::reference
                         >
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1083,7 +1083,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_,
                          is_constructible_v
                          <
                                 value_type,
-                                typename std::iterator_traits< InputIterator >::reference
+                                typename iterator_traits< InputIterator >::reference
                          >,
                 InputIterator > _last_ )
 {
@@ -1104,7 +1104,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_, InputIterato
                          is_constructible_v
                          <
                                 value_type,
-                                typename std::iterator_traits< InputIterator >::reference
+                                typename iterator_traits< InputIterator >::reference
                          >
                 > * )
                 : _base( _alloc_ )
@@ -1125,11 +1125,11 @@ fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_,
                          is_constructible_v
                          <
                                 value_type,
-                                typename std::iterator_traits< ForwardIterator >::reference
+                                typename iterator_traits< ForwardIterator >::reference
                          >,
                 ForwardIterator > _last_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1155,12 +1155,12 @@ fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_, ForwardIte
                          is_constructible_v
                          <
                                 value_type,
-                                typename std::iterator_traits< ForwardIterator >::reference
+                                typename iterator_traits< ForwardIterator >::reference
                          >
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1229,7 +1229,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( fenwick_tree && _other_, type_ident
         }
         else
         {
-                using mit = std::move_iterator< iterator >;
+                using mit = move_iterator< iterator >;
                 assign( mit( _other_.begin() ), mit( _other_.end() ) );
         }
 }
@@ -1289,7 +1289,7 @@ fenwick_tree< T, Allocator >::_move_assign ( fenwick_tree & _other_, false_type 
 {
         if( _base::_alloc() != _other_._alloc() )
         {
-                using mit = std::move_iterator< iterator >;
+                using mit = move_iterator< iterator >;
                 assign( mit( _other_.begin() ), mit( _other_.end() ) );
         }
         else
@@ -1334,13 +1334,13 @@ enable_if_t
          is_constructible_v
          <
                 T,
-                typename std::iterator_traits< FtreeIterator >::reference
+                typename iterator_traits< FtreeIterator >::reference
          >,
          void
 >
 fenwick_tree< T, Allocator >::assign ( FtreeIterator _first_, FtreeIterator _last_ )
 {
-        size_type new_size = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type new_size = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
@@ -1351,7 +1351,7 @@ fenwick_tree< T, Allocator >::assign ( FtreeIterator _first_, FtreeIterator _las
                 {
                         growing = true;
                         mid = _first_;
-                        std::advance( mid, size() );
+                        advance( mid, size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1385,7 +1385,7 @@ enable_if_t
           is_constructible_v
           <
                 T,
-                typename std::iterator_traits< InputIterator >::reference
+                typename iterator_traits< InputIterator >::reference
           >,
           void
 >
@@ -1407,13 +1407,13 @@ enable_if_t
          is_constructible_v
          <
                 T,
-                typename std::iterator_traits< ForwardIterator >::reference
+                typename iterator_traits< ForwardIterator >::reference
          >,
          void
 >
 fenwick_tree< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_ )
 {
-        size_type new_size = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type new_size = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
@@ -1424,7 +1424,7 @@ fenwick_tree< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator 
                 {
                         growing = true;
                         mid = _first_;
-                        std::advance( mid, size() );
+                        advance( mid, size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1906,7 +1906,7 @@ fenwick_tree< T, Allocator >::_decrementable ( const_iterator const * _i_ ) cons
 
 template< typename T, typename Allocator >
 bool
-fenwick_tree< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
+fenwick_tree< T, Allocator >::_addable ( const_iterator const * _i_, ptrdiff_t _n_ ) const
 {
         const_pointer p = _i_->base() + _n_;
         return this->begin_ <= p && p <= this->end_;
@@ -1914,7 +1914,7 @@ fenwick_tree< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdif
 
 template< typename T, typename Allocator >
 bool
-fenwick_tree< T, Allocator >::_subscriptable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
+fenwick_tree< T, Allocator >::_subscriptable ( const_iterator const * _i_, ptrdiff_t _n_ ) const
 {
         const_pointer p = _i_->base() + _n_;
         return this->begin_ <= p && p < this->end_;

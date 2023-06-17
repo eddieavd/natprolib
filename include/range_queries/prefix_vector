@@ -36,7 +36,7 @@ class prefix_vector;
 struct prefix_vector_iterator_tag : public random_access_iterator_tag {};
 
 template< typename T >
-struct is_prefix_vector_iterator : public has_same_iterator_category< iterator_traits< T >, prefix_vector_iterator_tag > {};
+struct is_prefix_vector_iterator : public has_iterator_category_convertible_to< T, prefix_vector_iterator_tag > {};
 
 template< typename T >
 inline constexpr bool is_prefix_vector_iterator_v = is_prefix_vector_iterator< T >::value;
@@ -54,31 +54,31 @@ protected:
                 friend class _prefix_vector_iterator< !C, T_ >;
         public:
                 using             _base = iterator< C, T_ >                       ;
-                using     _alloc_traits = std::allocator_traits< Allocator >      ;
+                using     _alloc_traits = allocator_traits< Allocator >           ;
                 using   difference_type = typename _alloc_traits::difference_type ;
                 using iterator_category = prefix_vector_iterator_tag              ;
 
                 explicit constexpr _prefix_vector_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
         };
 
-        using          _base = _vector_base< T, Allocator >    ;
+        using          _base = _vector_base< T, Allocator >     ;
         using       iterator = _prefix_vector_iterator< false > ;
         using const_iterator = _prefix_vector_iterator<  true > ;
-        using allocator_type = typename _base::allocator_type  ;
+        using allocator_type = typename _base::allocator_type   ;
 
         _prefix_vector_base (                                 ) noexcept( is_nothrow_default_constructible_v< allocator_type > ) : _base() {}
         _prefix_vector_base ( allocator_type const &  _alloc_ )          : _base(           _alloc_   ) {}
         _prefix_vector_base ( allocator_type       && _alloc_ ) noexcept : _base( NPL_MOVE( _alloc_ ) ) {}
 };
 
-template< typename T, typename Allocator = std::allocator< T > >
+template< typename T, typename Allocator = default_allocator_t< T > >
 class prefix_vector
         : _prefix_vector_base< T, Allocator >
 {
 private:
         using                   _base = _prefix_vector_base< T, Allocator > ;
         using                   _self =  prefix_vector                      ;
-        using _default_allocator_type = std::allocator< T >                ;
+        using _default_allocator_type = default_allocator_t< T >            ;
 public:
         using      value_type = T                               ;
         using  allocator_type = Allocator                       ;
@@ -115,7 +115,7 @@ public:
                                                         is_constructible_v
                                                         <
                                                                 value_type,
-                                                                typename std::iterator_traits< PrefixIterator >::reference
+                                                                typename iterator_traits< PrefixIterator >::reference
                                                         >,
                                                         PrefixIterator
                                                 > _last_ );
@@ -127,7 +127,7 @@ public:
                                                         is_constructible_v
                                                         <
                                                                 value_type,
-                                                                typename std::iterator_traits< PrefixIterator >::reference
+                                                                typename iterator_traits< PrefixIterator >::reference
                                                         > > * = 0 );
 
         template< typename InputIterator >
@@ -139,7 +139,7 @@ public:
                                                          is_constructible_v
                                                          <
                                                                 value_type,
-                                                                typename std::iterator_traits< InputIterator >::reference
+                                                                typename iterator_traits< InputIterator >::reference
                                                          >,
                                                          InputIterator
                                                 > _last_ );
@@ -152,7 +152,7 @@ public:
                                                          is_constructible_v
                                                          <
                                                                 value_type,
-                                                                typename std::iterator_traits< InputIterator >::reference
+                                                                typename iterator_traits< InputIterator >::reference
                                                          > > * = 0 );
 
         template< typename ForwardIterator >
@@ -163,7 +163,7 @@ public:
                                                         is_constructible_v
                                                         <
                                                                 value_type,
-                                                                typename std::iterator_traits< ForwardIterator >::reference
+                                                                typename iterator_traits< ForwardIterator >::reference
                                                         >,
                                                         ForwardIterator
                                                 > _last_ );
@@ -176,7 +176,7 @@ public:
                                                         is_constructible_v
                                                         <
                                                                 value_type,
-                                                                typename std::iterator_traits< ForwardIterator >::reference
+                                                                typename iterator_traits< ForwardIterator >::reference
                                                         > > * = 0 );
 
         ~prefix_vector ()
@@ -208,7 +208,7 @@ public:
                 is_constructible_v
                 <
                         value_type,
-                        typename std::iterator_traits< PrefixIterator >::reference
+                        typename iterator_traits< PrefixIterator >::reference
                 >,
                 void
         >
@@ -222,7 +222,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< InputIterator >::reference
+                        typename iterator_traits< InputIterator >::reference
                  >,
                  void
         >
@@ -237,7 +237,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< ForwardIterator >::reference
+                        typename iterator_traits< ForwardIterator >::reference
                  >,
                  void
         >
@@ -315,7 +315,7 @@ public:
                 is_constructible_v
                 <
                         value_type,
-                        typename std::iterator_traits< PrefixIterator >::reference
+                        typename iterator_traits< PrefixIterator >::reference
                 >,
                 bool
         >
@@ -330,7 +330,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< InputIterator >::reference
+                        typename iterator_traits< InputIterator >::reference
                  >,
                  bool
         >
@@ -344,7 +344,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< ForwardIterator >::reference
+                        typename iterator_traits< ForwardIterator >::reference
                  >,
                  bool
         >
@@ -543,7 +543,7 @@ public:
                 is_constructible_v
                 <
                         value_type,
-                        typename std::iterator_traits< PrefixIterator >::reference
+                        typename iterator_traits< PrefixIterator >::reference
                 >,
                 iterator
         >
@@ -558,7 +558,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< InputIterator >::reference
+                        typename iterator_traits< InputIterator >::reference
                  >,
                  iterator
         >
@@ -572,7 +572,7 @@ public:
                  is_constructible_v
                  <
                         value_type,
-                        typename std::iterator_traits< ForwardIterator >::reference
+                        typename iterator_traits< ForwardIterator >::reference
                  >,
                  iterator
         >
@@ -600,10 +600,10 @@ public:
 
         bool _invariants () const;
 
-        bool _dereferenceable ( const_iterator const * _i_                     ) const;
-        bool _decrementable   ( const_iterator const * _i_                     ) const;
-        bool _addable         ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
-        bool _subscriptable   ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const;
+        bool _dereferenceable ( const_iterator const * _i_                ) const;
+        bool _decrementable   ( const_iterator const * _i_                ) const;
+        bool _addable         ( const_iterator const * _i_, ptrdiff_t _n_ ) const;
+        bool _subscriptable   ( const_iterator const * _i_, ptrdiff_t _n_ ) const;
 
 private:
         void _invalidate_all_iterators ();
@@ -747,7 +747,7 @@ private:
 
 
 template< typename InputIterator,
-          typename Alloc = std::allocator< _iter_value_type< InputIterator > >,
+          typename Alloc = allocator< _iter_value_type< InputIterator > >,
           typename       = enable_if< is_allocator< Alloc >::value >
           >
 prefix_vector ( InputIterator, InputIterator )
@@ -761,9 +761,9 @@ prefix_vector ( InputIterator, InputIterator, Alloc )
         -> prefix_vector< _iter_value_type< InputIterator >, Alloc >;
 
 template< typename T,
-          typename Alloc  = std::allocator< T >,
+          typename Alloc  = allocator< T >,
           typename        = enable_if< is_allocator< Alloc >::value >,
-          typename Traits = std::allocator_traits< Alloc >
+          typename Traits = allocator_traits< Alloc >
           >
 prefix_vector ( typename Traits::size_type const, T )
         -> prefix_vector< T, Alloc >;
@@ -771,7 +771,7 @@ prefix_vector ( typename Traits::size_type const, T )
 template< typename T,
           typename Alloc,
           typename        = enable_if< is_allocator< Alloc >::value >,
-          typename Traits = std::allocator_traits< Alloc >
+          typename Traits = allocator_traits< Alloc >
           >
 prefix_vector ( typename Traits::size_type const, T, Alloc )
         -> prefix_vector< T, Alloc >;
@@ -1052,11 +1052,11 @@ prefix_vector< T, Allocator >::prefix_vector ( PrefixIterator _first_,
                         is_constructible_v
                         <
                                 value_type,
-                                typename std::iterator_traits< PrefixIterator >::reference
+                                typename iterator_traits< PrefixIterator >::reference
                         >,
                 PrefixIterator > _last_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1074,12 +1074,12 @@ prefix_vector< T, Allocator >::prefix_vector ( PrefixIterator _first_, PrefixIte
                         is_constructible_v
                         <
                                 value_type,
-                                typename std::iterator_traits< PrefixIterator >::reference
+                                typename iterator_traits< PrefixIterator >::reference
                         >
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1099,7 +1099,7 @@ prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_,
                          is_constructible_v
                          <
                                 value_type,
-                                typename std::iterator_traits< InputIterator >::reference
+                                typename iterator_traits< InputIterator >::reference
                          >,
                 InputIterator > _last_ )
 {
@@ -1120,7 +1120,7 @@ prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_, InputItera
                          is_constructible_v
                          <
                                 value_type,
-                                typename std::iterator_traits< InputIterator >::reference
+                                typename iterator_traits< InputIterator >::reference
                          >
                 > * )
                 : _base( _alloc_ )
@@ -1141,11 +1141,11 @@ prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_,
                         is_constructible_v
                         <
                                 value_type,
-                                typename std::iterator_traits< ForwardIterator >::reference
+                                typename iterator_traits< ForwardIterator >::reference
                         >,
                 ForwardIterator > _last_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1169,12 +1169,12 @@ prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_, ForwardI
                         is_constructible_v
                         <
                                 value_type,
-                                typename std::iterator_traits< ForwardIterator >::reference
+                                typename iterator_traits< ForwardIterator >::reference
                         >
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1299,7 +1299,7 @@ prefix_vector< T, Allocator >::_move_assign ( prefix_vector & _other_, false_typ
 {
         if( _base::_alloc() != _other_._alloc() )
         {
-                using mit = std::move_iterator< iterator >;
+                using mit = move_iterator< iterator >;
                 assign( mit( _other_.begin() ), mit( _other_.end() ) );
         }
         else
@@ -1344,13 +1344,13 @@ enable_if_t
         is_constructible_v
         <
                 T,
-                typename std::iterator_traits< PrefixIterator >::reference
+                typename iterator_traits< PrefixIterator >::reference
         >,
         void
 >
 prefix_vector< T, Allocator >::assign ( PrefixIterator _first_, PrefixIterator _last_ )
 {
-        size_type new_size = static_cast< size_type >( std::distance( _first_, _last_ ) );
+        size_type new_size = static_cast< size_type >( distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
@@ -1361,7 +1361,7 @@ prefix_vector< T, Allocator >::assign ( PrefixIterator _first_, PrefixIterator _
                 {
                         growing = true;
                         mid = _first_;
-                        std::advance( mid, size() );
+                        advance( mid, size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1393,7 +1393,7 @@ enable_if_t
          is_constructible_v
          <
                 T,
-                typename std::iterator_traits< InputIterator >::reference
+                typename iterator_traits< InputIterator >::reference
          >,
          void
 >
@@ -1416,7 +1416,7 @@ enable_if_t
          is_constructible_v
          <
                 T,
-                typename std::iterator_traits< ForwardIterator >::reference
+                typename :iterator_traits< ForwardIterator >::reference
          >,
          void
 >
@@ -1651,7 +1651,7 @@ enable_if_t
         is_constructible_v
         <
                 T,
-                typename std::iterator_traits< PrefixIterator >::reference
+                typename iterator_traits< PrefixIterator >::reference
         >,
         bool
 >
@@ -1677,7 +1677,7 @@ enable_if_t
          is_constructible_v
          <
                 T,
-                typename std::iterator_traits< InputIterator >::reference
+                typename iterator_traits< InputIterator >::reference
          >,
          bool
 >
@@ -1702,7 +1702,7 @@ enable_if_t
          is_constructible_v
          <
                 T,
-                typename std::iterator_traits< ForwardIterator >::reference
+                typename iterator_traits< ForwardIterator >::reference
          >,
          bool
 >
@@ -1976,7 +1976,7 @@ prefix_vector< T, Allocator >::_decrementable ( const_iterator const * _i_ ) con
 
 template< typename T, typename Allocator >
 bool
-prefix_vector< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
+prefix_vector< T, Allocator >::_addable ( const_iterator const * _i_, ptrdiff_t _n_ ) const
 {
         const_pointer p = _i_->base() + _n_;
         return this->begin_ <= p && p <= this->end_;
@@ -1984,7 +1984,7 @@ prefix_vector< T, Allocator >::_addable ( const_iterator const * _i_, std::ptrdi
 
 template< typename T, typename Allocator >
 bool
-prefix_vector< T, Allocator >::_subscriptable ( const_iterator const * _i_, std::ptrdiff_t _n_ ) const
+prefix_vector< T, Allocator >::_subscriptable ( const_iterator const * _i_, ptrdiff_t _n_ ) const
 {
         const_pointer p = _i_->base() + _n_;
         return this->begin_ <= p && p < this->end_;
