@@ -50,9 +50,9 @@ template< typename T, typename Allocator >
 class _vector_base
 {
 public:
-        using allocator_type = Allocator                          ;
-        using  _alloc_traits = allocator_traits< allocator_type > ;
-        using      size_type = typename _alloc_traits::size_type  ;
+        using allocator_type = Allocator                           ;
+        using  _alloc_traits = allocator_traits<  allocator_type > ;
+        using      size_type = typename _alloc_traits::size_type   ;
 protected:
         template< bool C, typename T_ = T >
         class _vector_iterator
@@ -69,18 +69,18 @@ protected:
         };
 
         using      value_type = T                                       ;
-        using difference_type = typename _alloc_traits::difference_type ;
-        using       reference = value_type &                            ;
+        using       reference = value_type       &                      ;
         using const_reference = value_type const &                      ;
-        using         pointer = typename _alloc_traits::pointer         ;
-        using   const_pointer = typename _alloc_traits::const_pointer   ;
+        using difference_type = typename _alloc_traits::difference_type ;
+        using         pointer = typename _alloc_traits::        pointer ;
+        using   const_pointer = typename _alloc_traits::  const_pointer ;
         using        iterator = _vector_iterator< false >               ;
         using  const_iterator = _vector_iterator<  true >               ;
 
-        pointer        begin_  ;
-        pointer        end_    ;
-        pointer        end_cap_;
-        allocator_type alloc_  ;
+        pointer        begin_   ;
+        pointer        end_     ;
+        pointer        end_cap_ ;
+        allocator_type alloc_   ;
 
         allocator_type       & _alloc ()       noexcept { return alloc_; }
         allocator_type const & _alloc () const noexcept { return alloc_; }
@@ -88,9 +88,9 @@ protected:
         pointer       & _end_cap ()       noexcept { return end_cap_; }
         pointer const & _end_cap () const noexcept { return end_cap_; }
 
-        _vector_base (                                 ) noexcept( is_nothrow_default_constructible_v< allocator_type > );
-        _vector_base ( allocator_type const &  _alloc_ );
-        _vector_base ( allocator_type       && _alloc_ ) noexcept;
+        _vector_base (                                 ) noexcept( is_nothrow_default_constructible_v< allocator_type > ) ;
+        _vector_base ( allocator_type const &  _alloc_ )          ;
+        _vector_base ( allocator_type       && _alloc_ ) noexcept ;
 
         ~_vector_base ();
 
@@ -99,7 +99,7 @@ protected:
         size_type capacity () const noexcept
         { return static_cast< size_type >( end_cap_ - begin_ ); }
 
-        void _destruct_at_end ( pointer _new_last_ ) noexcept;
+        void _destruct_at_end ( pointer _new_last_ ) noexcept ;
 
         void _copy_assign_alloc ( _vector_base const & _other_ )
         {
@@ -198,18 +198,18 @@ private:
 public:
         using      value_type = T                               ;
         using  allocator_type = Allocator                       ;
-        using   _alloc_traits = typename _base::_alloc_traits   ;
-        using       reference = typename _base::reference       ;
+        using   _alloc_traits = typename _base::  _alloc_traits ;
+        using       reference = typename _base::      reference ;
         using const_reference = typename _base::const_reference ;
-        using       size_type = typename _base::size_type       ;
+        using       size_type = typename _base::      size_type ;
         using difference_type = typename _base::difference_type ;
-        using         pointer = typename _base::pointer         ;
-        using   const_pointer = typename _base::const_pointer   ;
+        using         pointer = typename _base::        pointer ;
+        using   const_pointer = typename _base::  const_pointer ;
 
-        using               iterator = typename _base::iterator       ;
-        using         const_iterator = typename _base::const_iterator ;
-        using       reverse_iterator = reverse_iter<       iterator > ;
-        using const_reverse_iterator = reverse_iter< const_iterator > ;
+        using               iterator = typename _base::      iterator   ;
+        using         const_iterator = typename _base::const_iterator   ;
+        using       reverse_iterator = reverse_iter<         iterator > ;
+        using const_reverse_iterator = reverse_iter<   const_iterator > ;
 
         static_assert( ( is_same_v< typename allocator_type::value_type, value_type > ),
                         "allocator_type::value_type != vector::value_type" );
@@ -233,47 +233,46 @@ public:
         template< typename InputIterator >
         vector ( InputIterator _first_,
                         enable_if_t<
-                                                         is_input_iterator_v  < InputIterator > &&
-                                                        !is_forward_iterator_v< InputIterator > &&
-                                                         is_constructible_v
-                                                         <
-                                                                value_type,
-                                                                typename iterator_traits< InputIterator >::reference
-                                                         >,
-                                                         InputIterator
-                                                > _last_ );
+                                         is_input_iterator_v  < InputIterator > &&
+                                        !is_forward_iterator_v< InputIterator > &&
+                                         is_constructible_v
+                                         <
+                                                value_type,
+                                                typename iterator_traits< InputIterator >::reference
+                                         >,
+                                         InputIterator
+                                > _last_ );
         template< typename InputIterator >
         vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                         enable_if_t<
-                                                         is_input_iterator_v  < InputIterator > &&
-                                                        !is_forward_iterator_v< InputIterator > &&
-                                                         is_constructible_v
-                                                         <
-                                                                value_type,
-                                                                typename iterator_traits< InputIterator >::reference
-                                                         > > * = 0 );
+                                         is_input_iterator_v  < InputIterator > &&
+                                        !is_forward_iterator_v< InputIterator > &&
+                                         is_constructible_v
+                                         <
+                                                value_type,
+                                                typename iterator_traits< InputIterator >::reference
+                                         > > * = 0 );
 
         template< typename ForwardIterator >
         vector ( ForwardIterator _first_,
                         enable_if_t<
-                                                         is_forward_iterator_v< ForwardIterator > &&
-                                                        is_constructible_v
-                                                        <
-                                                                value_type,
-                                                                typename iterator_traits< ForwardIterator >::reference
-                                                        >,
-                                                        ForwardIterator
-                                                > _last_ );
-
+                                        is_forward_iterator_v< ForwardIterator > &&
+                                        is_constructible_v
+                                        <
+                                                value_type,
+                                                typename iterator_traits< ForwardIterator >::reference
+                                        >,
+                                        ForwardIterator
+                                > _last_ );
         template< typename ForwardIterator >
         vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                         enable_if_t<
-                                                         is_forward_iterator_v< ForwardIterator > &&
-                                                        is_constructible_v
-                                                        <
-                                                                value_type,
-                                                                typename iterator_traits< ForwardIterator >::reference
-                                                        > > * = 0 );
+                                        is_forward_iterator_v< ForwardIterator > &&
+                                        is_constructible_v
+                                        <
+                                                value_type,
+                                                typename iterator_traits< ForwardIterator >::reference
+                                        > > * = 0 );
 
         /*
         template< typename InputIterator >
@@ -327,13 +326,13 @@ public:
                 _annotate_delete();
         }
 
-        vector ( vector const & _other_                                              );
+        vector ( vector const & _other_                                                  );
         vector ( vector const & _other_, type_identity< allocator_type > const & _alloc_ );
 
         vector & operator= ( vector const & _other_ );
 
-        vector ( vector && _other_                                              ) noexcept;
-        vector ( vector && _other_, type_identity< allocator_type > const & _alloc_ );
+        vector ( vector && _other_                                                  ) noexcept;
+        vector ( vector && _other_, type_identity< allocator_type > const & _alloc_ )         ;
 
         vector & operator= ( vector && _other_ )
                 noexcept( ( noexcept_move_assign_container_v< allocator_type, _alloc_traits > ) );
@@ -452,18 +451,18 @@ public:
 
         void shrink_to_fit () noexcept;
 
-        NPL_ALWAYS_INLINE       reference operator[] ( size_type const _index_ )       noexcept;
-        NPL_ALWAYS_INLINE const_reference operator[] ( size_type const _index_ ) const noexcept;
+        NPL_ALWAYS_INLINE       reference operator[] ( size_type const _index_ )       noexcept ;
+        NPL_ALWAYS_INLINE const_reference operator[] ( size_type const _index_ ) const noexcept ;
 
-        bool   operator== ( vector< T, Allocator > const & _rhs_ ) const noexcept;
-        bool   operator!= ( vector< T, Allocator > const & _rhs_ ) const noexcept;
-        auto   operator+  ( vector< T, Allocator > const & _rhs_ ) const         ;
-        auto & operator+= ( vector< T, Allocator > const & _rhs_ )       noexcept;
-        auto   operator-  ( vector< T, Allocator > const & _rhs_ ) const         ;
-        auto & operator-= ( vector< T, Allocator > const & _rhs_ )       noexcept;
+        bool   operator== ( vector< T, Allocator > const & _rhs_ ) const noexcept ;
+        bool   operator!= ( vector< T, Allocator > const & _rhs_ ) const noexcept ;
+        auto   operator+  ( vector< T, Allocator > const & _rhs_ ) const          ;
+        auto & operator+= ( vector< T, Allocator > const & _rhs_ )       noexcept ;
+        auto   operator-  ( vector< T, Allocator > const & _rhs_ ) const          ;
+        auto & operator-= ( vector< T, Allocator > const & _rhs_ )       noexcept ;
 
-        NPL_ALWAYS_INLINE       reference at ( size_type const _index_ )       noexcept;
-        NPL_ALWAYS_INLINE const_reference at ( size_type const _index_ ) const noexcept;
+        NPL_ALWAYS_INLINE       reference at ( size_type const _index_ )       noexcept ;
+        NPL_ALWAYS_INLINE const_reference at ( size_type const _index_ ) const noexcept ;
 
           ////////////////////
          // 2D overloads ////

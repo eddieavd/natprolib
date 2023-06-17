@@ -103,7 +103,7 @@ public:
         using str_const_reference = storage_type const & ;
 
         using       size_type = size_t         ;
-        using difference_type = std::ptrdiff_t ;
+        using difference_type = ptrdiff_t ;
 
         using               iterator = _static_vector_iterator< false > ;
         using         const_iterator = _static_vector_iterator<  true > ;
