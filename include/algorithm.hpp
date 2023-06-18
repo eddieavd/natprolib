@@ -174,26 +174,3 @@ T min ( std::initializer_list< T > _list_ )
 
 
 } // namespace npl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -103,7 +103,7 @@ public:
         using       str_reference = storage_type       & ;
         using str_const_reference = storage_type const & ;
 
-        using       size_type = size_t         ;
+        using       size_type =    size_t ;
         using difference_type = ptrdiff_t ;
 
         using               iterator = _static_vector_iterator< false > ;
@@ -125,7 +125,7 @@ public:
 
         constexpr ~static_vector () noexcept requires( is_trivially_destructible_v< value_type > ) = default;
 
-        constexpr ~static_vector () noexcept( std::is_nothrow_destructible_v< value_type > ) requires ( !is_trivially_destructible_v< value_type > )
+        constexpr ~static_vector () noexcept( is_nothrow_destructible_v< value_type > ) requires ( !is_trivially_destructible_v< value_type > )
         {
                 clear();
         }
@@ -204,7 +204,7 @@ public:
 
         NPL_NODISCARD constexpr bool empty () const noexcept { return size_ == 0; }
 
-        constexpr void clear () noexcept( std::is_nothrow_destructible_v< value_type > )
+        constexpr void clear () noexcept( is_nothrow_destructible_v< value_type > )
         {
                 if constexpr( !is_trivially_destructible_v< value_type > )
                 {
@@ -228,11 +228,11 @@ public:
 
 /*
         template< std::input_iterator InputIterator >
-        constexpr void assign ( InputIterator _first_, InputIterator _last_ ) noexcept( ( std::is_trivially_copyable_v< value_type > && std::contiguous_iterator< InputIterator > ) ||
+        constexpr void assign ( InputIterator _first_, InputIterator _last_ ) noexcept( ( is_trivially_copyable_v< value_type > && std::contiguous_iterator< InputIterator > ) ||
                                                                                         ( std::is_nothrow_copy_assignable_v< value_type > && std::is_nothrow_copy_constructible_v< value_type > ) );
 */
 
-        constexpr void assign ( std::initializer_list< value_type > _list_ ) noexcept( std::is_trivially_copyable_v     < value_type > ||
+        constexpr void assign ( std::initializer_list< value_type > _list_ ) noexcept( is_trivially_copyable_v     < value_type > ||
                                                                                      ( is_nothrow_copy_assignable_v< value_type > && is_nothrow_copy_constructible_v< value_type > ) );
 
         constexpr void push_back ( value_type const &  _val_ ) noexcept( noexcept( value_type{           _val_   } ) );
@@ -250,7 +250,7 @@ protected:
 /*
         template< typename InputIterator, typename Assigner >
         constexpr void assign ( InputIterator _begin_, InputIterator _end_, Assigner && _assigner_ )
-                noexcept( ( std::is_trivially_copyable_v< value_type > && std::contiguous_iterator< InputIterator > ) ||
+                noexcept( ( is_trivially_copyable_v< value_type > && std::contiguous_iterator< InputIterator > ) ||
                           ( noexcept( value_type{ assigner( _begin_ ) } ) && noexcept( std::declval< reference >() = assigner( _begin_ ) ) ) );
 */
 };
@@ -494,7 +494,7 @@ static_vector< T, N >::resize ( size_type const _count_ ) noexcept( is_nothrow_d
 template< typename T, size_t N >
 constexpr
 void
-static_vector< T, N >::assign ( std::initializer_list< value_type > _list_ ) noexcept( std::is_trivially_copyable_v< value_type > ||
+static_vector< T, N >::assign ( std::initializer_list< value_type > _list_ ) noexcept( is_trivially_copyable_v< value_type > ||
                                                                                      ( is_nothrow_copy_assignable_v< value_type > && is_nothrow_copy_constructible_v< value_type > ) )
 {
         this->assign( _list_.begin(), _list_.end(), []( auto it ) -> const_reference { return *it; } );

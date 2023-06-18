@@ -1157,6 +1157,12 @@ inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible< T, 
 //      is_nothrow_destructible
 //=====================================================================
 
+template< typename T >
+struct is_nothrow_destructible : bool_constant< __is_nothrow_destructible( T ) > {} ;
+
+template< typename T >
+inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::value ;
+
 //=====================================================================
 //      is_trivially_destructible
 //=====================================================================
@@ -1228,6 +1234,16 @@ struct is_trivially_copy_constructible : is_trivially_constructible< T, add_lval
 
 template< typename T >
 inline constexpr bool is_trivially_copy_constructible_v = is_trivially_copy_constructible< T >::value ;
+
+//=====================================================================
+//      is_trivially_copyable
+//=====================================================================
+
+template< typename T >
+struct is_trivially_copyable : bool_constant< __is_trivially_copyable( T ) > {} ;
+
+template< typename T >
+inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
 
 //=====================================================================
 //      is_trivially_move_constructible
