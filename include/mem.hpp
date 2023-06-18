@@ -14,7 +14,6 @@
 #include <_iter/iter_traits.hpp>
 #include <_traits/npl_traits.hpp>
 #include <algorithm.hpp>
-#include <iterator.hpp>
 
 
 #define NPL_HAS_NO_SIZED_DEALLOCATION
@@ -39,6 +38,13 @@ template< typename T >
 constexpr auto to_address ( T const & _ptr_ ) noexcept
 {
         return std::pointer_traits< T >::to_address( _ptr_ );
+}
+
+template< typename T >
+inline constexpr
+T * addressof ( T & _x_ ) noexcept
+{
+        return __builtin_addressof( _x_ );
 }
 
 template< typename T, typename... Args >

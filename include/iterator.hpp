@@ -7,6 +7,7 @@
 #pragma once
 
 #include <util.hpp>
+#include <mem.hpp>
 #include <_iter/iter_traits.hpp>
 
 
@@ -28,7 +29,7 @@ public:
         using   const_reference = value_type const &;
         using iterator_category = random_access_iterator_tag;
 
-        constexpr pointer     operator-> (     ) const noexcept {   return std::addressof( operator*() ); }
+        constexpr pointer     operator-> (     ) const noexcept {   return mem::addressof( operator*() ); }
         constexpr reference   operator*  (     ) const noexcept {                           return *ptr_; }
         constexpr iterator  & operator++ (     )       noexcept {                   ptr_++; return *this; }
         constexpr iterator  & operator-- (     )       noexcept {                   ptr_--; return *this; }

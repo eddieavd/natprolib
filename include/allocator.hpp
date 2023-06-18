@@ -67,12 +67,12 @@ public:
 
         inline pointer address ( reference _x_ ) const noexcept
         {
-                return std::addressof( _x_ );
+                return mem::addressof( _x_ );
         }
 
         inline const_pointer address ( const_reference _x_ ) const noexcept
         {
-                return std::addressof( _x_ );
+                return mem::addressof( _x_ );
         }
 
         NPL_NODISCARD inline value_type * allocate ( size_t _n_, void const * ) { return allocate( _n_ ); }
@@ -138,7 +138,7 @@ public:
         template< typename U >
         struct rebind { using other = allocator< U >; };
 
-        inline const_pointer address ( const_reference _x_ ) const noexcept { return std::addressof( _x_ ); }
+        inline const_pointer address ( const_reference _x_ ) const noexcept { return mem::addressof( _x_ ); }
 
         NPL_NODISCARD inline value_type const * allocate ( size_t _n_, void const * ) { return allocate( _n_ ); }
 
