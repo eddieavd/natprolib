@@ -41,6 +41,16 @@ _swap_result_t< T > swap ( T & _lhs_, T & _rhs_ ) noexcept( is_nothrow_move_cons
 }
 
 template< typename T >
+inline constexpr
+_swap_result_t< T > _swap_integral ( T & _lhs_, T & _rhs_ ) noexcept
+{
+        _lhs_ += _rhs_;
+        _rhs_  = _lhs_ - _rhs_;
+        _lhs_ -= _rhs_;
+}
+
+/*
+template< typename T >
         requires is_integral_v< T >
 inline constexpr
 _swap_result_t< T > swap ( T & _lhs_, T & _rhs_ ) noexcept
@@ -49,6 +59,7 @@ _swap_result_t< T > swap ( T & _lhs_, T & _rhs_ ) noexcept
         _rhs_  = _lhs_ - _rhs_;
         _lhs_ -= _rhs_;
 }
+*/
 
 /*
 template< typename T, size_t N >

@@ -18,6 +18,100 @@ namespace npl_bench
 
 
 template< typename T >
+static void bm_swap_integral ( benchmark::State & state )
+{
+        T a = 5 ;
+        T b = 3 ;
+
+        for( auto _ : state )
+        {
+                for( size_t i = 0; i < 1000; ++i )
+                {
+                        npl::_swap_integral( a, b ) ;
+                }
+
+                benchmark::ClobberMemory();
+                benchmark::DoNotOptimize( a );
+                benchmark::DoNotOptimize( b );
+        }
+}
+
+template< typename T >
+static void bm_swap_integral_with_temp ( benchmark::State & state )
+{
+        T a = 5 ;
+        T b = 3 ;
+
+        for( auto _ : state )
+        {
+                for( size_t i = 0; i < 1000; ++i )
+                {
+                        npl::swap( a, b );
+                }
+
+                benchmark::ClobberMemory();
+                benchmark::DoNotOptimize( a );
+                benchmark::DoNotOptimize( b );
+        }
+}
+
+template< typename T >
+static void bm_swap_array ( benchmark::State & state )
+{
+        T * a = ::new T[ state.range( 0 ) ];
+        T * b = ::new T[ state.range( 0 ) ];
+
+        for( int i = 0; i < state.range( 0 ); ++i )
+        {
+                a[ i ] = 1;
+                b[ i ] = 2;
+        }
+        for( auto _ : state )
+        {
+                for( int i = 0; i < 100; ++i )
+                {
+                        for( int i = 0; i < state.range( 0 ); ++i )
+                        {
+                                npl::_swap_integral( a[ i ], b[ i ] );
+                        }
+                }
+                benchmark::ClobberMemory();
+                benchmark::DoNotOptimize( a );
+                benchmark::DoNotOptimize( b );
+        }
+        ::delete[] a;
+        ::delete[] b;
+}
+
+template< typename T >
+static void bm_swap_array_with_temp ( benchmark::State & state )
+{
+        T * a = ::new T[ state.range( 0 ) ];
+        T * b = ::new T[ state.range( 0 ) ];
+
+        for( int i = 0; i < state.range( 0 ); ++i )
+        {
+                a[ i ] = 1;
+                b[ i ] = 2;
+        }
+        for( auto _ : state )
+        {
+                for( int i = 0; i < 100; ++i )
+                {
+                        for( int i = 0; i < state.range( 0 ); ++i )
+                        {
+                                npl::swap( a[ i ], b[ i ] );
+                        }
+                }
+                benchmark::ClobberMemory();
+                benchmark::DoNotOptimize( a );
+                benchmark::DoNotOptimize( b );
+        }
+        ::delete[] a;
+        ::delete[] b;
+}
+
+template< typename T >
 static void bm_sbuff_pfront ( benchmark::State & state )
 {
         for( auto _ : state )

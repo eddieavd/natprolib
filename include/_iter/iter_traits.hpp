@@ -274,6 +274,7 @@ constexpr void advance ( Iter & _iter_, Dist _dist_ )
 {
         using diff_t = typename iterator_traits< Iter >::difference_type ;
 
+        [[ maybe_unused ]]
         diff_t dist = static_cast< diff_t >( convert_to_integral( _dist_ ) );
         NPL_ASSERT( dist >= 0 || is_at_least_bidirectional_iterator_v< Iter >,
                         "attempt to advance( it, n ) with negative n on non-bidirectional iterator" );
