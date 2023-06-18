@@ -19,6 +19,7 @@
 #include <iterator.hpp>
 
 #include <container/split_buffer>
+#include <container/array>
 #include <container/vector>
 
 

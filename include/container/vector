@@ -231,6 +231,19 @@ public:
         vector ( size_type const _count_, value_type const & _val_                                 );
         vector ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ );
 
+        /*
+        template< typename TwoDimIter, typename U = _self >
+                requires is_2d_container_v< U > && is_2d_container_iterator_v< TwoDimIter >
+        vector ( TwoDimIter _first_, TwoDimIter _last_ )
+        {
+                while( _first_ != _last_ )
+                {
+                        emplace_back( _first_->begin(), _first_->end() );
+                        ++_first_;
+                }
+        }
+        */
+
         template< typename InputIterator >
         vector ( InputIterator _first_,
                         enable_if_t<
@@ -483,6 +496,23 @@ public:
         at ( size_type const _x_, size_type const _y_ ) noexcept
         {
                 return at( _x_ ).at( _y_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_if_2d_container_t< U, typename U::size_type >
+        width () const noexcept
+        {
+                NPL_ASSERT( !empty(), "npl::vector::width: called on empty vector" );
+                return at( 0 ).size();
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_if_2d_container_t< U, typename U::size_type >
+        height () const noexcept
+        {
+                return size();
         }
 
         //////////////////

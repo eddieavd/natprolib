@@ -133,50 +133,50 @@ using _2d_container_base_t = typename Container::value_type::value_type ;
 template< typename Container >
 using _3d_container_base_t = typename _2d_container_base_t< Container >::value_type ;
 
-template< typename Container >
-struct enable_if_2d_container : enable_if< is_2d_container_v< Container > > {} ;
+template< typename Container, typename T >
+struct enable_if_2d_container : enable_if< is_2d_container_v< Container >, T > {} ;
+
+template< typename Container, typename T >
+using enable_if_2d_container_t = typename enable_if_2d_container< Container, T >::type ;
+
+template< typename Container, typename T >
+struct enable_if_3d_container : enable_if< is_3d_container_v< Container >, T > {} ;
+
+template< typename Container, typename T >
+using enable_if_3d_container_t = typename enable_if_3d_container< Container, T >::type ;
+
+template< typename Container, typename T >
+struct enable_if_2d_range_container : enable_if< is_2d_range_container_v< Container >, T > {} ;
+
+template< typename Container, typename T >
+using enable_if_2d_range_container_t = typename enable_if_2d_range_container< Container, T >::type ;
+
+template< typename Container, typename T >
+struct enable_if_3d_range_container : enable_if< is_3d_range_container_v< Container >, T > {} ;
+
+template< typename Container, typename T >
+using enable_if_3d_range_container_t = typename enable_if_3d_range_container< Container, T >::type ;
 
 template< typename Container >
-using enable_if_2d_container_t = typename enable_if_2d_container< Container >::type ;
-
-template< typename Container >
-struct enable_if_3d_container : enable_if< is_3d_container_v< Container > > {} ;
-
-template< typename Container >
-using enable_if_3d_container_t = typename enable_if_3d_container< Container >::type ;
-
-template< typename Container >
-struct enable_if_2d_range_container : enable_if< is_2d_range_container_v< Container > > {} ;
-
-template< typename Container >
-using enable_if_2d_range_container_t = typename enable_if_2d_range_container< Container >::type ;
-
-template< typename Container >
-struct enable_if_3d_range_container : enable_if< is_3d_range_container_v< Container > > {} ;
-
-template< typename Container >
-using enable_if_3d_range_container_t = typename enable_if_3d_range_container< Container >::type ;
-
-template< typename Container >
-struct enable_2d_container_base : enable_if< is_2d_container_v< Container >, _2d_container_base_t< Container > > {} ;
+struct enable_2d_container_base : enable_if_2d_container< Container, _2d_container_base_t< Container > > {} ;
 
 template< typename Container >
 using enable_2d_container_base_t = typename enable_2d_container_base< Container >::type ;
 
 template< typename Container >
-struct enable_3d_container_base : enable_if< is_3d_container_v< Container >, _3d_container_base_t< Container > > {} ;
+struct enable_3d_container_base : enable_if_3d_container< Container, _3d_container_base_t< Container > > {} ;
 
 template< typename Container >
 using enable_3d_container_base_t = typename enable_3d_container_base< Container >::type ;
 
 template< typename Container >
-struct enable_2d_range_container_base : enable_if< is_2d_range_container_v< Container >, _2d_container_base_t< Container > > {} ;
+struct enable_2d_range_container_base : enable_if_2d_range_container< Container, _2d_container_base_t< Container > > {} ;
 
 template< typename Container >
 using enable_2d_range_container_base_t = typename enable_2d_range_container_base< Container >::type ;
 
 template< typename Container >
-struct enable_3d_range_container_base : enable_if< is_3d_range_container_v< Container >, _3d_container_base_t< Container > > {} ;
+struct enable_3d_range_container_base : enable_if_3d_range_container< Container, _3d_container_base_t< Container > > {} ;
 
 template< typename Container >
 using enable_3d_range_container_base_t = typename enable_3d_range_container_base< Container >::type ;

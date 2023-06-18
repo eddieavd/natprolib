@@ -7,6 +7,7 @@
 #pragma once
 
 #include <_traits/base_traits.hpp>
+#include <_traits/npl_traits.hpp>
 
 
 namespace npl
@@ -202,6 +203,12 @@ struct is_exactly_random_access_iterator : conjunction_t< is_at_least_random_acc
                                                             is_convertible< random_access_iterator_tag, typename iterator_traits< T >::iterator_category > > {} ;
 template< typename T >
 inline constexpr bool is_exactly_random_access_iterator_v = is_exactly_random_access_iterator< T >::value ;
+
+template< typename T >
+struct is_2d_container_iterator : is_container< typename iterator_traits< T >::value_type > {} ;
+
+template< typename T >
+inline constexpr bool is_2d_container_iterator_v = is_2d_container_iterator< T >::value ;
 
 
 template< typename InputIter >
