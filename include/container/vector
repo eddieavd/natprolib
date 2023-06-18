@@ -14,11 +14,12 @@
 #include <util.hpp>
 #include <_alloc/alloc_traits.hpp>
 #include <_iter/iter_traits.hpp>
-#include <_iter/std_iter.hpp>
 #include <_iter/move_iterator.hpp>
 #include <_traits/npl_traits.hpp>
+#include <algorithm.hpp>
 #include <iterator.hpp>
 #include <allocator.hpp>
+
 #include <container/split_buffer>
 
 #ifdef NPL_HAS_ASAN
@@ -806,9 +807,9 @@ vector< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, al
 
         mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_, this->end_, _buffer_.begin_ );
 
-        std::swap( this->begin_    , _buffer_.begin_     );
-        std::swap( this->end_      , _buffer_.end_       );
-        std::swap( this->_end_cap(), _buffer_._end_cap() );
+        npl::swap( this->begin_    , _buffer_.begin_     );
+        npl::swap( this->end_      , _buffer_.end_       );
+        npl::swap( this->_end_cap(), _buffer_._end_cap() );
 
         _buffer_.first_ = _buffer_.begin_;
         _annotate_new( size() );
@@ -826,9 +827,9 @@ vector< T, Allocator >::_swap_out_circular_buffer ( split_buffer< value_type, al
         mem::_construct_backward_with_exception_guarantees( this->_alloc(), this->begin_,      _ptr_, _buffer_.begin_ );
         mem::_construct_forward_with_exception_guarantees ( this->_alloc(),        _ptr_, this->end_, _buffer_.end_   );
 
-        std::swap( this->begin_    , _buffer_->begin_    );
-        std::swap( this->end_      , _buffer_.end_       );
-        std::swap( this->_end_cap(), _buffer_._end_cap() );
+        npl::swap( this->begin_    , _buffer_->begin_    );
+        npl::swap( this->end_      , _buffer_.end_       );
+        npl::swap( this->_end_cap(), _buffer_._end_cap() );
 
         _buffer_.first_ = _buffer_.begin_;
         _annotate_new( size() );
@@ -865,7 +866,7 @@ template< typename T, typename Allocator >
 typename vector< T, Allocator >::size_type
 vector< T, Allocator >::max_size () const noexcept
 {
-        return std::min< size_type >( _alloc_traits::max_size( this->_alloc() ), std::numeric_limits< difference_type >::max() );
+        return min< size_type >( _alloc_traits::max_size( this->_alloc() ), std::numeric_limits< difference_type >::max() );
 }
 
 template< typename T, typename Allocator >
@@ -1521,7 +1522,7 @@ void vector< T, Allocator >::assign ( size_type const _count_, const_reference _
         {
                 size_type sz = size();
 
-                std::fill_n( this->begin_, std::min( _count_, sz ), _val_ );
+                std::fill_n( this->begin_, min( _count_, sz ), _val_ );
 
                 if( _count_ > sz )
                 {
@@ -1616,7 +1617,7 @@ inline
 auto &
 vector< T, Allocator >::operator+= ( vector< T, Allocator > const & _other_ ) noexcept
 {
-        size_type common = std::min< size_type >( size(), _other_.size() );
+        size_type common = min< size_type >( size(), _other_.size() );
 
         for( size_type i = 0; i < common; ++i )
         {
@@ -1658,7 +1659,7 @@ inline
 auto &
 vector< T, Allocator >::operator-= ( vector< T, Allocator > const & _other_ ) noexcept
 {
-        size_type common = std::min< size_type >( size(), _other_.size() );
+        size_type common = min< size_type >( size(), _other_.size() );
 
         for( size_type i = 0; i < common; ++i )
         {
@@ -1892,9 +1893,9 @@ vector< T, Allocator >::swap ( vector & _other_ ) noexcept
         NPL_ASSERT( _alloc_traits::propagate_on_container_swap::value || this->_alloc() == _other_._alloc(),
                         "vector::swap: if lhs.alloc != rhs.alloc, alloc_type needs to propagate on swap" );
 
-        std::swap( this->begin_  , _other_.begin_   );
-        std::swap( this->end_    , _other_.end_     );
-        std::swap( this->end_cap_, _other_.end_cap_ );
+        npl::swap( this->begin_  , _other_.begin_   );
+        npl::swap( this->end_    , _other_.end_     );
+        npl::swap( this->end_cap_, _other_.end_cap_ );
 
         mem::_swap_allocator( this->_alloc(), _other_._alloc(),
                         bool_constant< _alloc_traits::propagate_on_container_swap::value >() );

@@ -427,10 +427,10 @@ split_buffer< T, Allocator >::swap ( split_buffer & _other_ )
         noexcept( !_alloc_traits::propagate_on_container_swap::value ||
                         std::is_nothrow_swappable< _alloc_rr >::value )
 {
-        std::swap( first_  , _other_.first_   );
-        std::swap( begin_  , _other_.begin_   );
-        std::swap( end_    , _other_.end_     );
-        std::swap( end_cap_, _other_.end_cap_ );
+        npl::swap( first_  , _other_.first_   );
+        npl::swap( begin_  , _other_.begin_   );
+        npl::swap( end_    , _other_.end_     );
+        npl::swap( end_cap_, _other_.end_cap_ );
 
         mem::_swap_allocator( _alloc(), _other_.alloc() );
 }
@@ -446,10 +446,10 @@ split_buffer< T, Allocator >::reserve ( size_type const _count_ )
                 tmp._construct_at_end( move_iterator< pointer >( begin_ ),
                                        move_iterator< pointer >( end_   ) );
 
-                std::swap( first_  , tmp.first_   );
-                std::swap( begin_  , tmp.begin_   );
-                std::swap( end_    , tmp.end_     );
-                std::swap( end_cap_, tmp.end_cap_ );
+                npl::swap( first_  , tmp.first_   );
+                npl::swap( begin_  , tmp.begin_   );
+                npl::swap( end_    , tmp.end_     );
+                npl::swap( end_cap_, tmp.end_cap_ );
         }
 }
 
@@ -465,10 +465,10 @@ split_buffer< T, Allocator >::shrink_to_fit () noexcept
                                        move_iterator< pointer >( end_   ) );
                 tmp.end_ = tmp.begin_ + ( end_ - begin_ );
 
-                std::swap( first_  , tmp.first_   );
-                std::swap( begin_  , tmp.begin_   );
-                std::swap( end_    , tmp.end_     );
-                std::swap( end_cap_, tmp.end_cap_ );
+                npl::swap( first_  , tmp.first_   );
+                npl::swap( begin_  , tmp.begin_   );
+                npl::swap( end_    , tmp.end_     );
+                npl::swap( end_cap_, tmp.end_cap_ );
         }
 }
 
@@ -495,10 +495,10 @@ split_buffer< T, Allocator >::push_front ( const_reference _val_ )
                         tmp._construct_at_end( move_iterator< pointer >( begin_ ),
                                                move_iterator< pointer >( end_   ) );
 
-                        std::swap( first_  , tmp.first_   );
-                        std::swap( begin_  , tmp.begin_   );
-                        std::swap( end_    , tmp.end_     );
-                        std::swap( end_cap_, tmp.end_cap_ );
+                        npl::swap( first_  , tmp.first_   );
+                        npl::swap( begin_  , tmp.begin_   );
+                        npl::swap( end_    , tmp.end_     );
+                        npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
         _alloc_traits::construct( _alloc(), mem::to_address( begin_ - 1 ), _val_ );
@@ -528,10 +528,10 @@ split_buffer< T, Allocator >::push_front ( value_type && _val_ )
                         tmp._construct_at_end( move_iterator< pointer >( begin_ ),
                                                move_iterator< pointer >( end_   ) );
 
-                        std::swap( first_  , tmp.first_   );
-                        std::swap( begin_  , tmp.begin_   );
-                        std::swap( end_    , tmp.end_     );
-                        std::swap( end_cap_, tmp.end_cap_ );
+                        npl::swap( first_  , tmp.first_   );
+                        npl::swap( begin_  , tmp.begin_   );
+                        npl::swap( end_    , tmp.end_     );
+                        npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
         _alloc_traits::construct( _alloc(), mem::to_address( begin_ - 1 ), NPL_MOVE( _val_ ) );
@@ -562,10 +562,10 @@ split_buffer< T, Allocator >::push_back ( const_reference _val_ )
                         tmp._construct_at_end( move_iterator< pointer >( begin_ ),
                                                move_iterator< pointer >( end_   ) );
 
-                        std::swap( first_  , tmp.first_   );
-                        std::swap( begin_  , tmp.begin_   );
-                        std::swap( end_    , tmp.end_     );
-                        std::swap( end_cap_, tmp.end_cap_ );
+                        npl::swap( first_  , tmp.first_   );
+                        npl::swap( begin_  , tmp.begin_   );
+                        npl::swap( end_    , tmp.end_     );
+                        npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
         _alloc_traits::construct( _alloc(), mem::to_address( end_ ), _val_ );
@@ -596,10 +596,10 @@ split_buffer< T, Allocator >::push_back ( value_type && _val_ )
                         tmp._construct_at_end( move_iterator< pointer >( begin_ ),
                                                move_iterator< pointer >( end_   ) );
 
-                        std::swap( first_  , tmp.first_   );
-                        std::swap( begin_  , tmp.begin_   );
-                        std::swap( end_    , tmp.end_     );
-                        std::swap( end_cap_, tmp.end_cap_ );
+                        npl::swap( first_  , tmp.first_   );
+                        npl::swap( begin_  , tmp.begin_   );
+                        npl::swap( end_    , tmp.end_     );
+                        npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
         _alloc_traits::construct( _alloc(), mem::to_address( end_ ), NPL_MOVE( _val_ ) );
@@ -630,10 +630,10 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
                         tmp._construct_at_end( move_iterator< pointer >( begin_ ),
                                                move_iterator< pointer >( end_   ) );
 
-                        std::swap( first_  , tmp.first_   );
-                        std::swap( begin_  , tmp.begin_   );
-                        std::swap( end_    , tmp.end_     );
-                        std::swap( end_cap_, tmp.end_cap_ );
+                        npl::swap( first_  , tmp.first_   );
+                        npl::swap( begin_  , tmp.begin_   );
+                        npl::swap( end_    , tmp.end_     );
+                        npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
         _alloc_traits::construct( _alloc(), mem::to_address( end_ ), NPL_FWD( _args_ )... );

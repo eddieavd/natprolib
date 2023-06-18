@@ -11,6 +11,7 @@
 #include <mem.hpp>
 #include <util.hpp>
 #include <_traits/npl_traits.hpp>
+#include <algorithm.hpp>
 #include <iterator.hpp>
 
 #include <container/array>
@@ -435,7 +436,7 @@ static_vector< T, N >::assign ( size_type const _count_, value_type const & _val
 {
         NPL_CONSTEXPR_ASSERT( _count_ <= N, "static_vector::assign: count > capacity" );
 
-        auto const real_count = std::min( size_, _count_ );
+        auto const real_count = min( size_, _count_ );
 
         for( size_type i = 0; i < real_count; ++i )
         {

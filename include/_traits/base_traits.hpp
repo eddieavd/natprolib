@@ -843,6 +843,21 @@ inline constexpr
 typename _sfinae_underlying_type< T >::_promoted_type
 convert_to_integral ( T _val_ ) { return _val_; }
 
+//=====================================================================
+//      is_callable
+//=====================================================================
+
+template< typename Func, typename... Args,
+          typename = decltype( declval< Func >()( declval< Args >()... ) ) >
+true_type _is_callable_impl ( int ) ;
+template< typename... >
+false_type _is_callable_impl ( ... ) ;
+
+template< typename Func, typename... Args >
+struct is_callable : decltype( _is_callable_impl< Func, Args... >( 0 ) ) {} ;
+
+template< typename Func, typename... Args >
+inline constexpr bool is_callable_v = is_callable< Func, Args... >::value ;
 
 //=====================================================================
 //  ┌─┐┌─┐┌─┐┬┌─┐┌┐┌┌─┐┌┐ ┬┬  ┬┌┬┐┬ ┬

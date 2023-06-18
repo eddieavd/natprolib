@@ -13,6 +13,7 @@
 #include <_alloc/alloc_traits.hpp>
 #include <_iter/iter_traits.hpp>
 #include <_traits/npl_traits.hpp>
+#include <algorithm.hpp>
 #include <iterator.hpp>
 
 
@@ -150,7 +151,7 @@ inline void _libnpl_deallocate_unsized ( void * _ptr_, [[ maybe_unused ]] size_t
 template< typename Alloc >
 void _swap_allocator ( Alloc & _lhs_, Alloc & _rhs_, true_type ) noexcept
 {
-        using std::swap;
+        using npl::swap;
         swap( _lhs_, _rhs_ );
 }
 
