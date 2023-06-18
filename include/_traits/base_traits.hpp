@@ -259,9 +259,53 @@ using remove_cvref_t = typename remove_cvref< T >::type ;
 //=====================================================================
 
 //=====================================================================
+//      if
+//=====================================================================
+
+template< bool >
+struct _if_impl ;
+
+template<>
+struct _if_impl< true >
+{
+        template< typename IfRes, typename ElseRes >
+        using select_t = IfRes ;
+};
+
+template<>
+struct _if_impl< false >
+{
+        template< typename IfRes, typename ElseRes >
+        using select_t = ElseRes ;
+};
+
+template< bool Cond, typename IfRes, typename ElseRes >
+using _if = typename _if_impl< Cond >::template select_t< IfRes, ElseRes > ;
+
+//=====================================================================
 //      conditional
 //=====================================================================
 
+template< bool Cond, typename If, typename Then >
+struct conditional
+{
+        using type = If ;
+};
+
+template< typename If, typename Then >
+struct conditional< false, If, Then >
+{
+        using type = Then ;
+};
+
+template< bool Cond, typename IfRes, typename ElseRes >
+using conditional_t = typename conditional< Cond, IfRes, ElseRes >::type ;
+
+//=====================================================================
+//      old_conditional
+//=====================================================================
+
+/*
 template< bool Condition, typename T, typename F >
 struct conditional : type_identity< T > {} ;
 
@@ -270,6 +314,7 @@ struct conditional< false, T, F > : type_identity< F > {} ;
 
 template< bool Condition, typename T, typename F >
 using conditional_t = typename conditional< Condition, T, F >::type ;
+*/
 
 //=====================================================================
 //      conjunction
@@ -292,9 +337,44 @@ template< typename... Args >
 inline constexpr bool conjunction_v = conjunction< Args... >::value ;
 
 //=====================================================================
+//      or
+//=====================================================================
+
+template< bool >
+struct _or_impl ;
+
+template<>
+struct _or_impl< true >
+{
+        template< typename Res, typename First, typename... Rest >
+        using Result = typename _or_impl< !bool( First::value ) && sizeof...( Rest ) != 0 >::template Result< First, Rest... > ;
+};
+
+template<>
+struct _or_impl< false >
+{
+        template< typename Res, typename... >
+        using Result = Res ;
+};
+
+template< typename... Args >
+using _or = typename _or_impl< sizeof...( Args ) != 0 >::template Result< false_type, Args... > ;
+
+//=====================================================================
 //      disjunction
 //=====================================================================
 
+template< typename... Args >
+struct disjunction : _or< Args... > {} ;
+
+template< typename... Args >
+inline constexpr bool disjunction_v = _or< Args... >::value ;
+
+//=====================================================================
+//      old disjunction
+//=====================================================================
+
+/*
 template< typename... >
 struct disjunction : false_type {} ;
 
@@ -310,6 +390,7 @@ using disjunction_t = typename disjunction< Args... >::type ;
 
 template< typename... Args >
 inline constexpr bool disjunction_v = disjunction< Args... >::value ;
+*/
 
 //=====================================================================
 //      is

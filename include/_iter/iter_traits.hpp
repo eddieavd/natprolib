@@ -26,11 +26,11 @@ struct random_access_iterator_tag : public bidirectional_iterator_tag {} ;
 template< typename Iter >
 struct _iter_traits_cache
 {
-        using type = conditional<
-                                        is_primary_template< iterator_traits< Iter > >::value,
-                                        Iter,
-                                        iterator_traits< Iter >
-                                > ;
+        using type = _if<
+                                is_primary_template< iterator_traits< Iter > >::value,
+                                Iter,
+                                iterator_traits< Iter >
+                        > ;
 };
 template< typename Iter >
 using ITER_TRAITS = typename _iter_traits_cache< Iter >::type ;
@@ -60,10 +60,11 @@ struct _test_iter_concept : is_valid_expansion< Tester::template _apply, Iter >,
 template< typename Iter >
 struct _iter_concept_cache
 {
-        using type = disjunction< _test_iter_concept< Iter, _iter_concept_concept_test    >,
-                                  _test_iter_concept< Iter, _iter_concept_category_test   >,
-                                  _test_iter_concept< Iter, _iter_concept_random_fallback >
-                                > ;
+        using type = _or<
+                                _test_iter_concept< Iter, _iter_concept_concept_test    >,
+                                _test_iter_concept< Iter, _iter_concept_category_test   >,
+                                _test_iter_concept< Iter, _iter_concept_random_fallback >
+                        > ;
 };
 
 template< typename Iter >
@@ -74,11 +75,11 @@ struct _has_iterator_typedefs
 {
 private:
         template< typename U > static false_type _test ( ... ) ;
-        template< typename U > static  true_type _test ( void_t< typename U::iterator_category >* = nullptr,
-                                                         void_t< typename U::  difference_type >* = nullptr,
-                                                         void_t< typename U::       value_type >* = nullptr,
-                                                         void_t< typename U::        reference >* = nullptr,
-                                                         void_t< typename U::          pointer >* = nullptr ) ;
+        template< typename U > static  true_type _test ( typename void_t< typename U::iterator_category >::type* = nullptr,
+                                                         typename void_t< typename U::  difference_type >::type* = nullptr,
+                                                         typename void_t< typename U::       value_type >::type* = nullptr,
+                                                         typename void_t< typename U::        reference >::type* = nullptr,
+                                                         typename void_t< typename U::          pointer >::type* = nullptr ) ;
 public:
         static const bool value = decltype( _test< T >( 0, 0, 0, 0, 0 ) )::value ;
 };

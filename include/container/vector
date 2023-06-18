@@ -14,6 +14,7 @@
 #include <util.hpp>
 #include <_alloc/alloc_traits.hpp>
 #include <_iter/iter_traits.hpp>
+#include <_iter/std_iter.hpp>
 #include <_iter/move_iterator.hpp>
 #include <_traits/npl_traits.hpp>
 #include <algorithm.hpp>
@@ -288,12 +289,11 @@ public:
                                                 typename iterator_traits< ForwardIterator >::reference
                                         > > * = 0 );
 
-        /*
         template< typename InputIterator >
         vector ( InputIterator _first_,
                         enable_if_t<
-                                                         is_std_input_iterator_v  < InputIterator > &&
-                                                        !is_std_forward_iterator_v< InputIterator > &&
+                                                         is_at_least_std_input_iterator_v  < InputIterator > &&
+                                                        !is_at_least_std_forward_iterator_v< InputIterator > &&
                                                          is_constructible_v
                                                          <
                                                                 value_type,
@@ -304,8 +304,8 @@ public:
         template< typename InputIterator >
         vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                         enable_if_t<
-                                                         is_std_input_iterator_v  < InputIterator > &&
-                                                        !is_std_forward_iterator_v< InputIterator > &&
+                                                         is_at_least_std_input_iterator_v  < InputIterator > &&
+                                                        !is_at_least_std_forward_iterator_v< InputIterator > &&
                                                          is_constructible_v
                                                          <
                                                                 value_type,
@@ -315,7 +315,7 @@ public:
         template< typename ForwardIterator >
         vector ( ForwardIterator _first_,
                         enable_if_t<
-                                                         is_std_forward_iterator_v< ForwardIterator > &&
+                                                         is_at_least_std_forward_iterator_v< ForwardIterator > &&
                                                         is_constructible_v
                                                         <
                                                                 value_type,
@@ -327,13 +327,12 @@ public:
         template< typename ForwardIterator >
         vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                         enable_if_t<
-                                                         is_std_forward_iterator_v< ForwardIterator > &&
+                                                         is_at_least_std_forward_iterator_v< ForwardIterator > &&
                                                         is_constructible_v
                                                         <
                                                                 value_type,
                                                                 typename std::iterator_traits< ForwardIterator >::reference
                                                         > > * = 0 );
-*/
 
         ~vector ()
         {
@@ -388,8 +387,8 @@ public:
         template< typename InputIterator >
         enable_if_t
         <
-                  is_std_input_iterator_v  < InputIterator > &&
-                 !is_std_forward_iterator_v< InputIterator > &&
+                  is_at_least_std_input_iterator_v  < InputIterator > &&
+                 !is_at_least_std_forward_iterator_v< InputIterator > &&
                   is_constructible_v
                   <
                         value_type,
@@ -402,7 +401,7 @@ public:
         template< typename ForwardIterator >
         enable_if_t
         <
-                 is_std_forward_iterator_v< ForwardIterator > &&
+                 is_at_least_std_forward_iterator_v< ForwardIterator > &&
                  is_constructible_v
                  <
                         value_type,
@@ -699,7 +698,7 @@ private:
         template< typename ForwardIterator >
         enable_if_t
         <
-                 is_std_forward_iterator_v< ForwardIterator >,
+                 is_at_least_std_forward_iterator_v< ForwardIterator >,
                  void
         >
         _construct_at_end ( ForwardIterator _begin_, ForwardIterator _end_, size_type const _count_ );
@@ -965,7 +964,7 @@ template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-         is_std_forward_iterator_v< ForwardIterator >,
+         is_at_least_std_forward_iterator_v< ForwardIterator >,
          void
 >
 vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
@@ -1176,14 +1175,13 @@ vector< T, Allocator >::vector ( ForwardIterator _first_, ForwardIterator _last_
         }
 }
 
-/*
 template< typename T, typename Allocator >
 template< typename InputIterator >
 vector< T, Allocator >::vector ( InputIterator _first_,
                 enable_if_t
                 <
-                         is_std_input_iterator_v  < InputIterator > &&
-                        !is_std_forward_iterator_v< InputIterator > &&
+                         is_at_least_std_input_iterator_v  < InputIterator > &&
+                        !is_at_least_std_forward_iterator_v< InputIterator > &&
                          is_constructible_v
                          <
                                 value_type,
@@ -1202,8 +1200,8 @@ template< typename InputIterator >
 vector< T, Allocator >::vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                         is_std_input_iterator_v  < InputIterator > &&
-                        !is_std_forward_iterator_v< InputIterator > &&
+                         is_at_least_std_input_iterator_v  < InputIterator > &&
+                        !is_at_least_std_forward_iterator_v< InputIterator > &&
                          is_constructible_v
                          <
                                 value_type,
@@ -1223,7 +1221,7 @@ template< typename ForwardIterator >
 vector< T, Allocator >::vector ( ForwardIterator _first_,
                 enable_if_t
                 <
-                        is_std_forward_iterator_v< ForwardIterator > &&
+                        is_at_least_std_forward_iterator_v< ForwardIterator > &&
                         is_constructible_v
                         <
                                 value_type,
@@ -1245,7 +1243,7 @@ template< typename ForwardIterator >
 vector< T, Allocator >::vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                        is_std_forward_iterator_v< ForwardIterator > &&
+                        is_at_least_std_forward_iterator_v< ForwardIterator > &&
                         is_constructible_v
                         <
                                 value_type,
@@ -1262,8 +1260,6 @@ vector< T, Allocator >::vector ( ForwardIterator _first_, ForwardIterator _last_
                 _construct_at_end( _first_, _last_, count );
         }
 }
-*/
-
 
 template< typename T, typename Allocator >
 vector< T, Allocator >::vector ( vector const & _other_ )
@@ -1477,8 +1473,8 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 enable_if_t
 <
-          is_std_input_iterator_v  < InputIterator > &&
-         !is_std_forward_iterator_v< InputIterator > &&
+          is_at_least_std_input_iterator_v  < InputIterator > &&
+         !is_at_least_std_forward_iterator_v< InputIterator > &&
           is_constructible_v
           <
                 T,
@@ -1499,7 +1495,7 @@ template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-         is_std_forward_iterator_v< ForwardIterator > &&
+         is_at_least_std_forward_iterator_v< ForwardIterator > &&
          is_constructible_v
          <
                 T,
