@@ -35,7 +35,7 @@ struct array
         using           _self = array;
         using      value_type = T;
         using       size_type = size_t;
-        using difference_type = std::ptrdiff_t;
+        using difference_type = ptrdiff_t;
         using       reference = value_type &;
         using const_reference = value_type const &;
         using         pointer = value_type *;
@@ -192,7 +192,7 @@ struct array< T, 0 >
         using           _self = array;
         using      value_type = T;
         using       size_type = size_t;
-        using difference_type = std::ptrdiff_t;
+        using difference_type = ptrdiff_t;
         using       reference = value_type &;
         using const_reference = value_type const &;
         using         pointer = value_type *;

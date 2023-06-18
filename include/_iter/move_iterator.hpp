@@ -18,11 +18,16 @@ class move_iterator
 {
 public:
         using iterator_type = Iter ;
-        using iterator_category = conditional<
-                                                is_random_access_iterator_v< Iter >,
+        using iterator_category = conditional_t<
+                                                is_exactly_random_access_iterator_v< Iter >,
                                                 random_access_iterator_tag,
                                                 typename iterator_traits< Iter >::iterator_category
-                                             > ;
+                                               > ;
+        using iterator_category_def = conditional_t<
+                                                is_at_least_random_access_iterator_v< Iter >,
+                                                random_access_iterator_tag,
+                                                typename iterator_traits< Iter >::iterator_category
+                                               > ;
         using      value_type = typename iterator_traits< iterator_type >::     value_type ;
         using difference_type = typename iterator_traits< iterator_type >::difference_type ;
 
@@ -72,8 +77,8 @@ public:
         constexpr move_iterator operator+ ( difference_type _n_ ) const { return move_iterator( current_ + _n_ ); }
         constexpr move_iterator operator- ( difference_type _n_ ) const { return move_iterator( current_ - _n_ ); }
 
-        constexpr move_iterator & operator+= ( difference_type _n_ ) const { current_ += _n_; return *this; }
-        constexpr move_iterator & operator-= ( difference_type _n_ ) const { current_ -= _n_; return *this; }
+        constexpr move_iterator & operator+= ( difference_type _n_ ) { current_ += _n_; return *this; }
+        constexpr move_iterator & operator-= ( difference_type _n_ ) { current_ -= _n_; return *this; }
 private:
         template< typename It2 > friend class move_iterator ;
 

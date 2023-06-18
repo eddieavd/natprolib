@@ -10,7 +10,8 @@
 #include <algorithm>
 
 #include <util.hpp>
-#include <traits.hpp>
+#include <_traits/npl_traits.hpp>
+#include <_iter/move_iterator.hpp>
 #include <mem.hpp>
 
 
@@ -18,7 +19,7 @@ namespace npl
 {
 
 
-template< typename T, typename Allocator = std::allocator< T > >
+template< typename T, typename Allocator = default_allocator_t< T > >
 struct split_buffer
 {
 private:
@@ -28,7 +29,7 @@ public:
         using      value_type = T;
         using  allocator_type = Allocator;
         using       _alloc_rr = remove_reference_t< allocator_type >;
-        using   _alloc_traits = std::allocator_traits< _alloc_rr >;
+        using   _alloc_traits = allocator_traits< _alloc_rr >;
         using       reference = value_type &;
         using const_reference = value_type const &;
         using       size_type = typename _alloc_traits::size_type;
@@ -110,8 +111,8 @@ public:
         template< typename InputIterator >
         enable_if_t
         <
-                 is_input_iterator_v  < InputIterator > &&
-                !is_forward_iterator_v< InputIterator >,
+                 is_at_least_input_iterator_v  < InputIterator > &&
+                !is_at_least_forward_iterator_v< InputIterator >,
                  void
         >
         _construct_at_end ( InputIterator _first_, InputIterator _last_ );
@@ -119,7 +120,7 @@ public:
         template< typename ForwardIterator >
         enable_if_t
         <
-                is_forward_iterator_v< ForwardIterator >,
+                is_at_least_forward_iterator_v< ForwardIterator >,
                 void
         >
         _construct_at_end( ForwardIterator _first_, ForwardIterator _last_ );
@@ -233,8 +234,8 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 enable_if_t
 <
-	 is_input_iterator_v  < InputIterator > &&
-	!is_forward_iterator_v< InputIterator >,
+	 is_at_least_input_iterator_v  < InputIterator > &&
+	!is_at_least_forward_iterator_v< InputIterator >,
 	 void
 >
 split_buffer< T, Allocator >::_construct_at_end ( InputIterator _first_, InputIterator _last_ )
@@ -266,12 +267,12 @@ template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-        is_forward_iterator_v< ForwardIterator >,
+        is_at_least_forward_iterator_v< ForwardIterator >,
         void
 >
 split_buffer< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_ )
 {
-        _construct_transaction tx( &this->end_, std::distance( _first_, _last_ ) );
+        _construct_transaction tx( &this->end_, distance( _first_, _last_ ) );
 
         for( ; tx.position_ != tx.end_; ++tx.position_, ++_first_ )
         {
@@ -394,7 +395,7 @@ split_buffer< T, Allocator >::split_buffer ( split_buffer && _other_, _alloc_rr 
                 begin_ = end_ = first_;
                 end_cap_ = first_ + cap;
 
-                using move_iter = std::move_iterator< iterator >;
+                using move_iter = move_iterator< iterator >;
                 _construct_at_end( move_iter( _other_.begin() ), move_iter( _other_.end() ) );
         }
 }
@@ -442,8 +443,8 @@ split_buffer< T, Allocator >::reserve ( size_type const _count_ )
         {
                 split_buffer< value_type, _alloc_rr & > tmp( _count_, 0, _alloc() );
 
-                tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                       std::move_iterator< pointer >( end_   ) );
+                tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                       move_iterator< pointer >( end_   ) );
 
                 std::swap( first_  , tmp.first_   );
                 std::swap( begin_  , tmp.begin_   );
@@ -460,8 +461,8 @@ split_buffer< T, Allocator >::shrink_to_fit () noexcept
         {
                 split_buffer< value_type, _alloc_rr & > tmp( size(), 0, _alloc() );
 
-                tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                       std::move_iterator< pointer >( end_   ) );
+                tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                       move_iterator< pointer >( end_   ) );
                 tmp.end_ = tmp.begin_ + ( end_ - begin_ );
 
                 std::swap( first_  , tmp.first_   );
@@ -491,8 +492,8 @@ split_buffer< T, Allocator >::push_front ( const_reference _val_ )
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, ( cap + 3 ) / 4, _alloc() );
 
-                        tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                               std::move_iterator< pointer >( end_   ) );
+                        tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                               move_iterator< pointer >( end_   ) );
 
                         std::swap( first_  , tmp.first_   );
                         std::swap( begin_  , tmp.begin_   );
@@ -524,8 +525,8 @@ split_buffer< T, Allocator >::push_front ( value_type && _val_ )
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, ( cap + 3 ) / 4, _alloc() );
 
-                        tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                               std::move_iterator< pointer >( end_   ) );
+                        tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                               move_iterator< pointer >( end_   ) );
 
                         std::swap( first_  , tmp.first_   );
                         std::swap( begin_  , tmp.begin_   );
@@ -558,8 +559,8 @@ split_buffer< T, Allocator >::push_back ( const_reference _val_ )
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
-                        tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                               std::move_iterator< pointer >( end_   ) );
+                        tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                               move_iterator< pointer >( end_   ) );
 
                         std::swap( first_  , tmp.first_   );
                         std::swap( begin_  , tmp.begin_   );
@@ -592,8 +593,8 @@ split_buffer< T, Allocator >::push_back ( value_type && _val_ )
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
-                        tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                               std::move_iterator< pointer >( end_   ) );
+                        tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                               move_iterator< pointer >( end_   ) );
 
                         std::swap( first_  , tmp.first_   );
                         std::swap( begin_  , tmp.begin_   );
@@ -626,8 +627,8 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
-                        tmp._construct_at_end( std::move_iterator< pointer >( begin_ ),
-                                               std::move_iterator< pointer >( end_   ) );
+                        tmp._construct_at_end( move_iterator< pointer >( begin_ ),
+                                               move_iterator< pointer >( end_   ) );
 
                         std::swap( first_  , tmp.first_   );
                         std::swap( begin_  , tmp.begin_   );
