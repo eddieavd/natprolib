@@ -186,8 +186,14 @@ public:
         segment_tree ( ForwardIterator _first_,
                         enable_if_t
                         <
-                                 is_at_least_forward_iterator_v< ForwardIterator > &&
-                                !is_segment_tree_iterator_v < ForwardIterator > &&
+                                !is_segment_tree_iterator_v< ForwardIterator > &&
+                                (
+                                        is_at_least_forward_iterator_v< ForwardIterator >
+#ifdef NPL_HAS_STL
+                                        ||
+                                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                                ) &&
                                 is_constructible_v
                                 <
                                         value_type,
@@ -200,8 +206,14 @@ public:
         segment_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                         enable_if_t
                         <
-                                 is_at_least_forward_iterator_v< ForwardIterator > &&
                                 !is_segment_tree_iterator_v < ForwardIterator > &&
+                                (
+                                        is_at_least_forward_iterator_v< ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                                ) &&
                                 is_constructible_v
                                 <
                                         value_type,
@@ -264,8 +276,14 @@ public:
         template< typename ForwardIterator >
         enable_if_t
         <
-                 is_at_least_forward_iterator_v< ForwardIterator > &&
                 !is_segment_tree_iterator_v < ForwardIterator > &&
+                (
+                        is_at_least_forward_iterator_v< ForwardIterator >
+#ifdef NPL_HAS_STL
+                ||
+                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                ) &&
                 is_constructible_v
                 <
                         value_type,
@@ -631,9 +649,18 @@ private:
         template< typename InputIterator >
         enable_if_t
         <
-                 is_at_least_input_iterator_v  < InputIterator > &&
-                !is_at_least_forward_iterator_v< InputIterator > &&
-                !is_segment_tree_iterator_v < InputIterator >,
+                !is_segment_tree_iterator_v < InputIterator > &&
+                ((
+                         is_at_least_input_iterator_v  < InputIterator > &&
+                        !is_at_least_forward_iterator_v< InputIterator >
+                )
+#ifdef NPL_HAS_STL
+                || (
+                         is_at_least_std_input_iterator_v  < InputIterator > &&
+                        !is_at_least_std_forward_iterator_v< InputIterator >
+                )
+#endif
+                ),
                 void
         >
         _construct_at_end ( InputIterator _first_, InputIterator _last_, size_type const _count_ );
@@ -641,8 +668,16 @@ private:
         template< typename ForwardIterator >
         enable_if_t
         <
-                 is_at_least_forward_iterator_v< ForwardIterator > &&
-                !is_segment_tree_iterator_v < ForwardIterator >,
+                !is_segment_tree_iterator_v < ForwardIterator > &&
+                ((
+                        is_at_least_forward_iterator_v< ForwardIterator >
+                )
+#ifdef NPL_HAS_STL
+                || (
+                        is_at_least_std_forward_iterator_v< ForwardIterator >
+                )
+#endif
+                ),
                 void
         >
         _construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ );
@@ -915,7 +950,7 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_rebuild_tree () noexcept
 {
-        size_type elems = distance( begin(), end() );
+        size_type elems = npl::distance( begin(), end() );
 
         for( auto i = size() - 1; i > 0; --i )
         {
@@ -952,7 +987,7 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_update ( iterator _position_, const_reference _val_ )
 {
-        size_type index = distance( begin() + size(), _position_ );
+        size_type index = npl::distance( begin() + size(), _position_ );
 
         _update( index, _val_ );
 }
@@ -975,7 +1010,7 @@ template< typename T, auto PB, typename Allocator >
 void
 segment_tree< T, PB, Allocator >::_update ( iterator _position_, value_type && _val_ ) noexcept
 {
-        size_type index = distance( begin() + size(), _position_ );
+        size_type index = npl::distance( begin() + size(), _position_ );
 
         _update( index, NPL_MOVE( _val_ ) );
 }
@@ -1000,7 +1035,7 @@ template< typename... Args >
 void
 segment_tree< T, PB, Allocator >::_update ( iterator _position_, Args... _args_ )
 {
-        size_type index = distance( begin() + size(), _position_ );
+        size_type index = npl::distance( begin() + size(), _position_ );
 
         _update( index, NPL_FWD( _args_ )... );
 }
@@ -1093,9 +1128,16 @@ template< typename T, auto PB, typename Allocator >
 template< typename InputIterator >
 enable_if_t
 <
-         is_at_least_input_iterator_v  < InputIterator > &&
-        !is_at_least_forward_iterator_v< InputIterator > &&
-        !is_segment_tree_iterator_v < InputIterator >,
+        !is_segment_tree_iterator_v < InputIterator > &&
+        ((
+                 is_at_least_input_iterator_v  < InputIterator > &&
+                !is_at_least_forward_iterator_v< InputIterator >
+        )
+        || (
+                 is_at_least_std_input_iterator_v  < InputIterator > &&
+                !is_at_least_std_forward_iterator_v< InputIterator >
+        )
+        ),
         void
 >
 segment_tree< T, PB, Allocator >::_construct_at_end ( InputIterator _first_, InputIterator _last_, size_type const _count_ )  //  TODO: temp impl
@@ -1113,8 +1155,16 @@ template< typename T, auto PB, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-         is_at_least_forward_iterator_v< ForwardIterator > &&
-        !is_segment_tree_iterator_v < ForwardIterator >,
+        !is_segment_tree_iterator_v < ForwardIterator > &&
+        ((
+                is_at_least_forward_iterator_v< ForwardIterator >
+        )
+#ifdef NPL_HAS_STL
+                || (
+                is_at_least_std_forward_iterator_v< ForwardIterator >
+        )
+#endif
+        ),
         void
 >
 segment_tree< T, PB, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )  //  TODO: temp impl
@@ -1200,7 +1250,7 @@ segment_tree< T, PB, Allocator >::segment_tree ( SegtreeIterator _first_,
                         SegtreeIterator
                 > _last_ )
 {
-        size_type count    = distance( _first_, _last_ );
+        size_type count    = npl::distance( _first_, _last_ );
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
@@ -1224,7 +1274,7 @@ segment_tree< T, PB, Allocator >::segment_tree ( SegtreeIterator _first_, Segtre
                 > * )
         : _base( _alloc_ )
 {
-        size_type count    = distance( _first_, _last_ );
+        size_type count    = npl::distance( _first_, _last_ );
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
@@ -1285,8 +1335,14 @@ template< typename ForwardIterator >
 segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_,
                 enable_if_t
                 <
-                         is_at_least_forward_iterator_v< ForwardIterator > &&
                         !is_segment_tree_iterator_v < ForwardIterator > &&
+                        (
+                                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                        ) &&
                         is_constructible_v
                         <
                                 value_type,
@@ -1295,7 +1351,7 @@ segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_,
                         ForwardIterator
                 > _last_ )
 {
-        size_type count    = distance( _first_, _last_ );
+        size_type count    = npl::distance( _first_, _last_ );
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
@@ -1310,8 +1366,14 @@ template< typename ForwardIterator >
 segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                         is_at_least_forward_iterator_v< ForwardIterator > &&
                         !is_segment_tree_iterator_v < ForwardIterator > &&
+                        (
+                                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                        ) &&
                         is_constructible_v
                         <
                                 value_type,
@@ -1320,7 +1382,7 @@ segment_tree< T, PB, Allocator >::segment_tree ( ForwardIterator _first_, Forwar
                 > * )
         : _base( _alloc_ )
 {
-        size_type count    = distance( _first_, _last_ );
+        size_type count    = npl::distance( _first_, _last_ );
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
@@ -1499,7 +1561,7 @@ enable_if_t
 >
 segment_tree< T, PB, Allocator >::assign ( SegtreeIterator _first_, SegtreeIterator _last_ )
 {
-        size_type count    = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count    = static_cast< size_type >( npl::distance( _first_, _last_ ) );
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
@@ -1512,7 +1574,7 @@ segment_tree< T, PB, Allocator >::assign ( SegtreeIterator _first_, SegtreeItera
                 {
                         growing = true;
                         mid = _first_;
-                        advance( mid, real_size() );
+                        npl::advance( mid, real_size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1568,8 +1630,14 @@ template< typename T, auto PB, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-         is_at_least_forward_iterator_v< ForwardIterator > &&
         !is_segment_tree_iterator_v < ForwardIterator > &&
+        (
+                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                ||
+                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+        ) &&
         is_constructible_v
         <
                 T,
@@ -1579,7 +1647,7 @@ enable_if_t
 >
 segment_tree< T, PB, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_ )
 {
-        size_type count    = distance( _first_, _last_ );
+        size_type count    = npl::distance( _first_, _last_ );
         size_type new_size = _round_to_pow2( count );
         size_type new_cap  = 2 * new_size;
 
