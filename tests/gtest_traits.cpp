@@ -36,6 +36,12 @@ TEST( TraitsTest, Constants )
 
         static_assert( npl::integral_constant< int, 5 >()() == 5 );
 
+        static_assert( npl::is_convertible_v< std::integral_constant< int, 5 >, npl::integral_constant< int, 5 > > );
+        static_assert( npl::is_convertible_v< npl::integral_constant< int, 5 >, std::integral_constant< int, 5 > > );
+
+        static_assert( std::is_convertible_v< std::integral_constant< int, 5 >, npl::integral_constant< int, 5 > > );
+        static_assert( std::is_convertible_v< npl::integral_constant< int, 5 >, std::integral_constant< int, 5 > > );
+
         static_assert( std::is_same_v< std::integral_constant< int, 5 >, decltype( static_cast< std::integral_constant< int, 5 > >( npl::integral_constant< int, 5 >{} ) ) > );
         static_assert( std::is_same_v< npl::integral_constant< int, 5 >, decltype( static_cast< npl::integral_constant< int, 5 > >( std::integral_constant< int, 5 >{} ) ) > );
 
@@ -156,7 +162,15 @@ TEST( TraitsTest, Allocators )
 
 TEST( TraitsTest, Iterators )
 {
+        static_assert( std::is_same_v< npl::random_access_iterator_tag, typename npl::iterator_traits<                     npl::iterator< false, int > >  ::iterator_category > );
+        static_assert( std::is_same_v< npl::random_access_iterator_tag, typename std::iterator_traits<                     npl::iterator< false, int > >  ::iterator_category > );
+        static_assert( std::is_same_v< npl::random_access_iterator_tag, typename npl::iterator_traits< npl:: reverse_iter< npl::iterator< false, int > > >::iterator_category > );
+        static_assert( std::is_same_v< npl::random_access_iterator_tag, typename std::iterator_traits< npl:: reverse_iter< npl::iterator< false, int > > >::iterator_category > );
+        static_assert( std::is_same_v< npl::random_access_iterator_tag, typename npl::iterator_traits< npl::move_iterator< npl::iterator< false, int > > >::iterator_category > );
+        static_assert( std::is_same_v< npl::random_access_iterator_tag, typename std::iterator_traits< npl::move_iterator< npl::iterator< false, int > > >::iterator_category > );
 
+        static_assert( std::is_same_v< std::random_access_iterator_tag, typename std::iterator_traits< std::vector< int >::iterator >::iterator_category > );
+        static_assert( std::is_same_v< std::random_access_iterator_tag, typename npl::iterator_traits< std::vector< int >::iterator >::iterator_category > );
 }
 
 TEST( TraitsTest, Containers )
@@ -184,22 +198,3 @@ TEST( TraitsTest, Containers )
 
         static_assert( std::is_same_v< int, npl::enable_3d_container_base_t< npl::vector< npl::vector< npl::array< int, 4 > > > > > );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
