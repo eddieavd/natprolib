@@ -7,15 +7,6 @@
 #pragma once
 
 
-#define NPL_HAS_STL
-
-
-#define NPL_MOVE(...) \
-        static_cast< std::remove_reference_t< decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
-
-#define NPL_FWD(...) \
-        static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
-
 #ifdef NPL_RELEASE
 #       ifndef NPL_ASSERT
 #       define NPL_ASSERT(cond, ...) ((void)0)

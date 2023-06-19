@@ -10,13 +10,14 @@
 
 #include <limits>
 
-#include <mem.hpp>
-#include <util.hpp>
+#include <_traits/base_traits.hpp>
+#include <_traits/npl_traits.hpp>
 #include <_alloc/alloc_traits.hpp>
 #include <_iter/iter_traits.hpp>
 #include <_iter/std_iter.hpp>
 #include <_iter/move_iterator.hpp>
-#include <_traits/npl_traits.hpp>
+#include <util.hpp>
+#include <mem.hpp>
 #include <algorithm.hpp>
 #include <iterator.hpp>
 #include <allocator.hpp>

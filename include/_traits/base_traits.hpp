@@ -7,26 +7,18 @@
 #pragma once
 
 #if !__has_builtin(__is_final)                   || \
+    !__has_builtin(__is_empty)                   || \
     !__has_builtin(__is_enum)                    || \
     !__has_builtin(__is_union)                   || \
-    !__has_builtin(__is_assignable)              || \
-    !__has_builtin(__is_nothrow_assignable)      || \
-    !__has_builtin(__is_constructible)           || \
-    !__has_builtin(__is_nothrow_constructible)   || \
+    !__has_builtin(__underlying_type)            || \
     !__has_builtin(__is_trivially_constructible) || \
-    !__has_builtin(__is_trivially_destructible)
-#include <type_traits>
+    !__has_builtin(__is_trivially_copyable)
+#       ifdef NPL_HAS_STL
+#               include <type_traits>
+#       else
+//              oh boi
+#       endif
 #else
-#endif
-
-#if __has_builtin(__is_final)
-#       define _builtin_is_final(x) __is_final(x)
-#endif
-#if __has_builtin(__is_enum)
-#       define _builtin_is_enum(x) __is_enum(x)
-#endif
-#if __has_builtin(__is_union)
-#       define _builtin_is_union(x) __is_union(x)
 #endif
 
 
@@ -320,21 +312,6 @@ template< bool Cond, typename IfRes, typename ElseRes >
 using conditional_t = typename conditional< Cond, IfRes, ElseRes >::type ;
 
 //=====================================================================
-//      old_conditional
-//=====================================================================
-
-/*
-template< bool Condition, typename T, typename F >
-struct conditional : type_identity< T > {} ;
-
-template< typename T, typename F >
-struct conditional< false, T, F > : type_identity< F > {} ;
-
-template< bool Condition, typename T, typename F >
-using conditional_t = typename conditional< Condition, T, F >::type ;
-*/
-
-//=====================================================================
 //      conjunction
 //=====================================================================
 
@@ -390,28 +367,6 @@ using disjunction_t = typename disjunction< Args... >::type ;
 
 template< typename... Args >
 inline constexpr bool disjunction_v = _or< Args... >::value ;
-
-//=====================================================================
-//      old disjunction
-//=====================================================================
-
-/*
-template< typename... >
-struct disjunction : false_type {} ;
-
-template< typename T >
-struct disjunction< T > : T {} ;
-
-template< typename T, typename... Ts >
-struct disjunction< T, Ts... >
-        : conditional_t< bool( T::value ), T, disjunction< Ts... > > {} ;
-
-template< typename... Args >
-using disjunction_t = typename disjunction< Args... >::type ;
-
-template< typename... Args >
-inline constexpr bool disjunction_v = disjunction< Args... >::value ;
-*/
 
 //=====================================================================
 //      is
@@ -594,6 +549,7 @@ add_rvalue_reference_t< T > declval () noexcept
 
 using ptrdiff_t = decltype( declval< int * >() - declval< int * >() );
 
+
 //=====================================================================
 //  ┌─┐┬─┐┬┌┬┐┌─┐┬─┐┬ ┬
 //  ├─┘├┬┘││││├─┤├┬┘└┬┘
@@ -609,6 +565,11 @@ using ptrdiff_t = decltype( declval< int * >() - declval< int * >() );
 template< typename T >
 struct is_empty : bool_constant< __is_empty( T ) > {} ;
 
+#elif NPL_HAS_STL
+
+template< typename T >
+struct is_empty : std::is_empty< T > {} ;
+
 #else
 
 #endif
@@ -620,20 +581,21 @@ inline constexpr bool is_empty_v = is_empty< T >::value ;
 //      is_final
 //=====================================================================
 
-#ifdef _builtin_is_final
+#if __has_builtin(__is_final)
 
 template< typename T >
-struct is_final : bool_constant< _builtin_is_final( T ) > {} ;
+struct is_final : bool_constant< __is_final( T ) > {} ;
 
-template< typename T >
-inline constexpr bool is_final_v = _builtin_is_final( T ) ;
-
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T >
 struct is_final : std::is_final< T > {} ;
 
+#else
 #endif
+
+template< typename T >
+inline constexpr bool is_final_v = is_final< T >::value ;
 
 //=====================================================================
 //      is_void
@@ -787,15 +749,17 @@ inline constexpr bool is_rvalue_reference_v = is_rvalue_reference< T >::value ;
 //      is_enum
 //=====================================================================
 
-#ifdef _builtin_is_enum
+#if __has_builtin(__is_enum)
 
 template< typename T >
-struct is_enum : bool_constant< _builtin_is_enum( T ) > {} ;
+struct is_enum : bool_constant< __is_enum( T ) > {} ;
 
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T >
 struct is_enum : std::is_enum< T > {} ;
+
+#else
 
 #endif
 
@@ -806,15 +770,17 @@ inline constexpr bool is_enum_v = is_enum< T >::value ;
 //      is_union
 //=====================================================================
 
-#ifdef _builtin_is_union
+#if __has_builtin(__is_union)
 
 template< typename T >
-struct is_union : bool_constant< _builtin_is_union( T ) > {} ;
+struct is_union : bool_constant< __is_union( T ) > {} ;
 
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T >
 struct is_union : std::is_union< T > {} ;
+
+#else
 
 #endif
 
@@ -886,6 +852,29 @@ struct is_member_object_pointer : bool_constant< is_member_pointer_v< T > && !is
 template< typename T >
 inline constexpr bool is_member_object_pointer_v = is_member_object_pointer< T >::value ;
 
+//=====================================================================
+//      is_arithmetic
+//=====================================================================
+
+template< typename T >
+struct is_arithmetic : bool_constant< is_integral_v< T > || is_floating_point_v< T > > {} ;
+
+template< typename T >
+inline constexpr bool is_arithmetic_v = is_arithmetic< T >::value ;
+
+//=====================================================================
+//      is_scalar
+//=====================================================================
+
+template< typename T >
+struct is_scalar : bool_constant< is_arithmetic_v    < T > ||
+                                  is_enum_v          < T > ||
+                                  is_pointer_v       < T > ||
+                                  is_member_pointer_v< T > ||
+                                  is_null_pointer_v  < T > > {} ;
+
+template< typename T >
+inline constexpr bool is_scalar_v = is_scalar< T >::value ;
 
 //=====================================================================
 //      convert_to_integral
@@ -977,10 +966,32 @@ inline constexpr bool is_callable_v = is_callable< Func, Args... >::value ;
 template< typename T, typename U >
 struct is_assignable : bool_constant< __is_assignable( T, U ) > {} ;
 
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T, typename U >
 struct is_assignable : std::is_assignable< T, U > {} ;
+
+#else
+
+template< typename, typename T >
+struct _select_2nd { using type = T ; };
+
+template< typename T, typename Arg >
+typename _select_2nd< decltype( ( declval< T >() = declval< Arg >() ) ), true_type >::type _is_assignable_test( int ) ;
+
+template< typename, typename > false_type _is_assignable_test ( ... ) ;
+
+template< typename T, typename Arg, bool = is_void_v< T > || is_void_v< Arg > >
+struct _is_assignable_impl
+        : public decltype( ( _is_assignable_test< T, Arg >( 0 ) ) ) {} ;
+
+template< typename T, typename Arg >
+struct _is_assignable_impl< T, Arg, true >
+        : public false_type {} ;
+
+template< typename T, typename Arg >
+struct is_assignable
+        : public _is_assignable_impl< T, Arg > {} ;
 
 #endif
 
@@ -999,20 +1010,6 @@ struct is_move_assignable : is_assignable< add_lvalue_reference_t< T >, add_rval
 template< typename T >
 inline constexpr bool is_move_assignable_v = is_move_assignable< T >::value ;
 
-/*
-template< typename T >
-using move_assignment_t = decltype( declval< T & >() = declval< T && >() ) ;
-
-template< typename T, typename = void >
-struct is_move_assignable : false_type {} ;
-
-template< typename T >
-struct is_move_assignable< T, void_t< move_assignment_t< T > > > : is_same< move_assignment_t< T >, T & > {} ;
-
-template< typename T >
-inline constexpr bool is_move_assignable_v = is_move_assignable< T >::value ;
-*/
-
 //=====================================================================
 //      nothrow_assignability
 //=====================================================================
@@ -1022,10 +1019,25 @@ inline constexpr bool is_move_assignable_v = is_move_assignable< T >::value ;
 template< typename T, typename... Args >
 struct is_nothrow_assignable : bool_constant< __is_nothrow_assignable( T, Args... ) > {} ;
 
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T, typename... Args >
 struct is_nothrow_assignable : std::is_nothrow_assignable< T, Args... > {} ;
+
+#else
+
+template< bool, typename T, typename Arg > struct _is_nothrow_assignable_impl ;
+
+template< typename T, typename Arg >
+struct _is_nothrow_assignable_impl< false, T, Arg > : public false_type {} ;
+
+template< typename T, typename Arg >
+struct _is_nothrow_assignable_impl< true, T, Arg >
+        : public bool_constant< noexcept( declval< T >() = declval< Arg >() ) > {} ;
+
+template< typename T, typename Arg >
+struct is_nothrow_assignable
+        : public _is_nothrow_assignable_impl< is_assignable_v< T, Arg >, T, Arg > {} ;
 
 #endif
 
@@ -1092,6 +1104,11 @@ inline constexpr bool is_pointer_to_const_v = is_pointer_to_const< T >::value ;
 template< typename T, typename... Args >
 struct _is_constructible_impl : bool_constant< __is_constructible( T, Args... ) > {} ;
 
+#elif defined( NPL_HAS_STL )
+
+template< typename T, typename... Args >
+struct _is_constructible_impl : std::is_constructible< T, Args... > {} ;
+
 #else
 
 template< typename, typename T, typename... Args >
@@ -1117,10 +1134,12 @@ inline constexpr bool is_constructible_v = is_constructible< T, Args... >::value
 template< typename T, typename... Args >
 struct _is_trivially_constructible_impl : bool_constant< __is_trivially_constructible( T, Args... ) > {} ;
 
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T, typename... Args >
 struct _is_trivially_constructible_impl : std::is_trivially_constructible< T, Args... > {} ;
+
+#else
 
 #endif
 
@@ -1138,6 +1157,11 @@ inline constexpr bool is_trivially_constructible_v = is_trivially_constructible<
 
 template< typename T, typename... Args >
 struct is_nothrow_constructible : bool_constant< __is_nothrow_constructible( T, Args... ) > {} ;
+
+#elif defined( NPL_HAS_STL )
+
+template< typename T, typename... Args >
+struct is_nothrow_constructible : std::is_nothrow_constructible< T, Args... > {} ;
 
 #else
 
@@ -1254,10 +1278,21 @@ inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::
 template< typename T >
 struct is_trivially_destructible : bool_constant< __is_trivially_destructible( T ) > {} ;
 
-#else
+#elif defined( NPL_HAS_STL )
 
 template< typename T >
 struct is_trivially_destructible : std::is_trivially_destructible< T > {} ;
+
+#else
+
+template< typename T >
+struct _trivial_destructor_impl : public bool_constant< is_scalar_v< T > || is_reference_v< T > > {} ;
+
+template< typename T >
+struct is_trivially_destructible : _trivial_destructor_impl< typename remove_all_extents< T >::type > {} ;
+
+template< typename T >
+struct is_trivially_destructible< T[] > : public false_type {} ;
 
 #endif
 
@@ -1275,7 +1310,6 @@ inline constexpr bool is_trivially_destructible_v = is_trivially_destructible< T
 //=====================================================================
 //      is_trivially_swappable
 //=====================================================================
-
 
 //=====================================================================
 //      is_copy_constructible
@@ -1321,8 +1355,19 @@ inline constexpr bool is_trivially_copy_constructible_v = is_trivially_copy_cons
 //      is_trivially_copyable
 //=====================================================================
 
+#if __has_builtin(__is_trivially_copyable)
+
 template< typename T >
 struct is_trivially_copyable : bool_constant< __is_trivially_copyable( T ) > {} ;
+
+#elif defined( NPL_HAS_STL )
+
+template< typename T >
+struct is_trivially_copyable : std::is_trivially_copyable< T > {} ;
+
+#else
+
+#endif
 
 template< typename T >
 inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
@@ -1378,11 +1423,6 @@ inline constexpr bool is_nothrow_move_constructible_v = is_nothrow_move_construc
 //      is_convertible
 //=====================================================================
 
-
-namespace _detail
-{
-
-
 template< typename T >
 auto test_returnable( int ) -> decltype( void( static_cast< T( * )() >( nullptr ) ), true_type{} );
 
@@ -1397,15 +1437,12 @@ template< typename, typename >
 auto test_implicitly_convertible( ... ) -> false_type;
 
 
-} // namespace _detail
-
-
 template< typename From, typename To >
 struct is_convertible
         : bool_constant
           <
-                ( decltype( _detail::test_returnable< To >( 0 ) )::value &&
-                  decltype( _detail::test_implicitly_convertible< From, To >( 0 ) )::value ) ||
+                ( decltype( test_returnable< To >( 0 ) )::value &&
+                  decltype( test_implicitly_convertible< From, To >( 0 ) )::value ) ||
                 ( is_void_v< From > && is_void_v< To > )
           > {} ;
 
@@ -1432,3 +1469,10 @@ inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible< From, T
 
 
 } // namespace npl
+
+
+#define NPL_MOVE(...) \
+        static_cast< remove_reference_t< decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
+
+#define NPL_FWD(...) \
+        static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
