@@ -27,7 +27,7 @@ template< typename Iter >
 struct _iter_traits_cache
 {
         using type = _if<
-                                is_primary_template< iterator_traits< Iter > >::value,
+                                is_primary_template_v< iterator_traits< Iter > >,
                                 Iter,
                                 iterator_traits< Iter >
                         > ;
@@ -75,11 +75,11 @@ struct _has_iterator_typedefs
 {
 private:
         template< typename U > static false_type _test ( ... ) ;
-        template< typename U > static  true_type _test ( typename void_t< typename U::iterator_category >::type* = nullptr,
-                                                         typename void_t< typename U::  difference_type >::type* = nullptr,
-                                                         typename void_t< typename U::       value_type >::type* = nullptr,
-                                                         typename void_t< typename U::        reference >::type* = nullptr,
-                                                         typename void_t< typename U::          pointer >::type* = nullptr ) ;
+        template< typename U > static  true_type _test ( typename void_t< typename U::iterator_category >::type* = 0,
+                                                         typename void_t< typename U::  difference_type >::type* = 0,
+                                                         typename void_t< typename U::       value_type >::type* = 0,
+                                                         typename void_t< typename U::        reference >::type* = 0,
+                                                         typename void_t< typename U::          pointer >::type* = 0 ) ;
 public:
         static const bool value = decltype( _test< T >( 0, 0, 0, 0, 0 ) )::value ;
 };
@@ -131,7 +131,8 @@ struct _iterator_traits< Iter, true >
           <
                 Iter,
                 is_convertible< typename Iter::iterator_category,  input_iterator_tag >::value ||
-                is_convertible< typename Iter::iterator_category, output_iterator_tag >::value
+                is_convertible< typename Iter::iterator_category, output_iterator_tag >::value ||
+                true                                                                           // temporary bugfix
           >
 {} ;
 
@@ -164,16 +165,15 @@ template< typename T >
 struct has_iterator_category
 {
 private:
-        struct _two { char _lx; char _lxx; };
-        template< typename U > static _two _test( ... ) ;
-        template< typename U > static char _test( typename U::iterator_category* = 0 ) ;
+        template< typename U > static false_type _test( ... ) ;
+        template< typename U > static  true_type _test( typename U::iterator_category* = nullptr ) ;
 public:
-        static bool const value = sizeof( _test< T >( 0 ) ) == 1 ;
+        static bool const value = decltype( _test< T >( nullptr ) )::value ;
 };
 
 template< typename T, typename U, bool = has_iterator_category< iterator_traits< T > >::value >
 struct has_iterator_category_convertible_to
-        : bool_constant< is_convertible_v< typename iterator_traits< T >::iterator_category, U > > {} ;
+        : is_convertible< typename iterator_traits< T >::iterator_category, U > {} ;
 
 template< typename T, typename U >
 struct has_iterator_category_convertible_to< T, U, false > : false_type {} ;
@@ -212,6 +212,56 @@ template< typename T >
 inline constexpr bool is_2d_container_iterator_v = is_2d_container_iterator< T >::value ;
 
 
+template< typename Iter, typename ValueType >
+struct test_if_input_iterator
+        : conjunction
+          <
+                 is_at_least_input_iterator< Iter >,
+                 is_not< is_at_least_forward_iterator< Iter > >,
+                 is_constructible
+                 <
+                        ValueType,
+                        typename iterator_traits< Iter >::reference
+                 >
+          > {} ;
+
+template< typename Iter, typename ValueType, typename T = void >
+struct enable_if_input_iterator
+        : enable_if
+          <
+                conjunction_v
+                <
+                        is_at_least_input_iterator< Iter >,
+                        is_not< is_at_least_forward_iterator< Iter > >,
+                        is_constructible
+                        <
+                                ValueType,
+                                typename iterator_traits< Iter >::reference
+                        >
+                >,
+                T
+          > {} ;
+
+template< typename Iter, typename ValueType, typename T = void >
+using enable_if_input_iterator_t = typename enable_if_input_iterator< Iter, ValueType, T >::type ;
+
+template< typename Iter, typename ValueType, typename T = void >
+struct enable_if_forward_iterator
+        : enable_if
+          <
+                is_at_least_forward_iterator_v< Iter > &&
+                is_constructible_v
+                <
+                        ValueType,
+                        typename iterator_traits< Iter >::reference
+                >,
+                T
+          > {} ;
+
+template< typename Iter, typename ValueType, typename T = void >
+using enable_if_forward_iterator_t = typename enable_if_forward_iterator< Iter, ValueType, T >::type ;
+
+
 template< typename InputIter >
 inline constexpr
 typename iterator_traits< InputIter >::difference_type
@@ -231,14 +281,6 @@ typename iterator_traits< RandIter >::difference_type
 _distance ( RandIter _first_, RandIter _last_, random_access_iterator_tag )
 {
         return _last_ - _first_;
-}
-
-template< typename Iter >
-inline constexpr
-typename iterator_traits< Iter >::difference_type
-distance ( Iter _first_, Iter _last_ )
-{
-        return _distance( _first_, _last_, typename iterator_traits< Iter >::iterator_category() );
 }
 
 template< typename InputIter >
@@ -273,20 +315,6 @@ template< typename RandIter >
 constexpr void _advance ( RandIter & _iter_, typename iterator_traits< RandIter >::difference_type _dist_, random_access_iterator_tag )
 {
         _iter_ += _dist_;
-}
-
-template< typename Iter, typename Dist,
-          typename IntegralDist = decltype( convert_to_integral( declval< Dist >() ) ),
-          typename = enable_if_t< is_integral_v< IntegralDist > > >
-constexpr void advance ( Iter & _iter_, Dist _dist_ )
-{
-        using diff_t = typename iterator_traits< Iter >::difference_type ;
-
-        [[ maybe_unused ]]
-        diff_t dist = static_cast< diff_t >( convert_to_integral( _dist_ ) );
-        NPL_ASSERT( dist >= 0 || is_at_least_bidirectional_iterator_v< Iter >,
-                        "attempt to advance( it, n ) with negative n on non-bidirectional iterator" );
-        _advance( _iter_, _dist_, typename iterator_traits< Iter >::iterator_category() );
 }
 
 

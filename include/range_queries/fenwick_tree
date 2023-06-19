@@ -137,9 +137,18 @@ public:
         fenwick_tree ( InputIterator _first_,
                         enable_if_t
                         <
-                                 is_at_least_input_iterator_v  < InputIterator > &&
-                                !is_at_least_forward_iterator_v< InputIterator > &&
-                                !is_fenwick_tree_iterator_v < InputIterator > &&
+                                !is_fenwick_tree_iterator_v< InputIterator > &&
+                                ((
+                                         is_at_least_input_iterator_v  < InputIterator > &&
+                                        !is_at_least_forward_iterator_v< InputIterator >
+                                 )
+#ifdef NPL_HAS_STL
+                                 || (
+                                          is_at_least_std_input_iterator_v  < InputIterator > &&
+                                         !is_at_least_std_forward_iterator_v< InputIterator >
+                                 )
+#endif
+                                 ) &&
                                  is_constructible_v
                                  <
                                         value_type,
@@ -152,9 +161,18 @@ public:
         fenwick_tree ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                         enable_if_t
                         <
-                                 is_at_least_input_iterator_v  < InputIterator > &&
-                                !is_at_least_forward_iterator_v< InputIterator > &&
                                 !is_fenwick_tree_iterator_v < InputIterator > &&
+                                ((
+                                         is_at_least_input_iterator_v      < InputIterator > &&
+                                        !is_at_least_std_forward_iterator_v< InputIterator >
+                                )
+#ifdef NPL_HAS_STL
+                                || (
+                                         is_at_least_std_input_iterator_v  < InputIterator > &&
+                                        !is_at_least_std_forward_iterator_v< InputIterator >
+                                )
+#endif
+                                ) &&
                                  is_constructible_v
                                  <
                                         value_type,
@@ -166,8 +184,14 @@ public:
         fenwick_tree ( ForwardIterator _first_,
                         enable_if_t
                         <
-                                 is_at_least_forward_iterator_v< ForwardIterator > &&
                                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
+                                (
+                                        is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                        ||
+                                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                                ) &&
                                  is_constructible_v
                                  <
                                         value_type,
@@ -180,8 +204,14 @@ public:
         fenwick_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                         enable_if_t
                         <
-                                 is_at_least_forward_iterator_v< ForwardIterator > &&
                                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
+                                (
+                                        is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                        ||
+                                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                                ) &&
                                  is_constructible_v
                                  <
                                         value_type,
@@ -228,8 +258,17 @@ public:
         enable_if_t
         <
                 !is_fenwick_tree_iterator_v < InputIterator > &&
-                !is_at_least_forward_iterator_v< InputIterator > &&
-                 is_at_least_input_iterator_v  < InputIterator > &&
+                ((
+                         is_at_least_input_iterator_v  < InputIterator > &&
+                        !is_at_least_forward_iterator_v< InputIterator >
+                )
+#ifdef NPL_HAS_STL
+                || (
+                         is_at_least_std_input_iterator_v   < InputIterator > &&
+                        !is_at_least_std_forward_iterator_v< InputIterator >
+                )
+#endif
+                ) &&
                  is_constructible_v
                  <
                         value_type,
@@ -243,13 +282,19 @@ public:
         enable_if_t
         <
                 !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                 is_at_least_forward_iterator_v< ForwardIterator > &&
-                 is_constructible_v
-                 <
+                (
+                        is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                        ||
+                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                ) &&
+                is_constructible_v
+                <
                         value_type,
                         typename iterator_traits< ForwardIterator >::reference
-                 >,
-                 void
+                >,
+                void
         >
         assign ( ForwardIterator _first_, ForwardIterator _last_ );
 
@@ -571,9 +616,15 @@ private:
         template< typename ForwardIterator >
         enable_if_t
         <
-                 is_at_least_forward_iterator_v< ForwardIterator > &&
-                !is_fenwick_tree_iterator_v < ForwardIterator >,
-                 void
+                !is_fenwick_tree_iterator_v < ForwardIterator > &&
+                (
+                        is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                        ||
+                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                ),
+                void
         >
         _construct_at_end ( ForwardIterator _begin_, ForwardIterator _end_, size_type const _count_ );
 
@@ -845,13 +896,19 @@ template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-         is_at_least_forward_iterator_v< ForwardIterator > &&
-        !is_fenwick_tree_iterator_v < ForwardIterator >,
-         void
+        !is_fenwick_tree_iterator_v < ForwardIterator > &&
+        (
+                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                ||
+                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+        ),
+        void
 >
 fenwick_tree< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
 {
-        NPL_ASSERT( static_cast< size_type >( distance( _first_, _last_ ) ) >= _count_, "fenwick_tree::_construct_at_end: range too small" );
+        NPL_ASSERT( static_cast< size_type >( npl::distance( _first_, _last_ ) ) >= _count_, "fenwick_tree::_construct_at_end: range too small" );
 
         _construct_transaction tx( *this, _count_ );
 
@@ -1041,7 +1098,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_,
                         >,
                 FtreeIterator > _last_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1064,7 +1121,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( FtreeIterator _first_, FtreeIterato
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1078,15 +1135,25 @@ template< typename InputIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_,
                 enable_if_t
                 <
-                         is_at_least_input_iterator_v  < InputIterator > &&
-                        !is_at_least_forward_iterator_v< InputIterator > &&
-                        !is_fenwick_tree_iterator_v < InputIterator > &&
-                         is_constructible_v
-                         <
+                        !is_fenwick_tree_iterator_v< InputIterator > &&
+                        ((
+                                 is_at_least_input_iterator_v  < InputIterator > &&
+                                !is_at_least_forward_iterator_v< InputIterator >
+                        )
+#ifdef NPL_HAS_STL
+                        || (
+                                 is_at_least_std_input_iterator_v  < InputIterator > &&
+                                !is_at_least_std_forward_iterator_v< InputIterator >
+                        )
+#endif
+                        ) &&
+                        is_constructible_v
+                        <
                                 value_type,
                                 typename iterator_traits< InputIterator >::reference
-                         >,
-                InputIterator > _last_ )
+                        >,
+                        InputIterator
+                > _last_ )
 {
         for( ; _first_ != _last_; ++_first_ )
         {
@@ -1099,9 +1166,18 @@ template< typename InputIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                         is_at_least_input_iterator_v  < InputIterator > &&
-                        !is_at_least_forward_iterator_v< InputIterator > &&
                         !is_fenwick_tree_iterator_v < InputIterator > &&
+                        ((
+                                 is_at_least_input_iterator_v      < InputIterator > &&
+                                !is_at_least_std_forward_iterator_v< InputIterator >
+                        )
+#ifdef NPL_HAS_STL
+                        || (
+                                 is_at_least_std_input_iterator_v  < InputIterator > &&
+                                !is_at_least_std_forward_iterator_v< InputIterator >
+                        )
+#endif
+                        ) &&
                          is_constructible_v
                          <
                                 value_type,
@@ -1121,16 +1197,23 @@ template< typename ForwardIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_,
                 enable_if_t
                 <
-                         is_at_least_forward_iterator_v< ForwardIterator > &&
                         !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                         is_constructible_v
-                         <
+                        (
+                                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                        ) &&
+                        is_constructible_v
+                        <
                                 value_type,
                                 typename iterator_traits< ForwardIterator >::reference
-                         >,
-                ForwardIterator > _last_ )
+                        >,
+                        ForwardIterator
+                > _last_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1151,17 +1234,23 @@ template< typename ForwardIterator >
 fenwick_tree< T, Allocator >::fenwick_tree ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                         is_at_least_forward_iterator_v< ForwardIterator > &&
                         !is_fenwick_tree_iterator_v < ForwardIterator > &&
-                         is_constructible_v
-                         <
+                        (
+                                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                        ) &&
+                        is_constructible_v
+                        <
                                 value_type,
                                 typename iterator_traits< ForwardIterator >::reference
-                         >
+                        >
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1341,7 +1430,7 @@ enable_if_t
 >
 fenwick_tree< T, Allocator >::assign ( FtreeIterator _first_, FtreeIterator _last_ )
 {
-        size_type new_size = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type new_size = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
@@ -1352,7 +1441,7 @@ fenwick_tree< T, Allocator >::assign ( FtreeIterator _first_, FtreeIterator _las
                 {
                         growing = true;
                         mid = _first_;
-                        advance( mid, size() );
+                        npl::advance( mid, size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1380,15 +1469,24 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 enable_if_t
 <
-         !is_fenwick_tree_iterator_v < InputIterator > &&
-         !is_at_least_forward_iterator_v< InputIterator > &&
-          is_at_least_input_iterator_v  < InputIterator > &&
-          is_constructible_v
-          <
+        !is_fenwick_tree_iterator_v < InputIterator > &&
+        ((
+                 is_at_least_input_iterator_v  < InputIterator > &&
+                !is_at_least_forward_iterator_v< InputIterator >
+        )
+#ifdef NPL_HAS_STL
+        || (
+                 is_at_least_std_input_iterator_v  < InputIterator > &&
+                !is_at_least_std_forward_iterator_v< InputIterator >
+        )
+#endif
+        ) &&
+        is_constructible_v
+        <
                 T,
                 typename iterator_traits< InputIterator >::reference
-          >,
-          void
+        >,
+        void
 >
 fenwick_tree< T, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
 {
@@ -1404,17 +1502,23 @@ template< typename ForwardIterator >
 enable_if_t
 <
         !is_fenwick_tree_iterator_v < ForwardIterator > &&
-         is_at_least_forward_iterator_v< ForwardIterator > &&
-         is_constructible_v
-         <
+        (
+                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                ||
+                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+        ) &&
+        is_constructible_v
+        <
                 T,
                 typename iterator_traits< ForwardIterator >::reference
-         >,
-         void
+        >,
+        void
 >
 fenwick_tree< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_ )
 {
-        size_type new_size = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type new_size = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
@@ -1425,7 +1529,7 @@ fenwick_tree< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator 
                 {
                         growing = true;
                         mid = _first_;
-                        advance( mid, size() );
+                        npl::advance( mid, size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1446,7 +1550,6 @@ fenwick_tree< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator 
                 _construct_at_end( _first_, _last_, new_size );
         }
         _invalidate_all_iterators();
-
 }
 
 template< typename T, typename Allocator >

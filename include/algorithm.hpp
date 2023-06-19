@@ -12,11 +12,42 @@
 #include <_traits/base_traits.hpp>
 #include <_algo/operations.hpp>
 #include <_iter/iter_traits.hpp>
+#include <_iter/std_iter.hpp>
 
 
 namespace npl
 {
 
+
+//=====================================================================
+//      advance
+//=====================================================================
+
+template< typename Iter, typename Dist,
+          typename IntegralDist = decltype( convert_to_integral( declval< Dist >() ) ),
+          typename = enable_if_t< is_integral_v< IntegralDist > > >
+constexpr void advance ( Iter & _iter_, Dist _dist_ )
+{
+        using diff_t = typename iterator_traits< Iter >::difference_type ;
+
+        [[ maybe_unused ]]
+        diff_t dist = static_cast< diff_t >( convert_to_integral( _dist_ ) );
+        NPL_ASSERT( dist >= 0 || is_at_least_bidirectional_iterator_v< Iter >,
+                        "attempt to advance( it, n ) with negative n on non-bidirectional iterator" );
+        _advance( _iter_, _dist_, typename iterator_traits< Iter >::iterator_category() );
+}
+
+//=====================================================================
+//      distance
+//=====================================================================
+
+template< typename Iter >
+inline constexpr
+typename iterator_traits< Iter >::difference_type
+distance ( Iter _first_, Iter _last_ )
+{
+        return _distance( _first_, _last_, typename iterator_traits< Iter >::iterator_category() );
+}
 
 //=====================================================================
 //      invoke

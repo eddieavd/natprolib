@@ -123,6 +123,24 @@ using bool_constant = integral_constant< bool, B > ;
 using  true_type = bool_constant<  true > ;
 using false_type = bool_constant< false > ;
 
+template< typename T >
+struct remove_all_extents
+{
+        using type = T ;
+};
+
+template< typename T >
+struct remove_all_extents< T[] >
+{
+        using type = typename remove_all_extents< T >::type ;
+};
+
+template< typename T, size_t N >
+struct remove_all_extents< T[ N ] >
+{
+        using type = typename remove_all_extents< T >::type ;
+};
+
 
 //=====================================================================
 //  ┌─┐┌─┐┌┐┌┌─┐┌┬┐
@@ -366,6 +384,9 @@ using _or = typename _or_impl< sizeof...( Args ) != 0 >::template Result< false_
 
 template< typename... Args >
 struct disjunction : _or< Args... > {} ;
+
+template< typename... Args >
+using disjunction_t = typename disjunction< Args... >::type ;
 
 template< typename... Args >
 inline constexpr bool disjunction_v = _or< Args... >::value ;
@@ -1153,12 +1174,73 @@ inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible< T, 
 //      is_destructible
 //=====================================================================
 
+template< typename >
+struct _is_destructible_apply
+{
+        using type = int ;
+};
+
+template< typename T >
+struct _is_destructor_wellformed
+{
+        template< typename T1 >
+        static true_type _test ( typename _is_destructible_apply< decltype( declval< T1 & >().~T1() ) >::type ) ;
+
+        template< typename T1 >
+        static false_type _test ( ... ) ;
+
+        static const bool value = decltype( _test< T >( 8372 ) )::value ;
+};
+
+template< typename, bool >
+struct _destructible_impl ;
+
+template< typename T >
+struct _destructible_impl< T, false >
+        : public bool_constant< _is_destructor_wellformed< typename remove_all_extents< T >::type >::value > {} ;
+
+template< typename T >
+struct _destructible_impl< T, true >
+        : public true_type {} ;
+
+template< typename T, bool >
+struct _destructible_false ;
+
+template< typename T >
+struct _destructible_false< T, false > : public _destructible_impl< T, is_reference_v< T > > {} ;
+
+template< typename T >
+struct _destructible_false< T, true > : public false_type {} ;
+
+template< typename T >
+struct is_destructible : public _destructible_false< T, is_function< T >::value > {} ;
+
+template< typename T >
+struct is_destructible< T[] > : public false_type {} ;
+
+template<>
+struct is_destructible< void > : public false_type {} ;
+
+template< typename T >
+inline constexpr bool is_destructible_v = is_destructible< T >::value ;
+
 //=====================================================================
 //      is_nothrow_destructible
 //=====================================================================
 
+template< bool, typename T >
+struct _is_nothrow_destructible_impl ;
+
 template< typename T >
-struct is_nothrow_destructible : bool_constant< __is_nothrow_destructible( T ) > {} ;
+struct _is_nothrow_destructible_impl< false, T >
+        : public false_type {} ;
+
+template< typename T >
+struct _is_nothrow_destructible_impl< true, T >
+        : public bool_constant< noexcept( declval< T >().~T() ) > {} ;
+
+template< typename T >
+struct is_nothrow_destructible : public _is_nothrow_destructible_impl< is_destructible_v< T >, T > {} ;
 
 template< typename T >
 inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::value ;

@@ -7,6 +7,9 @@
 #pragma once
 
 
+#define NPL_HAS_STL
+
+
 #define NPL_MOVE(...) \
         static_cast< std::remove_reference_t< decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
 

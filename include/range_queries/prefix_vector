@@ -14,6 +14,7 @@
 #include <util.hpp>
 #include <_alloc/alloc_traits.hpp>
 #include <_iter/iter_traits.hpp>
+#include <_iter/std_iter.hpp>
 #include <_traits/npl_traits.hpp>
 #include <algorithm.hpp>
 #include <iterator.hpp>
@@ -109,76 +110,132 @@ public:
         prefix_vector ( size_type const _count_, value_type const & _val_                                 );
         prefix_vector ( size_type const _count_, value_type const & _val_, allocator_type const & _alloc_ );
 
-        template< typename PrefixIterator >
-        prefix_vector ( PrefixIterator _first_,
-                        enable_if_t<
-                                                        is_prefix_vector_iterator_v< PrefixIterator > &&
-                                                        is_constructible_v
-                                                        <
-                                                                value_type,
-                                                                typename iterator_traits< PrefixIterator >::reference
-                                                        >,
-                                                        PrefixIterator
-                                                > _last_ );
+        template< typename PrefixIter >
+        prefix_vector ( PrefixIter _first_,
+                        enable_if_t
+                        <
+                                is_prefix_vector_iterator_v< PrefixIter > &&
+                                is_constructible_v
+                                <
+                                        value_type,
+                                        typename iterator_traits< PrefixIter >::reference
+                                >,
+                                PrefixIter
+                        > _last_ );
 
-        template< typename PrefixIterator >
-        prefix_vector ( PrefixIterator _first_, PrefixIterator _last_, allocator_type const & _alloc_,
-                        enable_if_t<
-                                                        is_prefix_vector_iterator_v< PrefixIterator > &&
-                                                        is_constructible_v
-                                                        <
-                                                                value_type,
-                                                                typename iterator_traits< PrefixIterator >::reference
-                                                        > > * = 0 );
+        template< typename PrefixIter >
+        prefix_vector ( PrefixIter _first_, PrefixIter _last_, allocator_type const & _alloc_,
+                        enable_if_t
+                        <
+                                is_prefix_vector_iterator_v< PrefixIter > &&
+                                is_constructible_v
+                                <
+                                        value_type,
+                                        typename iterator_traits< PrefixIter >::reference
+                                >
+                        > * = 0 );
 
-        template< typename InputIterator >
-        prefix_vector ( InputIterator _first_,
-                        enable_if_t<
-                                                         is_at_least_input_iterator_v  < InputIterator > &&
-                                                        !is_at_least_forward_iterator_v< InputIterator > &&
-                                                        !is_prefix_vector_iterator_v < InputIterator > &&
-                                                         is_constructible_v
-                                                         <
-                                                                value_type,
-                                                                typename iterator_traits< InputIterator >::reference
-                                                         >,
-                                                         InputIterator
-                                                > _last_ );
-        template< typename InputIterator >
-        prefix_vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
-                        enable_if_t<
-                                                         is_at_least_input_iterator_v  < InputIterator > &&
-                                                        !is_at_least_forward_iterator_v< InputIterator > &&
-                                                        !is_prefix_vector_iterator_v < InputIterator > &&
-                                                         is_constructible_v
-                                                         <
-                                                                value_type,
-                                                                typename iterator_traits< InputIterator >::reference
-                                                         > > * = 0 );
+        template< typename InputIter >
+        prefix_vector ( InputIter _first_,
+                        enable_if_t
+                        <
+                                !is_prefix_vector_iterator_v< InputIter > &&
+                                ((
+                                         is_at_least_input_iterator_v  < InputIter > &&
+                                        !is_at_least_forward_iterator_v< InputIter >
+                                )
+#ifdef NPL_HAS_STL
+                                || (
+                                         is_at_least_std_input_iterator_v  < InputIter > &&
+                                        !is_at_least_std_forward_iterator_v< InputIter >
+                                )
+#endif
+                                ) &&
+                                is_constructible_v
+                                <
+                                        value_type,
+                                        typename iterator_traits< InputIter >::reference
+                                >,
+                                InputIter
+                        > _last_ );
 
-        template< typename ForwardIterator >
-        prefix_vector ( ForwardIterator _first_,
-                        enable_if_t<
-                                                         is_at_least_forward_iterator_v< ForwardIterator > &&
-                                                        !is_prefix_vector_iterator_v < ForwardIterator > &&
-                                                        is_constructible_v
-                                                        <
-                                                                value_type,
-                                                                typename iterator_traits< ForwardIterator >::reference
-                                                        >,
-                                                        ForwardIterator
-                                                > _last_ );
+        template< typename InputIter >
+        prefix_vector ( InputIter _first_, InputIter _last_, allocator_type const & _alloc_,
+                        enable_if_t
+                        <
+                                !is_prefix_vector_iterator_v< InputIter > &&
+                                ((
+                                         is_at_least_input_iterator_v  < InputIter > &&
+                                        !is_at_least_forward_iterator_v< InputIter >
+                                )
+#ifdef NPL_HAS_STL
+                                || (
+                                         is_at_least_std_input_iterator_v  < InputIter > &&
+                                        !is_at_least_std_forward_iterator_v< InputIter >
+                                )
+#endif
+                                ) &&
+                                is_constructible_v
+                                <
+                                       value_type,
+                                       typename iterator_traits< InputIter >::reference
+                                >
+                        > * = 0 );
 
-        template< typename ForwardIterator >
-        prefix_vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
-                        enable_if_t<
-                                                         is_at_least_forward_iterator_v< ForwardIterator > &&
-                                                        !is_prefix_vector_iterator_v < ForwardIterator > &&
-                                                        is_constructible_v
-                                                        <
-                                                                value_type,
-                                                                typename iterator_traits< ForwardIterator >::reference
-                                                        > > * = 0 );
+        template< typename ForwardIter >
+        prefix_vector ( ForwardIter _first_,
+                        enable_if_t
+                        <
+                                !is_prefix_vector_iterator_v< ForwardIter > &&
+                                (
+                                        is_at_least_forward_iterator_v    < ForwardIter >
+#ifdef NPL_HAS_STL
+                                        ||
+                                        is_at_least_std_forward_iterator_v< ForwardIter >
+#endif
+                                ) &&
+                                is_constructible_v
+                                <
+                                        value_type,
+                                        typename iterator_traits< ForwardIter >::reference
+                                >,
+                                ForwardIter
+                        > _last_ );
+
+        template< typename ForwardIter >
+        prefix_vector ( ForwardIter _first_, ForwardIter _last_, allocator_type const & _alloc_,
+                        enable_if_t
+                        <
+                                !is_prefix_vector_iterator_v< ForwardIter > &&
+                                (
+                                        is_at_least_forward_iterator_v    < ForwardIter >
+#ifdef NPL_HAS_STL
+                                        ||
+                                        is_at_least_std_forward_iterator_v< ForwardIter >
+#endif
+                                ) &&
+                                is_constructible_v
+                                <
+                                        value_type,
+                                        typename iterator_traits< ForwardIter >::reference
+                                >
+                        > * = 0 );
+
+/*
+        template< typename StdInputIterator >
+        prefix_vector ( StdInputIterator _first_, enable_if_std_input_iterator< StdInputIterator, StdInputIterator, value_type > _last_ );
+
+        template< typename StdInputIterator >
+        prefix_vector ( StdInputIterator _first_, StdInputIterator _last_, allocator_type const & _alloc_,
+                        enable_if_std_input_iterator< StdInputIterator, void, value_type > * = 0 );
+
+        template< typename StdForwardIterator >
+        prefix_vector ( StdForwardIterator _first_, enable_if_std_forward_iterator< StdForwardIterator, StdForwardIterator, value_type > _last_ );
+
+        template< typename StdForwardIterator >
+        prefix_vector ( StdForwardIterator _first_, StdForwardIterator _last_, allocator_type const & _alloc_,
+                        enable_if_std_forward_iterator< StdForwardIterator, void, value_type > * = 0 );
+*/
 
         ~prefix_vector ()
         {
@@ -218,8 +275,14 @@ public:
         template< typename InputIterator >
         enable_if_t
         <
-                 is_at_least_input_iterator_v  < InputIterator > &&
                 !is_prefix_vector_iterator_v < InputIterator > &&
+                (
+                        is_at_least_input_iterator_v    < InputIterator >
+#ifdef NPL_HAS_STL
+                        ||
+                        is_at_least_std_input_iterator_v< InputIterator >
+#endif
+                ) &&
                  is_constructible_v
                  <
                         value_type,
@@ -326,8 +389,17 @@ public:
         enable_if_t
         <
                 !is_prefix_vector_iterator_v < InputIterator > &&
-                !is_at_least_forward_iterator_v< InputIterator > &&
-                 is_at_least_input_iterator_v  < InputIterator > &&
+                ((
+                        !is_at_least_forward_iterator_v< InputIterator > &&
+                         is_at_least_input_iterator_v  < InputIterator >
+                 )
+#ifdef NPL_HAS_STL
+                 || (
+                         !is_at_least_std_forward_iterator_v< InputIterator > &&
+                          is_at_least_std_input_iterator_v  < InputIterator >
+                 )
+#endif
+                 ) &&
                  is_constructible_v
                  <
                         value_type,
@@ -341,7 +413,13 @@ public:
         enable_if_t
         <
                 !is_prefix_vector_iterator_v< ForwardIterator > &&
-                 is_at_least_forward_iterator_v< ForwardIterator > &&
+                (
+                        is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                        ||
+                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                ) &&
                  is_constructible_v
                  <
                         value_type,
@@ -629,11 +707,27 @@ private:
         template< typename ForwardIterator >
         enable_if_t
         <
-                 is_at_least_forward_iterator_v< ForwardIterator > &&
-                !is_prefix_vector_iterator_v < ForwardIterator >,
+                !is_prefix_vector_iterator_v < ForwardIterator > &&
+                (
+                        is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                        ||
+                        is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                ),
                  void
         >
         _construct_at_end ( ForwardIterator _begin_, ForwardIterator _end_, size_type const _count_ );
+
+/*
+        template< typename StdForwardIterator >
+        enable_if_t
+        <
+                 is_at_least_std_forward_iterator_v< StdForwardIterator >,
+                 void
+        >
+        _construct_at_end ( StdForwardIterator _begin_, StdForwardIterator _end_, size_type const _count_ );
+*/
 
         void _append ( size_type const _count_                        );
         void _append ( size_type const _count_, const_reference _val_ );
@@ -913,8 +1007,14 @@ template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_if_t
 <
-         is_at_least_forward_iterator_v< ForwardIterator > &&
-        !is_prefix_vector_iterator_v < ForwardIterator >,
+        !is_prefix_vector_iterator_v< ForwardIterator > &&
+        (
+                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                ||
+                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+        ),
          void
 >
 prefix_vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
@@ -1055,9 +1155,10 @@ prefix_vector< T, Allocator >::prefix_vector ( PrefixIterator _first_,
                                 value_type,
                                 typename iterator_traits< PrefixIterator >::reference
                         >,
-                PrefixIterator > _last_ )
+                        PrefixIterator
+                > _last_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1080,7 +1181,7 @@ prefix_vector< T, Allocator >::prefix_vector ( PrefixIterator _first_, PrefixIte
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1094,15 +1195,25 @@ template< typename InputIterator >
 prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_,
                 enable_if_t
                 <
-                         is_at_least_input_iterator_v  < InputIterator > &&
-                        !is_at_least_forward_iterator_v< InputIterator > &&
-                        !is_prefix_vector_iterator_v < InputIterator > &&
+                        !is_prefix_vector_iterator_v< InputIterator > &&
+                        ((
+                                 is_at_least_input_iterator_v  < InputIterator > &&
+                                !is_at_least_forward_iterator_v< InputIterator >
+                         )
+#ifdef NPL_HAS_STL
+                         || (
+                                  is_at_least_std_input_iterator_v  < InputIterator > &&
+                                 !is_at_least_std_forward_iterator_v< InputIterator >
+                         )
+#endif
+                         ) &&
                          is_constructible_v
                          <
                                 value_type,
                                 typename iterator_traits< InputIterator >::reference
                          >,
-                InputIterator > _last_ )
+                         InputIterator
+                > _last_ )
 {
         for( ; _first_ != _last_; ++_first_ )
         {
@@ -1115,9 +1226,18 @@ template< typename InputIterator >
 prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                         is_at_least_input_iterator_v  < InputIterator > &&
-                        !is_at_least_forward_iterator_v< InputIterator > &&
                         !is_prefix_vector_iterator_v < InputIterator > &&
+                        ((
+                                 is_at_least_input_iterator_v  < InputIterator > &&
+                                !is_at_least_forward_iterator_v< InputIterator >
+                         )
+#ifdef NPL_HAS_STL
+                         || (
+                                  is_at_least_std_input_iterator_v  < InputIterator > &&
+                                 !is_at_least_std_forward_iterator_v< InputIterator >
+                         )
+#endif
+                         ) &&
                          is_constructible_v
                          <
                                 value_type,
@@ -1137,16 +1257,23 @@ template< typename ForwardIterator >
 prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_,
                 enable_if_t
                 <
-                         is_at_least_forward_iterator_v< ForwardIterator > &&
                         !is_prefix_vector_iterator_v < ForwardIterator > &&
+                        (
+                                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                         ) &&
                         is_constructible_v
                         <
                                 value_type,
                                 typename iterator_traits< ForwardIterator >::reference
                         >,
-                ForwardIterator > _last_ )
+                        ForwardIterator
+                > _last_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1165,8 +1292,14 @@ template< typename ForwardIterator >
 prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
                 enable_if_t
                 <
-                        is_at_least_forward_iterator_v< ForwardIterator > &&
                         !is_prefix_vector_iterator_v < ForwardIterator > &&
+                        (
+                                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                                ||
+                                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+                        ) &&
                         is_constructible_v
                         <
                                 value_type,
@@ -1175,7 +1308,7 @@ prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_, ForwardI
                 > * )
         : _base( _alloc_ )
 {
-        size_type count = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( count > 0 )
         {
@@ -1351,7 +1484,7 @@ enable_if_t
 >
 prefix_vector< T, Allocator >::assign ( PrefixIterator _first_, PrefixIterator _last_ )
 {
-        size_type new_size = static_cast< size_type >( distance( _first_, _last_ ) );
+        size_type new_size = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
@@ -1362,7 +1495,7 @@ prefix_vector< T, Allocator >::assign ( PrefixIterator _first_, PrefixIterator _
                 {
                         growing = true;
                         mid = _first_;
-                        advance( mid, size() );
+                        npl::advance( mid, size() );
                 }
 
                 pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
@@ -1389,8 +1522,14 @@ template< typename T, typename Allocator >
 template< typename InputIterator >
 enable_if_t
 <
-         is_at_least_input_iterator_v < InputIterator > &&
         !is_prefix_vector_iterator_v< InputIterator > &&
+        (
+                is_at_least_input_iterator_v    < InputIterator >
+#ifdef NPL_HAS_STL
+                ||
+                is_at_least_std_input_iterator_v< InputIterator >
+#endif
+        ) &&
          is_constructible_v
          <
                 T,
@@ -1673,8 +1812,17 @@ template< typename InputIterator >
 enable_if_t
 <
         !is_prefix_vector_iterator_v < InputIterator > &&
-        !is_at_least_forward_iterator_v< InputIterator > &&
-         is_at_least_input_iterator_v  < InputIterator > &&
+        ((
+                !is_at_least_forward_iterator_v< InputIterator > &&
+                 is_at_least_input_iterator_v  < InputIterator >
+         )
+#ifdef NPL_HAS_STL
+         || (
+                 !is_at_least_std_forward_iterator_v< InputIterator > &&
+                  is_at_least_std_input_iterator_v   < InputIterator >
+         )
+#endif
+         ) &&
          is_constructible_v
          <
                 T,
@@ -1699,7 +1847,13 @@ template< typename ForwardIterator >
 enable_if_t
 <
         !is_prefix_vector_iterator_v< ForwardIterator > &&
-         is_at_least_forward_iterator_v< ForwardIterator > &&
+        (
+                is_at_least_forward_iterator_v    < ForwardIterator >
+#ifdef NPL_HAS_STL
+                ||
+                is_at_least_std_forward_iterator_v< ForwardIterator >
+#endif
+        ) &&
          is_constructible_v
          <
                 T,
