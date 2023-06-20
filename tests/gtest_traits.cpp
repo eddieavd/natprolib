@@ -170,7 +170,9 @@ TEST( TraitsTest, Iterators )
         static_assert( std::is_same_v< npl::random_access_iterator_tag, typename std::iterator_traits< npl::move_iterator< npl::iterator< false, int > > >::iterator_category > );
 
         static_assert( std::is_same_v< std::random_access_iterator_tag, typename std::iterator_traits< std::vector< int >::iterator >::iterator_category > );
+#ifdef NPL_HAS_STL
         static_assert( std::is_same_v< std::random_access_iterator_tag, typename npl::iterator_traits< std::vector< int >::iterator >::iterator_category > );
+#endif
 }
 
 TEST( TraitsTest, Containers )

@@ -27,6 +27,9 @@ namespace npl
 {
 
 
+using size_t = unsigned long ;
+
+
 //=====================================================================
 //  ┬┌┬┐┌─┐┌┐┌┌┬┐┬┌┬┐┬ ┬
 //  │ ││├┤ │││ │ │ │ └┬┘
@@ -571,7 +574,6 @@ add_rvalue_reference_t< T > declval () noexcept
 }
 
 
-using    size_t =       unsigned long ;
 using nullptr_t = decltype( nullptr ) ;
 using ptrdiff_t = decltype( declval< int * >() - declval< int * >() );
 

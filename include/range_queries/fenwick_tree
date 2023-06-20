@@ -164,7 +164,7 @@ public:
                                 !is_fenwick_tree_iterator_v < InputIterator > &&
                                 ((
                                          is_at_least_input_iterator_v      < InputIterator > &&
-                                        !is_at_least_std_forward_iterator_v< InputIterator >
+                                        !is_at_least_forward_iterator_v< InputIterator >
                                 )
 #ifdef NPL_HAS_STL
                                 || (
@@ -1169,7 +1169,7 @@ fenwick_tree< T, Allocator >::fenwick_tree ( InputIterator _first_, InputIterato
                         !is_fenwick_tree_iterator_v < InputIterator > &&
                         ((
                                  is_at_least_input_iterator_v      < InputIterator > &&
-                                !is_at_least_std_forward_iterator_v< InputIterator >
+                                !is_at_least_forward_iterator_v< InputIterator >
                         )
 #ifdef NPL_HAS_STL
                         || (
