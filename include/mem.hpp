@@ -82,6 +82,13 @@ constexpr void destruct_at ( T * _ptr_ )
         _ptr_->~T();
 }
 
+template< typename Iter >
+inline
+constexpr void destruct_at ( Iter _iter_ )
+{
+        destruct_at( _iter_.raw() );
+}
+
 #pragma GCC diagnostic pop
 
 inline constexpr bool _is_overaligned_for_new ( size_t _align_ ) noexcept
