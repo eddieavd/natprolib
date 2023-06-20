@@ -1307,6 +1307,7 @@ struct is_trivially_destructible : bool_constant< __is_trivially_destructible( T
 #elif __has_builtin(__has_trivial_destructor)
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wdeprecated-builtins"
 
 template< typename T >
