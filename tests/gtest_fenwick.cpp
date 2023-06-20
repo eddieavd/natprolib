@@ -432,8 +432,7 @@ TEST( FenwickTreeTest, StdVectorTests )
 
         for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
         {
-                EXPECT_EQ( vec   [ i ], CUSTOM_VALUE );
-                EXPECT_EQ( vec.at( i ), CUSTOM_VALUE );
+                EXPECT_EQ( vec.element_at( i ), CUSTOM_VALUE );
         }
 
         npl::fenwick_tree< int > pbvec( stdvec.begin(), stdvec.end() );

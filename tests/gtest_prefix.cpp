@@ -453,8 +453,8 @@ TEST( PrefixVectorTest, StdVectorTests )
 
         for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
         {
-                EXPECT_EQ( vec   [ i ], CUSTOM_VALUE );
-                EXPECT_EQ( vec.at( i ), CUSTOM_VALUE );
+                EXPECT_EQ( vec   [ i ], i + 1 );
+                EXPECT_EQ( vec.at( i ), i + 1 );
         }
 
         npl::prefix_vector< int > pbvec( stdvec.begin(), stdvec.end() );
