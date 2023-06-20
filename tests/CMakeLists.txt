@@ -12,6 +12,7 @@ enable_testing()
 add_executable(
         gtest_nplib
         gtest_nplib.cpp
+        gtest_traits.cpp
         gtest_vector.cpp
         gtest_static_vector.cpp
         gtest_prefix.cpp

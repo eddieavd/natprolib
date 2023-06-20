@@ -15,11 +15,18 @@
 
 #include <vector>
 
-#include <util/util.hpp>
-#include <util/traits.hpp>
-#include <util/mem.hpp>
-#include <util/split_buffer.hpp>
+#include <util.hpp>
+#include <mem.hpp>
+#include <iterator.hpp>
+#include <allocator.hpp>
 
+#include <_traits/base_traits.hpp>
+#include <_traits/npl_traits.hpp>
+#include <_iter/iter_traits.hpp>
+#include <_iter/move_iterator.hpp>
+#include <_alloc/alloc_traits.hpp>
+
+#include <container/split_buffer>
 #include <container/array>
 #include <container/vector>
 #include <container/static_vector>
@@ -86,7 +93,7 @@ class input_iterator
 {
         using _base = npl::iterator< C, T >;
 public:
-        using iterator_category = std::input_iterator_tag;
+        using iterator_category = npl::input_iterator_tag ;
 
         input_iterator ( typename _base::pointer _ptr_ ) : _base( _ptr_ ) {}
 };

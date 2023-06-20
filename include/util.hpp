@@ -8,10 +8,11 @@
 
 
 #define NPL_MOVE(...) \
-        static_cast< std::remove_reference_t< decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
+        static_cast< npl::remove_reference_t< decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
 
 #define NPL_FWD(...) \
         static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
+
 
 #ifdef NPL_RELEASE
 #       ifndef NPL_ASSERT
@@ -41,7 +42,7 @@
 #define NPL_CONSTEXPR_ASSERT(expr, ...)                                                                       \
                 do                                                                                             \
                 {                                                                                               \
-                        if( std::is_constant_evaluated() )                                                       \
+                        if( npl::is_constant_evaluated() )                                                       \
                         {                                                                                         \
                                 int test = 1;                                                                      \
                                 test /= ( expr );          /* UB in constexpr context causes compile error */       \

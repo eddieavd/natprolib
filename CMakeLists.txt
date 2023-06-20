@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.21 )
 
-project( natprolib VERSION 2.3.2 )
+project( natprolib VERSION 3.0.0 )
 
 option( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
@@ -20,6 +20,9 @@ endif()
 
 if( NPL_HAS_ASAN )
         add_compile_definitions( NPL_HAS_ASAN )
+endif()
+if( NPL_HAS_STL )
+        add_compile_definitions( NPL_HAS_STL )
 endif()
 
 if( GTEST )
