@@ -247,7 +247,7 @@ split_buffer< T, Allocator >::_construct_at_end ( InputIterator _first_, InputIt
                 if( end_ == end_cap_ )
                 {
                         size_type old_cap = end_cap_ - _first_;
-                        size_type new_cap = std::max< size_type >( 2 * old_cap, 8 );
+                        size_type new_cap = npl::max< size_type >( 2 * old_cap, 8 );
 
                         split_buffer buf( new_cap, 0, alloc );
 
@@ -488,7 +488,7 @@ split_buffer< T, Allocator >::push_front ( const_reference _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = npl::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, ( cap + 3 ) / 4, _alloc() );
 
@@ -521,7 +521,7 @@ split_buffer< T, Allocator >::push_front ( value_type && _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = npl::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, ( cap + 3 ) / 4, _alloc() );
 
@@ -555,7 +555,7 @@ split_buffer< T, Allocator >::push_back ( const_reference _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = npl::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
@@ -589,7 +589,7 @@ split_buffer< T, Allocator >::push_back ( value_type && _val_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = npl::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 
@@ -623,7 +623,7 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
                 }
                 else
                 {
-                        size_type cap = std::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
+                        size_type cap = npl::max< size_type >( 2 * static_cast< size_t >( end_cap_ - first_ ), 1 );
 
                         split_buffer< value_type, _alloc_rr & > tmp( cap, cap / 4, _alloc() );
 

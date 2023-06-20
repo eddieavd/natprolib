@@ -194,6 +194,73 @@ T min ( std::initializer_list< T > _list_ )
 //      max
 //=====================================================================
 
+template< typename Comp, typename ForwardIter >
+inline constexpr
+ForwardIter _max_element ( ForwardIter _first_, ForwardIter _last_, Comp _comp_ )
+{
+        static_assert( is_at_least_forward_iterator_v< ForwardIter >,
+                        "npl::_max_element: requires at least forward iterator" );
+        if( _first_ != _last_ )
+        {
+                ForwardIter iter = _first_;
+                while( ++iter != _last_ )
+                {
+                        if( _comp_( *_first_, *iter ) )
+                        {
+                                _first_ = iter;
+                        }
+                }
+        }
+        return _first_;
+}
+
+template< typename ForwardIter, typename Comp >
+NPL_NODISCARD inline constexpr
+ForwardIter max_element ( ForwardIter _first_, ForwardIter _last_, Comp _comp_ )
+{
+        return npl::_max_element< _comp_ref_type< Comp > >( _first_, _last_, _comp_ );
+}
+
+template< typename ForwardIter >
+NPL_NODISCARD inline constexpr
+ForwardIter max_element ( ForwardIter _first_, ForwardIter _last_ )
+{
+        return npl::max_element( _first_, _last_, less< typename iterator_traits< ForwardIter >::value_type >() );
+}
+
+template< typename T, typename Comp >
+NPL_NODISCARD inline constexpr
+T const & max ( T const & _lhs_, T const & _rhs_, Comp _comp_ )
+{
+        return _comp_( _lhs_, _rhs_ ) ? _rhs_ : _lhs_ ;
+}
+
+template< typename T >
+NPL_NODISCARD inline constexpr
+T const & max ( T const & _lhs_, T const & _rhs_ )
+{
+        return npl::max( _lhs_, _rhs_, less< T >() );
+}
+
+#ifdef NPL_HAS_STL
+
+template< typename T, typename Comp >
+NPL_NODISCARD inline constexpr
+T max ( std::initializer_list< T > _list_, Comp _comp_ )
+{
+        using comp_ref_t = typename _comp_ref_type< Comp >::type ;
+        return *npl::_max_element< comp_ref_t >( _list_.begin(), _list_.end(), _comp_ );
+}
+
+template< typename T >
+NPL_NODISCARD inline constexpr
+T max ( std::initializer_list< T > _list_ )
+{
+        return *npl::max_element( _list_.begin(), _list_.end(), less< T >() );
+}
+
+#endif
+
 //=====================================================================
 //      copy ( in mem )
 //=====================================================================

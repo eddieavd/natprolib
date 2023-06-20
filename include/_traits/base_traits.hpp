@@ -27,8 +27,19 @@ namespace npl
 {
 
 
-using size_t = unsigned long ;
+#if defined(_MSC_VER)
+using max_align_t = double ;
+#elif defined(__APPLE__)
+using max_align_t = long double ;
+#else
+typedef struct
+{
+        long long   _npl_max_align_nonce1 __attribute__((__aligned__(__alignof__(long   long))));
+        long double _npl_max_align_nonce2 __attribute__((__aligned__(__alignof__(long double))));
+} max_align_t ;
+#endif
 
+using size_t = unsigned long ;
 
 //=====================================================================
 //  ┬┌┬┐┌─┐┌┐┌┌┬┐┬┌┬┐┬ ┬
@@ -961,6 +972,16 @@ template< typename T >
 inline constexpr
 typename _sfinae_underlying_type< T >::_promoted_type
 convert_to_integral ( T _val_ ) { return _val_; }
+
+//=====================================================================
+//      alignment_of
+//=====================================================================
+
+template< typename T >
+struct alignment_of : integral_constant< size_t, alignof( T ) > {} ;
+
+template< typename T >
+inline constexpr size_t alignment_of_v = alignment_of< T >::value ;
 
 //=====================================================================
 //      is_callable

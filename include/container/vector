@@ -930,7 +930,7 @@ vector< T, Allocator >::_recommend ( size_type const _new_size_ ) const noexcept
                 return ms;
         }
 
-        return std::max< size_type >( 1.618 * cap, _new_size_ );
+        return npl::max< size_type >( 1.618 * cap, _new_size_ );
 }
 
 template< typename T, typename Allocator >
