@@ -1133,10 +1133,12 @@ enable_if_t
                  is_at_least_input_iterator_v  < InputIterator > &&
                 !is_at_least_forward_iterator_v< InputIterator >
         )
+#ifdef NPL_HAS_STL
         || (
                  is_at_least_std_input_iterator_v  < InputIterator > &&
                 !is_at_least_std_forward_iterator_v< InputIterator >
         )
+#endif
         ),
         void
 >

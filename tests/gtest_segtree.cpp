@@ -69,7 +69,7 @@ TEST( SegmentTreeTest, InputIterConstruct )
 
 TEST( SegmentTreeTest, ForwardIterConstruct )
 {
-        std::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
+        npl::vector< int > source( CUSTOM_CAPACITY, CUSTOM_VALUE );
 
         npl::segment_tree< int > seg( source.begin(), source.end() );
 
@@ -173,11 +173,8 @@ TEST( SegmentTreeTest, Assign ) // add to other containers as well, tests all as
 
 TEST( SegmentTreeTest, SubscriptOperator )
 {
-        std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::segment_tree< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::segment_tree< int > vec_fiter( seg.begin(), seg.end() );
         npl::segment_tree< int > vec_copy ( vec_fill );
         npl::segment_tree< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -188,7 +185,6 @@ TEST( SegmentTreeTest, SubscriptOperator )
         {
                 EXPECT_EQ( vec_fill [ i ], 1 );
                 EXPECT_EQ( vec_piter[ i ], 1 );
-                EXPECT_EQ( vec_fiter[ i ], 1 );
                 EXPECT_EQ( vec_copy [ i ], 1 );
                 EXPECT_EQ( vec_init [ i ], 1 );
                 EXPECT_EQ( vec_cpass[ i ], 1 );
@@ -197,11 +193,8 @@ TEST( SegmentTreeTest, SubscriptOperator )
 
 TEST( SegmentTreeTest, At )
 {
-        std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::segment_tree< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::segment_tree< int > vec_fiter( seg.begin(), seg.end() );
         npl::segment_tree< int > vec_copy ( vec_fill );
         npl::segment_tree< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -212,7 +205,6 @@ TEST( SegmentTreeTest, At )
         {
                 EXPECT_EQ( vec_fill .at( i ), 1 );
                 EXPECT_EQ( vec_piter.at( i ), 1 );
-                EXPECT_EQ( vec_fiter.at( i ), 1 );
                 EXPECT_EQ( vec_copy .at( i ), 1 );
                 EXPECT_EQ( vec_init .at( i ), 1 );
                 EXPECT_EQ( vec_cpass.at( i ), 1 );
@@ -221,11 +213,8 @@ TEST( SegmentTreeTest, At )
 
 TEST( SegmentTreeTest, ElementAt )
 {
-        std::vector< int > seg( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::segment_tree< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::segment_tree< int > vec_fiter( seg.begin(), seg.end() );
         npl::segment_tree< int > vec_copy ( vec_fill );
         npl::segment_tree< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -236,7 +225,6 @@ TEST( SegmentTreeTest, ElementAt )
         {
                 EXPECT_EQ( vec_fill .element_at( i + CUSTOM_CAPACITY ), 1 );
                 EXPECT_EQ( vec_piter.element_at( i + CUSTOM_CAPACITY ), 1 );
-                EXPECT_EQ( vec_fiter.element_at( i + CUSTOM_CAPACITY ), 1 );
                 EXPECT_EQ( vec_copy .element_at( i + CUSTOM_CAPACITY ), 1 );
                 EXPECT_EQ( vec_init .element_at( i + CUSTOM_CAPACITY ), 1 );
                 EXPECT_EQ( vec_cpass.element_at( i + CUSTOM_CAPACITY ), 1 );
@@ -246,11 +234,8 @@ TEST( SegmentTreeTest, ElementAt )
 
 TEST( SegmentTreeTest, Range )
 {
-        std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::segment_tree< int, pb_sum< int > > segtree_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::segment_tree< int, pb_sum< int > > segtree_piter( segtree_fill.begin(), segtree_fill.end() );
-        npl::segment_tree< int, pb_sum< int > > segtree_fiter( vec.begin(), vec.end() );
         npl::segment_tree< int, pb_sum< int > > segtree_copy ( segtree_fill );
         npl::segment_tree< int, pb_sum< int > > segtree_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -263,7 +248,6 @@ TEST( SegmentTreeTest, Range )
                 {
                         EXPECT_EQ( segtree_fill .range( i, j ), j - i + 1 );
                         EXPECT_EQ( segtree_piter.range( i, j ), j - i + 1 );
-                        EXPECT_EQ( segtree_fiter.range( i, j ), j - i + 1 );
                         EXPECT_EQ( segtree_copy .range( i, j ), j - i + 1 );
                         EXPECT_EQ( segtree_init .range( i, j ), j - i + 1 );
                         EXPECT_EQ( segtree_cpass.range( i, j ), j - i + 1 );
@@ -472,3 +456,20 @@ TEST( SegmentTreeTest, ThreeDimensional )
                 }
         }
 }
+
+#ifdef NPL_HAS_STL
+
+TEST( SegmentTreeTest, StdVectorTests )
+{
+        std::vector< int > stdvec( CUSTOM_CAPACITY, CUSTOM_VALUE );
+
+        npl::segment_tree< int > vec( stdvec.begin(), stdvec.end() );
+
+        for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
+        {
+                EXPECT_EQ( vec   [ i ], CUSTOM_VALUE );
+                EXPECT_EQ( vec.at( i ), CUSTOM_VALUE );
+        }
+}
+
+#endif

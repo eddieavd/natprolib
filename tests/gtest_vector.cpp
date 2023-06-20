@@ -172,11 +172,8 @@ TEST( VectorTest, InitListAssign )
 
 TEST( VectorTest, SubscriptOperator )
 {
-        std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::vector< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::vector< int > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::vector< int > vec_fiter( vec.begin(), vec.end() );
         npl::vector< int > vec_copy ( vec_fill );
         npl::vector< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -187,7 +184,6 @@ TEST( VectorTest, SubscriptOperator )
         {
                 EXPECT_EQ( vec_fill [ i ], 1 );
                 EXPECT_EQ( vec_piter[ i ], 1 );
-                EXPECT_EQ( vec_fiter[ i ], 1 );
                 EXPECT_EQ( vec_copy [ i ], 1 );
                 EXPECT_EQ( vec_init [ i ], 1 );
                 EXPECT_EQ( vec_cpass[ i ], 1 );
@@ -196,11 +192,8 @@ TEST( VectorTest, SubscriptOperator )
 
 TEST( VectorTest, At )
 {
-        std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::vector< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::vector< int > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::vector< int > vec_fiter( vec.begin(), vec.end() );
         npl::vector< int > vec_copy ( vec_fill );
         npl::vector< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -211,7 +204,6 @@ TEST( VectorTest, At )
         {
                 EXPECT_EQ( vec_fill .at( i ), 1 );
                 EXPECT_EQ( vec_piter.at( i ), 1 );
-                EXPECT_EQ( vec_fiter.at( i ), 1 );
                 EXPECT_EQ( vec_copy .at( i ), 1 );
                 EXPECT_EQ( vec_init .at( i ), 1 );
                 EXPECT_EQ( vec_cpass.at( i ), 1 );
@@ -243,12 +235,8 @@ TEST( VectorTest, Accessors )
 
 TEST( VectorTest, PushBack )
 {
-        std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::vector< int > vec_def;
         npl::vector< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
-        npl::vector< int > vec_piter( vec.begin(), vec.end() );
-        npl::vector< int > vec_fiter( vec.begin(), vec.end() );
         npl::vector< int > vec_copy ( vec_fill );
         npl::vector< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -259,16 +247,12 @@ TEST( VectorTest, PushBack )
         {
                 vec_def  .push_back( 1 );
                 vec_fill .push_back( 1 );
-                vec_piter.push_back( 1 );
-                vec_fiter.push_back( 1 );
                 vec_copy .push_back( 1 );
                 vec_init .push_back( 1 );
                 vec_cpass.push_back( 1 );
 
                 EXPECT_EQ( vec_def  .size(), i + 1 );
                 EXPECT_EQ( vec_fill .size(), CUSTOM_CAPACITY + i + 1 );
-                EXPECT_EQ( vec_piter.size(), CUSTOM_CAPACITY + i + 1 );
-                EXPECT_EQ( vec_fiter.size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_copy .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_init .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_cpass.size(), CUSTOM_CAPACITY + i + 1 );
@@ -277,12 +261,9 @@ TEST( VectorTest, PushBack )
 
 TEST( VectorTest, EmplaceBackBasic )
 {
-        std::vector< int > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::vector< int > vec_def;
         npl::vector< int > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::vector< int > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::vector< int > vec_fiter( vec.begin(), vec.end() );
         npl::vector< int > vec_copy ( vec_fill );
         npl::vector< int > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -294,7 +275,6 @@ TEST( VectorTest, EmplaceBackBasic )
                 vec_def  .emplace_back( 1 );
                 vec_fill .emplace_back( 1 );
                 vec_piter.emplace_back( 1 );
-                vec_fiter.emplace_back( 1 );
                 vec_copy .emplace_back( 1 );
                 vec_init .emplace_back( 1 );
                 vec_cpass.emplace_back( 1 );
@@ -302,7 +282,6 @@ TEST( VectorTest, EmplaceBackBasic )
                 EXPECT_EQ( vec_def  .size(), i + 1 );
                 EXPECT_EQ( vec_fill .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_piter.size(), CUSTOM_CAPACITY + i + 1 );
-                EXPECT_EQ( vec_fiter.size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_copy .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_init .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_cpass.size(), CUSTOM_CAPACITY + i + 1 );
@@ -311,12 +290,9 @@ TEST( VectorTest, EmplaceBackBasic )
 
 TEST( VectorTest, EmplaceBack )
 {
-        std::vector< nplib_test::some_addable_data > vec( CUSTOM_CAPACITY, CUSTOM_VALUE );
-
         npl::vector< nplib_test::some_addable_data > vec_def;
         npl::vector< nplib_test::some_addable_data > vec_fill ( CUSTOM_CAPACITY, CUSTOM_VALUE );
         npl::vector< nplib_test::some_addable_data > vec_piter( vec_fill.begin(), vec_fill.end() );
-        npl::vector< nplib_test::some_addable_data > vec_fiter( vec.begin(), vec.end() );
         npl::vector< nplib_test::some_addable_data > vec_copy ( vec_fill );
         npl::vector< nplib_test::some_addable_data > vec_init ( { 1, 1, 1, 1, 1, 1, 1, 1 } );
 
@@ -328,14 +304,12 @@ TEST( VectorTest, EmplaceBack )
                 vec_def  .emplace_back( 1 );
                 vec_fill .emplace_back( 1 );
                 vec_piter.emplace_back( 1 );
-                vec_fiter.emplace_back( 1 );
                 vec_copy .emplace_back( 1 );
                 vec_init .emplace_back( 1 );
 
                 EXPECT_EQ( vec_def  .size(), i + 1 );
                 EXPECT_EQ( vec_fill .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_piter.size(), CUSTOM_CAPACITY + i + 1 );
-                EXPECT_EQ( vec_fiter.size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_copy .size(), CUSTOM_CAPACITY + i + 1 );
                 EXPECT_EQ( vec_init .size(), CUSTOM_CAPACITY + i + 1 );
         }
@@ -410,3 +384,32 @@ TEST( VectorTest, ThreeDimensional )
                 }
         }
 }
+
+#ifdef NPL_HAS_STL
+
+TEST( VectorTest, StdVectorTests )
+{
+        std::vector< int > stdvec( CUSTOM_CAPACITY, CUSTOM_VALUE );
+
+        npl::vector< int > vec( stdvec.begin(), stdvec.end() );
+
+        for( std::size_t i = 0; i < CUSTOM_CAPACITY; ++i )
+        {
+                EXPECT_EQ( vec   [ i ], CUSTOM_VALUE );
+                EXPECT_EQ( vec.at( i ), CUSTOM_VALUE );
+        }
+
+        npl::vector< int > pbvec( stdvec.begin(), stdvec.end() );
+        npl::vector< int > ebvec( stdvec.begin(), stdvec.end() );
+
+        for( std::size_t i = 0; i < 1024; ++i )
+        {
+                pbvec.push_back( CUSTOM_VALUE );
+                ebvec.push_back( CUSTOM_VALUE );
+
+                EXPECT_EQ( pbvec.size(), CUSTOM_CAPACITY + i + 1 );
+                EXPECT_EQ( ebvec.size(), CUSTOM_CAPACITY + i + 1 );
+        }
+}
+
+#endif
