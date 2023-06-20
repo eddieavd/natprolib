@@ -10,9 +10,10 @@
 #include <cstring>
 
 #include <util.hpp>
+#include <_traits/base_traits.hpp>
+#include <_traits/npl_traits.hpp>
 #include <_alloc/alloc_traits.hpp>
 #include <_iter/iter_traits.hpp>
-#include <_traits/npl_traits.hpp>
 #include <algorithm.hpp>
 
 
