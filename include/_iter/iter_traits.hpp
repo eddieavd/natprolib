@@ -6,6 +6,10 @@
 
 #pragma once
 
+#ifdef NPL_HAS_STL
+#       include <memory>
+#endif
+
 #include <_traits/base_traits.hpp>
 #include <_traits/npl_traits.hpp>
 
@@ -129,10 +133,13 @@ template< typename Iter >
 struct _iterator_traits< Iter, true >
         : _iterator_traits_impl
           <
-                Iter,
-                is_convertible< typename Iter::iterator_category,  input_iterator_tag >::value ||
-                is_convertible< typename Iter::iterator_category, output_iterator_tag >::value ||
-                true                                                                           // temporary bugfix
+                   Iter,
+                   is_convertible_v< typename Iter::iterator_category,  input_iterator_tag >
+                || is_convertible_v< typename Iter::iterator_category, output_iterator_tag >
+#ifdef NPL_HAS_STL
+                || is_convertible_v< typename Iter::iterator_category,  std::input_iterator_tag >
+                || is_convertible_v< typename Iter::iterator_category, std::output_iterator_tag >
+#endif
           >
 {} ;
 
@@ -212,56 +219,6 @@ template< typename T >
 inline constexpr bool is_2d_container_iterator_v = is_2d_container_iterator< T >::value ;
 
 
-template< typename Iter, typename ValueType >
-struct test_if_input_iterator
-        : conjunction
-          <
-                 is_at_least_input_iterator< Iter >,
-                 is_not< is_at_least_forward_iterator< Iter > >,
-                 is_constructible
-                 <
-                        ValueType,
-                        typename iterator_traits< Iter >::reference
-                 >
-          > {} ;
-
-template< typename Iter, typename ValueType, typename T = void >
-struct enable_if_input_iterator
-        : enable_if
-          <
-                conjunction_v
-                <
-                        is_at_least_input_iterator< Iter >,
-                        is_not< is_at_least_forward_iterator< Iter > >,
-                        is_constructible
-                        <
-                                ValueType,
-                                typename iterator_traits< Iter >::reference
-                        >
-                >,
-                T
-          > {} ;
-
-template< typename Iter, typename ValueType, typename T = void >
-using enable_if_input_iterator_t = typename enable_if_input_iterator< Iter, ValueType, T >::type ;
-
-template< typename Iter, typename ValueType, typename T = void >
-struct enable_if_forward_iterator
-        : enable_if
-          <
-                is_at_least_forward_iterator_v< Iter > &&
-                is_constructible_v
-                <
-                        ValueType,
-                        typename iterator_traits< Iter >::reference
-                >,
-                T
-          > {} ;
-
-template< typename Iter, typename ValueType, typename T = void >
-using enable_if_forward_iterator_t = typename enable_if_forward_iterator< Iter, ValueType, T >::type ;
-
-
 template< typename InputIter >
 inline constexpr
 typename iterator_traits< InputIter >::difference_type
@@ -274,7 +231,6 @@ _distance ( InputIter _first_, InputIter _last_, input_iterator_tag )
         }
         return dist;
 }
-
 template< typename RandIter >
 inline constexpr
 typename iterator_traits< RandIter >::difference_type
@@ -291,7 +247,6 @@ constexpr void _advance ( InputIter & _iter_, typename iterator_traits< InputIte
                 ++_iter_;
         }
 }
-
 template< typename BiDirIter >
 constexpr void _advance ( BiDirIter & _iter_, typename iterator_traits< BiDirIter >::difference_type _dist_, bidirectional_iterator_tag )
 {
@@ -310,12 +265,75 @@ constexpr void _advance ( BiDirIter & _iter_, typename iterator_traits< BiDirIte
                 }
         }
 }
-
 template< typename RandIter >
 constexpr void _advance ( RandIter & _iter_, typename iterator_traits< RandIter >::difference_type _dist_, random_access_iterator_tag )
 {
         _iter_ += _dist_;
 }
+
+#ifdef NPL_HAS_STL
+
+template< typename T, typename U, bool = has_iterator_category< std::iterator_traits< T > >::value >
+struct has_std_iterator_category_convertible_to
+        : bool_constant< is_convertible_v< typename std::iterator_traits< T >::iterator_category, U > > {} ;
+
+template< typename T, typename U >
+struct has_std_iterator_category_convertible_to< T, U, false > : false_type {} ;
+
+
+template< typename T >
+struct is_at_least_std_input_iterator : has_std_iterator_category_convertible_to< T, std::input_iterator_tag > {} ;
+template< typename T >
+inline constexpr bool is_at_least_std_input_iterator_v = is_at_least_std_input_iterator< T >::value ;
+
+template< typename T >
+struct is_at_least_std_forward_iterator : has_std_iterator_category_convertible_to< T, std::forward_iterator_tag > {} ;
+template< typename T >
+inline constexpr bool is_at_least_std_forward_iterator_v = is_at_least_std_forward_iterator< T >::value ;
+
+template< typename T >
+struct is_at_least_std_bidirectional_iterator : has_std_iterator_category_convertible_to< T, std::bidirectional_iterator_tag > {} ;
+template< typename T >
+inline constexpr bool is_at_least_std_bidirectional_iterator_v = is_at_least_std_bidirectional_iterator< T >::value ;
+
+template< typename T >
+struct is_at_least_std_random_access_iterator : has_std_iterator_category_convertible_to< T, std::random_access_iterator_tag > {} ;
+template< typename T >
+inline constexpr bool is_at_least_std_random_access_iterator_v = is_at_least_std_random_access_iterator< T >::value ;
+
+
+template< typename InputIter >
+inline constexpr
+typename iterator_traits< InputIter >::difference_type
+_distance ( InputIter _first_, InputIter _last_, std::input_iterator_tag )
+{
+        return _distance( _first_, _last_, input_iterator_tag{} );
+}
+template< typename RandIter >
+inline constexpr
+typename iterator_traits< RandIter >::difference_type
+_distance ( RandIter _first_, RandIter _last_, std::random_access_iterator_tag )
+{
+        return _distance( _first_, _last_, random_access_iterator_tag{} );
+}
+
+template< typename InputIter >
+constexpr void _advance ( InputIter & _iter_, typename iterator_traits< InputIter >::difference_type _dist_, std::input_iterator_tag )
+{
+        _advance( _iter_, _dist_, input_iterator_tag{} );
+}
+template< typename BiDirIter >
+constexpr void _advance ( BiDirIter & _iter_, typename iterator_traits< BiDirIter >::difference_type _dist_, std::bidirectional_iterator_tag )
+{
+        _advance( _iter_, _dist_, bidirectional_iterator_tag{} );
+}
+template< typename RandIter >
+constexpr void _advance ( RandIter & _iter_, typename iterator_traits< RandIter >::difference_type _dist_, std::random_access_iterator_tag )
+{
+        _advance( _iter_, _dist_, random_access_iterator_tag{} );
+}
+
+#endif
 
 
 } // namespace npl

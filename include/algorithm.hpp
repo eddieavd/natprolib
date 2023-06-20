@@ -96,7 +96,7 @@ _swap_result_t< T > swap ( T & _lhs_, T & _rhs_ ) noexcept
 template< typename T, size_t N >
 inline constexpr
 enable_if_t< is_swappable_v< T > >
-swap ( T ( &_lhs_ )[ N ], T ( &_rhs_ )[ N ] ) noexcept( is_nothrow_swappable_v< T > )
+swap ( T ( &_lhs_ )[ N ], T ( &_rhs_ )[ N ] ) noexcept( is_nothrow_swappable_v< T > )           // TODO needs swappable traits
 {
         for( size_t i = 0; i != N; ++i )
         {

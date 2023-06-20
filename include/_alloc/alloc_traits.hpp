@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include <util.hpp>
 #include <_traits/base_traits.hpp>
 

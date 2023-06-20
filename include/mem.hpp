@@ -308,7 +308,6 @@ _construct_range_forward ( [[ maybe_unused ]] Alloc & _alloc_, SrcT * _begin1_, 
 }
 
 
-
 } // namespace mem
 
 

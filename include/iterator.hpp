@@ -98,6 +98,7 @@ protected:
         explicit constexpr iterator ( pointer _ptr_ ) : ptr_( _ptr_ ) {}
 };
 
+
 template< typename Iter >
 class reverse_iter
 {

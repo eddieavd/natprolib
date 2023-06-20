@@ -26,18 +26,18 @@ private:
         split_buffer             ( split_buffer const & );
         split_buffer & operator= ( split_buffer const & );
 public:
-        using      value_type = T;
-        using  allocator_type = Allocator;
-        using       _alloc_rr = remove_reference_t< allocator_type >;
-        using   _alloc_traits = allocator_traits< _alloc_rr >;
-        using       reference = value_type &;
-        using const_reference = value_type const &;
-        using       size_type = typename _alloc_traits::size_type;
-        using difference_type = typename _alloc_traits::difference_type;
-        using         pointer = typename _alloc_traits::pointer;
-        using   const_pointer = typename _alloc_traits::const_pointer;
-        using        iterator = pointer;
-        using  const_iterator = const_pointer;
+        using      value_type = T                                       ;
+        using  allocator_type = Allocator                               ;
+        using       _alloc_rr = remove_reference_t< allocator_type >    ;
+        using   _alloc_traits = allocator_traits< _alloc_rr >           ;
+        using       reference = value_type       &                      ;
+        using const_reference = value_type const &                      ;
+        using       size_type = typename _alloc_traits::      size_type ;
+        using difference_type = typename _alloc_traits::difference_type ;
+        using         pointer = typename _alloc_traits::        pointer ;
+        using   const_pointer = typename _alloc_traits::  const_pointer ;
+        using        iterator =       pointer                           ;
+        using  const_iterator = const_pointer                           ;
 
         pointer        first_  ;
         pointer        begin_  ;
@@ -45,8 +45,8 @@ public:
         pointer        end_cap_;
         allocator_type alloc_  ;
 
-        using _alloc_ref       = add_lvalue_reference_t< allocator_type >;
-        using _alloc_const_ref = add_lvalue_reference_t< allocator_type >;
+        using _alloc_ref       = add_lvalue_reference_t< allocator_type > ;
+        using _alloc_const_ref = add_lvalue_reference_t< allocator_type > ;
 
         _alloc_rr       & _alloc   ()       noexcept { return alloc_  ; }
         _alloc_rr const & _alloc   () const noexcept { return alloc_  ; }
