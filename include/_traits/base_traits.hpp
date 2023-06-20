@@ -398,27 +398,27 @@ inline constexpr bool disjunction_v = _or< Args... >::value ;
 //      is
 //=====================================================================
 
-template< bool >
+template< typename T >
 struct is : false_type {} ;
 
 template<>
-struct is< true > : true_type {} ;
+struct is< true_type > : true_type {} ;
 
-template< bool C >
-inline constexpr bool is_v = is< C >::value ;
+template< typename T >
+inline constexpr bool is_v = is< T >::value ;
 
 //=====================================================================
 //      is_not
 //=====================================================================
 
-template< bool >
+template< typename T >
 struct is_not : true_type {} ;
 
 template<>
-struct is_not< true > : false_type {} ;
+struct is_not< true_type > : false_type {} ;
 
-template< bool C >
-inline constexpr bool is_not_v = is_not< C >::value ;
+template< typename T >
+inline constexpr bool is_not_v = is_not< T >::value ;
 
 //=====================================================================
 //      is_same
@@ -1486,6 +1486,9 @@ struct is_convertible
                   decltype( test_implicitly_convertible< From, To >( 0 ) )::value ) ||
                 ( is_void_v< From > && is_void_v< To > )
           > {} ;
+
+template< typename From, typename To >
+using is_convertible_t = typename is_convertible< From, To >::type ;
 
 template< typename From, typename To >
 inline constexpr bool is_convertible_v = is_convertible< From, To >::value ;

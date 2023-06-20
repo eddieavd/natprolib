@@ -26,8 +26,8 @@ int main ()
 
         static_assert(                npl::is_convertible_v< npl::integral_constant< bool,  true >, std::integral_constant< bool,  true > >   );
         static_assert(                npl::is_convertible_v< std::integral_constant< bool, false >, npl::integral_constant< bool, false > >   );
-        static_assert( npl::is_not_v< npl::is_convertible_v< npl::integral_constant< bool,  true >, std::integral_constant< bool, false > > > );
-        static_assert( npl::is_not_v< npl::is_convertible_v< std::integral_constant< bool, false >, npl::integral_constant< bool,  true > > > );
+        static_assert( npl::is_not_v< npl::is_convertible_t< npl::integral_constant< bool,  true >, std::integral_constant< bool, false > > > );
+        static_assert( npl::is_not_v< npl::is_convertible_t< std::integral_constant< bool, false >, npl::integral_constant< bool,  true > > > );
 
 
         return 0;
