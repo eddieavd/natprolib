@@ -12,6 +12,7 @@
     !__has_builtin(__is_union)                   || \
     !__has_builtin(__underlying_type)            || \
     !__has_builtin(__is_trivially_constructible) || \
+    !__has_builtin(__is_trivially_destructible)  || \
     !__has_builtin(__is_trivially_copyable)
 #       ifdef NPL_HAS_STL
 #               include <type_traits>
