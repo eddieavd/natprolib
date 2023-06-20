@@ -48,16 +48,26 @@ T * addressof ( T & _x_ ) noexcept
         return __builtin_addressof( _x_ );
 }
 
-template< typename T, typename... Args >
-constexpr T * construct_at ( T * _ptr_, Args&&... _args_ )
+template< typename T >
+inline constexpr void * voidify( T & _from_ )
 {
-        return std::construct_at( _ptr_, _args_... );
+        return const_cast< void * >( static_cast< void const volatile * >( addressof( _from_ ) ) );
+}
+
+template< typename T, typename... Args, typename = decltype( ::new( declval< void * >() ) T( declval< Args >()... ) ) >
+constexpr T * construct_at ( T * _location_, Args&&... _args_ )
+{
+        /*
+        NPL_CONSTEXPR_ASSERT( _location_ != nullptr, "null pointer passed to construct_at" );
+        return ::new ( voidify( *_location_ ) ) T( NPL_FWD( _args_ )... );
+        */
+        return std::construct_at( _location_, NPL_FWD( _args_ )... );
 }
 
 template< typename Iter, typename... Args >
 constexpr auto construct_at ( Iter _it_, Args&&... _args_ ) -> _iter_value_type< Iter > *
 {
-        return std::construct_at( _it_.raw(), _args_... );
+        return mem::construct_at( _it_.raw(), NPL_FWD( _args_ )... );
 }
 
 #pragma GCC diagnostic push
