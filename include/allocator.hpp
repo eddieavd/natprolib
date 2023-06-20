@@ -40,7 +40,7 @@ public:
         {
                 NPL_ASSERT( _n_ <= allocator_traits< allocator >::max_size( *this ), "allocator::allocate: n > max_size" );
 
-                if( std::is_constant_evaluated() )
+                if( npl::is_constant_evaluated() )
                 {
                         return static_cast< value_type * >( ::operator new( _n_ * sizeof( value_type ) ) );
                 }
@@ -52,7 +52,7 @@ public:
 
         inline constexpr void deallocate ( value_type * _ptr_, size_t _n_ ) noexcept
         {
-                if( std::is_constant_evaluated() )
+                if( npl::is_constant_evaluated() )
                 {
                         ::operator delete( _ptr_ );
                 }
@@ -113,7 +113,7 @@ public:
         {
                 NPL_ASSERT( _n_ <= allocator_traits< allocator >::max_size( *this ), "allocator::allocate: n > max_size" );
 
-                if( std::is_constant_evaluated() )
+                if( npl::is_constant_evaluated() )
                 {
                         return static_cast< value_type * >( ::operator new( _n_ * sizeof( value_type ) ) );
                 }
@@ -125,7 +125,7 @@ public:
 
         inline constexpr void deallocate ( value_type const * _ptr_, size_t _n_ )
         {
-                if( std::is_constant_evaluated() )
+                if( npl::is_constant_evaluated() )
                 {
                         ::operator delete( const_cast< value_type * >( _ptr_ ) );
                 }

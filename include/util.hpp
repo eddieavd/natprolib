@@ -35,7 +35,7 @@
 #define NPL_CONSTEXPR_ASSERT(expr, ...)                                                                       \
                 do                                                                                             \
                 {                                                                                               \
-                        if( std::is_constant_evaluated() )                                                       \
+                        if( npl::is_constant_evaluated() )                                                       \
                         {                                                                                         \
                                 int test = 1;                                                                      \
                                 test /= ( expr );          /* UB in constexpr context causes compile error */       \

@@ -115,6 +115,32 @@ using bool_constant = integral_constant< bool, B > ;
 using  true_type = bool_constant<  true > ;
 using false_type = bool_constant< false > ;
 
+//=====================================================================
+//      is_constant_evaluated
+//=====================================================================
+
+#if __has_builtin(__builtin_is_constant_evaluated)
+
+inline constexpr bool is_constant_evaluated () noexcept
+{
+        return __builtin_is_constant_evaluated();
+}
+
+#elif defined( NPL_HAS_STL )
+
+inline constexpr bool is_constant_evaluated () noexcept
+{
+        return std::is_constant_evaluated();
+}
+
+#else
+
+#endif
+
+//=====================================================================
+//      remove_all_extents
+//=====================================================================
+
 template< typename T >
 struct remove_all_extents
 {
