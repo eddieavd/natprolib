@@ -3,7 +3,7 @@ name: googletest
 on: push
 
 jobs:
-  googletest_macos_clang:
+  googletest_macos_clang_no_stl:
 
     runs-on: macos-latest
     steps:
@@ -15,7 +15,7 @@ jobs:
       - name: build and run tests
         run:  mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_ASAN=ON && cmake --build . && ./tests/gtest_nplib
 
-  googletest_macos_clang_w_stl:
+  googletest_macos_clang:
 
     runs-on: macos-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name: build and run tests
         run:  mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_ASAN=ON -DNPL_HAS_STL=ON && cmake --build . && ./tests/gtest_nplib
 
-  googletest_ubuntu_clang:
+  googletest_ubuntu_clang_no_stl:
 
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +39,7 @@ jobs:
       - name: build and run tests
         run:  export CXX=$(which clang++) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_ASAN=ON && cmake --build . && ./tests/gtest_nplib
 
-  googletest_ubuntu_clang_w_stl:
+  googletest_ubuntu_clang:
 
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +51,7 @@ jobs:
       - name: build and run tests
         run:  export CXX=$(which clang++) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_ASAN=ON -DNPL_HAS_STL=ON && cmake --build . && ./tests/gtest_nplib
 
-  googletest_ubuntu_gcc:
+  googletest_ubuntu_gcc_no_stl:
 
     runs-on: ubuntu-latest
     steps:
@@ -64,9 +64,9 @@ jobs:
         run:  sudo apt install g++-10
 
       - name: build and run tests
-        run:  export CXX=$(which g++-10) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON -DNPL_HAS_STL=ON && cmake --build . && ./tests/gtest_nplib
+        run:  export CXX=$(which g++-10) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DGTEST=ON -DNPL_DEBUG=ON && cmake --build . && ./tests/gtest_nplib
 
-  googletest_ubuntu_gcc_w_stl:
+  googletest_ubuntu_gcc:
 
     runs-on: ubuntu-latest
     steps:
