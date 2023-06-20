@@ -398,27 +398,27 @@ inline constexpr bool disjunction_v = _or< Args... >::value ;
 //      is
 //=====================================================================
 
-template< typename T >
+template< bool >
 struct is : false_type {} ;
 
 template<>
-struct is< true_type > : true_type {} ;
+struct is< true > : true_type {} ;
 
-template< typename T >
-inline constexpr bool is_v = is< T >::value ;
+template< bool C >
+inline constexpr bool is_v = is< C >::value ;
 
 //=====================================================================
 //      is_not
 //=====================================================================
 
-template< typename T >
+template< bool >
 struct is_not : true_type {} ;
 
 template<>
-struct is_not< true_type > : false_type {} ;
+struct is_not< true > : false_type {} ;
 
-template< typename T >
-inline constexpr bool is_not_v = is_not< T >::value ;
+template< bool C >
+inline constexpr bool is_not_v = is_not< C >::value ;
 
 //=====================================================================
 //      is_same

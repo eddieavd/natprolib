@@ -140,6 +140,7 @@ struct _iterator_traits< Iter, true >
                 || is_convertible_v< typename Iter::iterator_category,  std::input_iterator_tag >
                 || is_convertible_v< typename Iter::iterator_category, std::output_iterator_tag >
 #endif
+                || true
           >
 {} ;
 
