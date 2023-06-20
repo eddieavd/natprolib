@@ -1304,12 +1304,22 @@ inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::
 template< typename T >
 struct is_trivially_destructible : bool_constant< __is_trivially_destructible( T ) > {} ;
 
+#elif __has_builtin(__has_trivial_destructor)
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-builtins"
+
+template< typename T >
+struct is_trivially_destructible : bool_constant< __has_trivial_destructor( T ) > {} ;
+
+#pragma GCC diagnostic pop
+
 #elif defined( NPL_HAS_STL )
 
 template< typename T >
 struct is_trivially_destructible : std::is_trivially_destructible< T > {} ;
 
-#else
+#elif 0  //  works only prior to cpp11
 
 template< typename T >
 struct _trivial_destructor_impl : public bool_constant< is_scalar_v< T > || is_reference_v< T > > {} ;
@@ -1319,6 +1329,8 @@ struct is_trivially_destructible : _trivial_destructor_impl< typename remove_all
 
 template< typename T >
 struct is_trivially_destructible< T[] > : public false_type {} ;
+
+#else
 
 #endif
 
