@@ -19,6 +19,9 @@
 
 #define NPL_HAS_NO_SIZED_DEALLOCATION
 
+#define NPL_SMOL_MEMCPY 16
+#define NPL_MEMCPY_SIZE ( sizeof( unsigned long long ) )
+
 
 namespace npl
 {
@@ -93,7 +96,7 @@ constexpr void destruct_at ( Iter _iter_ )
 
 inline constexpr bool _is_overaligned_for_new ( size_t _align_ ) noexcept
 {
-        return _align_ > std::alignment_of< std::max_align_t >::value ;
+        return _align_ > npl::alignment_of< npl::max_align_t >::value ;
 }
 
 template< typename... Args >

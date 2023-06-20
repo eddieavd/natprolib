@@ -943,7 +943,7 @@ segment_tree< T, PB, Allocator >::_recommend ( size_type const _new_size_ ) cons
                 return ms;
         }
 
-        return std::max< size_type >( 2 * cap, 2 * ( _round_to_pow2( _new_size_ ) ) );
+        return npl::max< size_type >( 2 * cap, 2 * ( _round_to_pow2( _new_size_ ) ) );
 }
 
 template< typename T, auto PB, typename Allocator >
