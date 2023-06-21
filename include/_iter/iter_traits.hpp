@@ -412,10 +412,8 @@ using enable_input_iter_func_if_constructible_t = typename enable_input_iter_fun
 
 template< typename Iter, typename ValueType,
           typename T = void,
-          bool = conjunction_v
+          bool = disjunction_v
                  <
-                        disjunction_t
-                        <
                         conjunction_t
                         <
                                  is_at_least_input_iterator        < Iter >,
@@ -429,7 +427,6 @@ template< typename Iter, typename ValueType,
                         ,is_not< is_at_least_std_forward_iterator_t< Iter > >
                         >
 #endif
-                        >
                  > >
 struct enable_input_iter_func {} ;
 
@@ -472,21 +469,13 @@ using enable_forward_iter_func_if_constructible_t = typename enable_forward_iter
 
 template< typename Iter, typename ValueType,
           typename T = void,
-          bool = conjunction_v
+          bool = disjunction_v
                  <
-                        disjunction_t
-                        <
                          is_at_least_forward_iterator    < Iter >
 #ifdef NPL_HAS_STL
                         ,is_at_least_std_forward_iterator< Iter >
 #endif
-                        >,
-                        is_constructible
-                        <
-                                ValueType,
-                                typename iterator_traits< Iter >::reference
-                        >
-                 > >
+                  > >
 struct enable_forward_iter_func {} ;
 
 template< typename Iter, typename ValueType, typename T >
