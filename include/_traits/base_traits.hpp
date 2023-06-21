@@ -47,10 +47,16 @@ using size_t = unsigned long ;
 //  ┴─┴┘└─┘┘└┘ ┴ ┴ ┴  ┴
 //=====================================================================
 
-template< typename... >
+template< typename T, typename... >
+struct _first
+{
+        using type = T ;
+};
+
+template< typename... Ts >
 struct void_t
 {
-        using type = void ;
+        using type = typename _first< void, Ts... >::type ;
 };
 
 template< auto Val >
