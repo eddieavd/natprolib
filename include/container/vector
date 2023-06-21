@@ -488,6 +488,9 @@ public:
         NPL_ALWAYS_INLINE       reference at ( size_type const _index_ )       noexcept ;
         NPL_ALWAYS_INLINE const_reference at ( size_type const _index_ ) const noexcept ;
 
+        template< typename RetFloat = value_type, typename FloatIndex = float >
+        NPL_ALWAYS_INLINE RetFloat at ( enable_if_t< is_convertible_v< value_type, RetFloat >, FloatIndex > const _index_ ) const noexcept ;
+
           ////////////////////
          // 2D overloads ////
         ////////////////////
@@ -545,6 +548,16 @@ public:
         at ( size_type const _x_, size_type const _y_, size_type const _z_ ) noexcept
         {
                 return at( _x_ ).at( _y_ ).at( _z_ );
+        }
+
+        template< typename U = _self >
+        NPL_ALWAYS_INLINE NPL_FLATTEN
+        enable_if_3d_container_t< U, typename U::size_type >
+        depth () const noexcept
+        {
+                NPL_ASSERT( !empty() && !at( 0 ).empty(), "vector::depth: called on empty vector" );
+
+                return at( 0 ).at( 0 ).size();
         }
 
         //////////////////
@@ -1824,6 +1837,21 @@ vector< T, Allocator >::at ( size_type const _index_ ) const noexcept
         NPL_ASSERT( _index_ < size(), "vector::at: index out of bounds" );
 
         return this->begin_[ _index_ ];
+}
+
+template< typename T, typename Allocator >
+template< typename RetFloat, typename FloatIndex >
+NPL_ALWAYS_INLINE
+RetFloat vector< T, Allocator >::at ( enable_if_t< is_convertible_v< value_type, RetFloat >, FloatIndex > const _index_ ) const noexcept
+{
+        NPL_ASSERT( _index_ >= 0 && _index_ < size(), "vector::at: index out of bounds" );
+
+        size_type floor = npl::floor( _index_ );
+        size_type  ceil = npl::ceil ( _index_ );
+
+        FloatIndex pos = _index_ - floor;
+
+        return static_cast< RetFloat >( operator[]( floor ) ) + pos * static_cast< RetFloat >( operator[]( ceil ) - operator[]( floor ) );
 }
 
 template< typename T, typename Allocator >

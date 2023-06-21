@@ -175,6 +175,8 @@ T const & min ( T const & _lhs_, T const & _rhs_ )
         return min( _lhs_, _rhs_, less< T >() );
 }
 
+#ifdef NPL_HAS_STL
+
 template< typename T, typename Comp >
 NPL_NODISCARD inline constexpr
 T min ( std::initializer_list< T > _list_, Comp _comp_ )
@@ -189,6 +191,8 @@ T min ( std::initializer_list< T > _list_ )
 {
         return *min_element( _list_.begin(), _list_.end(), less< T >() );
 }
+
+#endif
 
 //=====================================================================
 //      max
@@ -260,6 +264,54 @@ T max ( std::initializer_list< T > _list_ )
 }
 
 #endif
+
+//=====================================================================
+//      floor
+//=====================================================================
+
+#ifndef __sun__
+
+NPL_NODISCARD inline       float floor (       float _val_ ) noexcept { return __builtin_floorf( _val_ ); }
+
+template< typename = int >
+NPL_NODISCARD             double floor (      double _val_ ) noexcept { return __builtin_floor ( _val_ ); }
+
+NPL_NODISCARD inline long double floor ( long double _val_ ) noexcept { return __builtin_floorl( _val_ ); }
+
+#endif
+
+template< typename T >
+NPL_NODISCARD inline
+enable_if_t
+<
+        is_integral_v< T >,
+        double
+>
+floor ( T _val_ ) noexcept { return __builtin_floor( ( double ) _val_ ); }
+
+//=====================================================================
+//      ceil
+//=====================================================================
+
+#ifndef __sun__
+
+NPL_NODISCARD inline       float ceil (       float _val_ ) noexcept { return __builtin_ceilf( _val_ ); }
+
+template< typename = int >
+NPL_NODISCARD             double ceil (      double _val_ ) noexcept { return __builtin_ceil ( _val_ ); }
+
+NPL_NODISCARD inline long double ceil ( long double _val_ ) noexcept { return __builtin_ceill( _val_ ); }
+
+#endif
+
+template< typename T >
+NPL_NODISCARD inline
+enable_if_t
+<
+        is_integral_v< T >,
+        double
+>
+ceil ( T _val_ ) noexcept { return __builtin_ceil( ( double ) _val_ ); }
 
 //=====================================================================
 //      copy ( in mem )
