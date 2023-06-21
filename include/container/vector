@@ -59,7 +59,7 @@ protected:
         class _vector_iterator
                 : public iterator< C, T_ >
         {
-                friend class _vector_iterator< !C, T_ >;
+                friend class _vector_iterator< !C, T_ > ;
         public:
                 using             _base = iterator< C, T_ >                       ;
                 using     _alloc_traits = allocator_traits< Allocator >           ;
@@ -93,7 +93,7 @@ protected:
         _vector_base ( allocator_type const &  _alloc_ )          ;
         _vector_base ( allocator_type       && _alloc_ ) noexcept ;
 
-        ~_vector_base ();
+        ~_vector_base () ;
 
         void clear () noexcept { _destruct_at_end( begin_ ); }
 
@@ -244,91 +244,21 @@ public:
         }
         */
 
-        template< typename InputIterator >
-        vector ( InputIterator _first_,
-                        enable_if_t
-                        <
-                                ((
-                                         is_at_least_input_iterator_v  < InputIterator > &&
-                                        !is_at_least_forward_iterator_v< InputIterator >
-                                )
-#ifdef NPL_HAS_STL
-                                || (
-                                         is_at_least_std_input_iterator_v  < InputIterator > &&
-                                        !is_at_least_std_forward_iterator_v< InputIterator >
-                                )
-#endif
-                                )
-                                &&
-                                is_constructible_v
-                                <
-                                        value_type,
-                                        typename iterator_traits< InputIterator >::reference
-                                >,
-                                InputIterator
-                        > _last_ );
+        template< typename InputIter >
+        vector ( InputIter _first_,
+                        enable_input_iter_func_if_constructible_t< InputIter, value_type, InputIter > _last_ ) ;
 
-        template< typename InputIterator >
-        vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
-                        enable_if_t
-                        <
-                                ((
-                                         is_at_least_input_iterator_v  < InputIterator > &&
-                                        !is_at_least_forward_iterator_v< InputIterator >
-                                )
-#ifdef NPL_HAS_STL
-                                || (
-                                         is_at_least_std_input_iterator_v  < InputIterator > &&
-                                        !is_at_least_std_forward_iterator_v< InputIterator >
-                                )
-#endif
-                                )
-                                &&
-                                is_constructible_v
-                                <
-                                        value_type,
-                                        typename iterator_traits< InputIterator >::reference
-                                >,
-                                void
-                        > * = 0 );
+        template< typename InputIter >
+        vector ( InputIter _first_, InputIter _last_, allocator_type const & _alloc_,
+                        enable_input_iter_func_if_constructible_t< InputIter, value_type > * = 0 ) ;
 
-        template< typename ForwardIterator >
-        vector ( ForwardIterator _first_,
-                        enable_if_t
-                        <
-                                (
-                                        is_at_least_forward_iterator_v    < ForwardIterator >
-#ifdef NPL_HAS_STL
-                                        ||
-                                        is_at_least_std_forward_iterator_v< ForwardIterator >
-#endif
-                                ) &&
-                                is_constructible_v
-                                <
-                                        value_type,
-                                        typename iterator_traits< ForwardIterator >::reference
-                                >,
-                                ForwardIterator
-                        > _last_ );
+        template< typename ForwardIter >
+        vector ( ForwardIter _first_,
+                        enable_forward_iter_func_t< ForwardIter, value_type, ForwardIter > _last_ ) ;
 
-        template< typename ForwardIterator >
-        vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
-                        enable_if_t
-                        <
-                                (
-                                is_at_least_forward_iterator_v    < ForwardIterator >
-#ifdef NPL_HAS_STL
-                                ||
-                                is_at_least_std_forward_iterator_v< ForwardIterator >
-#endif
-                                ) &&
-                                is_constructible_v
-                                <
-                                        value_type,
-                                        typename iterator_traits< ForwardIterator >::reference
-                                >,
-                                void
-                        > * = 0 );
+        template< typename ForwardIter >
+        vector ( ForwardIter _first_, ForwardIter _last_, allocator_type const & _alloc_,
+                        enable_forward_iter_func_t< ForwardIter, value_type > * = 0 ) ;
 
         ~vector ()
         {
@@ -352,76 +282,13 @@ public:
         vector & operator= ( std::initializer_list< value_type > _list_ )
         { assign( _list_.begin(), _list_.end() ); return *this; }
 
-        template< typename InputIterator >
-        enable_if_t
-        <
-                ((
-                         is_at_least_input_iterator_v  < InputIterator > &&
-                        !is_at_least_forward_iterator_v< InputIterator >
-                )
-#ifdef NPL_HAS_STL
-                || (
-                         is_at_least_std_input_iterator_v  < InputIterator > &&
-                        !is_at_least_std_forward_iterator_v< InputIterator >
-                )
-#endif
-                ) &&
-                  is_constructible_v
-                  <
-                        value_type,
-                        typename iterator_traits< InputIterator >::reference
-                  >,
-                  void
-        >
-        assign ( InputIterator _first_, InputIterator _last_ );
+        template< typename InputIter >
+        enable_input_iter_func_if_constructible_t< InputIter, value_type >
+        assign ( InputIter _first_, InputIter _last_ );
 
-        template< typename ForwardIterator >
-        enable_if_t
-        <
-                (
-                        is_at_least_forward_iterator_v    < ForwardIterator >
-#ifdef NPL_HAS_STL
-                        ||
-                        is_at_least_std_forward_iterator_v< ForwardIterator >
-#endif
-                ) &&
-                 is_constructible_v
-                 <
-                        value_type,
-                        typename iterator_traits< ForwardIterator >::reference
-                 >,
-                 void
-        >
-        assign ( ForwardIterator _first_, ForwardIterator _last_ );
-
-        /*
-        template< typename InputIterator >
-        enable_if_t
-        <
-                  is_at_least_std_input_iterator_v  < InputIterator > &&
-                 !is_at_least_std_forward_iterator_v< InputIterator > &&
-                  is_constructible_v
-                  <
-                        value_type,
-                        typename std::iterator_traits< InputIterator >::reference
-                  >,
-                  void
-        >
-        assign ( InputIterator _first_, InputIterator _last_ );
-
-        template< typename ForwardIterator >
-        enable_if_t
-        <
-                 is_at_least_std_forward_iterator_v< ForwardIterator > &&
-                 is_constructible_v
-                 <
-                        value_type,
-                        typename std::iterator_traits< ForwardIterator >::reference
-                 >,
-                 void
-        >
-        assign ( ForwardIterator _first_, ForwardIterator _last_ );
-        */
+        template< typename ForwardIter >
+        enable_forward_iter_func_if_constructible_t< ForwardIter, value_type >
+        assign ( ForwardIter _first_, ForwardIter _last_ );
 
         void assign ( size_type const _count_, const_reference _val_ );
 
@@ -697,28 +564,9 @@ private:
         void _construct_at_end ( size_type const _count_                        );
         void _construct_at_end ( size_type const _count_, const_reference _val_ );
 
-        template< typename ForwardIterator >
-        enable_if_t
-        <
-                 is_at_least_forward_iterator_v    < ForwardIterator >
-#ifdef NPL_HAS_STL
-                 ||
-                 is_at_least_std_forward_iterator_v< ForwardIterator >
-#endif
-                 ,
-                 void
-        >
-        _construct_at_end ( ForwardIterator _begin_, ForwardIterator _end_, size_type const _count_ );
-
-        /*
-        template< typename ForwardIterator >
-        enable_if_t
-        <
-                 is_at_least_std_forward_iterator_v< ForwardIterator >,
-                 void
-        >
-        _construct_at_end ( ForwardIterator _begin_, ForwardIterator _end_, size_type const _count_ );
-        */
+        template< typename ForwardIter >
+        enable_forward_iter_func_t< ForwardIter, value_type >
+        _construct_at_end ( ForwardIter _begin_, ForwardIter _end_, size_type const _count_ );
 
         void _append ( size_type const _count_                        );
         void _append ( size_type const _count_, const_reference _val_ );
@@ -962,39 +810,14 @@ vector< T, Allocator >::_construct_at_end ( size_type const _count_, const_refer
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
-enable_if_t
-<
-         is_at_least_forward_iterator_v    < ForwardIterator >
-#ifdef NPL_HAS_STL
-         ||
-         is_at_least_std_forward_iterator_v< ForwardIterator >
-#endif
-         ,
-         void
->
-vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
+template< typename ForwardIter >
+enable_forward_iter_func_t< ForwardIter, T >
+vector< T, Allocator >::_construct_at_end ( ForwardIter _first_, ForwardIter _last_, size_type const _count_ )
 {
         _construct_transaction tx( *this, _count_ );
 
         mem::_construct_range_forward( this->_alloc(), _first_, _last_, tx.position_ );
 }
-
-/*
-template< typename T, typename Allocator >
-template< typename ForwardIterator >
-enable_if_t
-<
-         is_at_least_std_forward_iterator_v< ForwardIterator >,
-         void
->
-vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
-{
-        _construct_transaction tx( *this, _count_ );
-
-        mem::_construct_range_forward( this->_alloc(), _first_, _last_, tx.position_ );
-}
-*/
 
 template< typename T, typename Allocator >
 void
@@ -1110,6 +933,75 @@ vector< T, Allocator >::vector ( size_type const _count_, value_type const & _va
         }
 }
 
+/*
+        template< typename InputIter >
+        vector ( InputIter _first_,
+                        enable_input_iter_func_t< InputIter, value_type, InputIter > _last_ ) ;
+
+        template< typename InputIter >
+        vector ( InputIter _first_, InputIter _last_, allocator_type const & _alloc_,
+                        enable_input_iter_func_t< InputIter, value_type > * = 0 ) ;
+
+        template< typename ForwardIter >
+        vector ( ForwardIter _first_,
+                        enable_forward_iter_func_t< ForwardIter, value_type, ForwardIter > _last_ ) ;
+
+        template< typename ForwardIter >
+        vector ( ForwardIter _first_, ForwardIter _last_, allocator_type const & _alloc_,
+                        enable_forward_iter_func_t< ForwardIter, value_type > * = 0 ) ;
+*/
+
+template< typename T, typename Allocator >
+template< typename InputIter >
+vector< T, Allocator >::vector ( InputIter _first_, enable_input_iter_func_if_constructible_t< InputIter, value_type, InputIter > _last_ )
+{
+        for( ; _first_ != _last_; ++_first_ )
+        {
+                _emplace_back( *_first_ );
+        }
+}
+
+template< typename T, typename Allocator >
+template< typename InputIter >
+vector< T, Allocator >::vector ( InputIter _first_, InputIter _last_, allocator_type const & _alloc_,
+                                 enable_input_iter_func_if_constructible_t< InputIter, value_type > * )
+        : _base( _alloc_ )
+{
+        for( ; _first_ != _last_; ++_first_ )
+        {
+                _emplace_back( *_first_ );
+        }
+}
+
+template< typename T, typename Allocator >
+template< typename ForwardIter >
+vector< T, Allocator >::vector ( ForwardIter _first_, enable_forward_iter_func_t< ForwardIter, value_type, ForwardIter > _last_ )
+{
+        size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
+
+        if( count > 0 )
+        {
+                _vallocate( count );
+                _construct_at_end( _first_, _last_, count );
+        }
+}
+
+template< typename T, typename Allocator >
+template< typename ForwardIter >
+vector< T, Allocator >::vector ( ForwardIter _first_, ForwardIter _last_, allocator_type const & _alloc_,
+                                 enable_forward_iter_func_t< ForwardIter, value_type > * )
+        : _base( _alloc_ )
+{
+        size_type count = static_cast< size_type >( npl_distance( _first_, _last_ ) );
+
+        if( count > 0 )
+        {
+                _vallocate( count );
+                _construct_at_end( _first_, _last_, count );
+        }
+}
+
+#if 0
 template< typename T, typename Allocator >
 template< typename InputIterator >
 vector< T, Allocator >::vector ( InputIterator _first_,
@@ -1229,6 +1121,8 @@ vector< T, Allocator >::vector ( ForwardIterator _first_, ForwardIterator _last_
                 _construct_at_end( _first_, _last_, count );
         }
 }
+
+#endif
 
 /*
 template< typename T, typename Allocator >
@@ -1441,28 +1335,9 @@ vector< T, Allocator >::operator= ( vector const & _other_ )
 }
 
 template< typename T, typename Allocator >
-template< typename InputIterator >
-enable_if_t
-<
-        ((
-                 is_at_least_input_iterator_v  < InputIterator > &&
-                !is_at_least_forward_iterator_v< InputIterator >
-        )
-#ifdef NPL_HAS_STL
-        || (
-                 is_at_least_std_input_iterator_v  < InputIterator > &&
-                !is_at_least_std_forward_iterator_v< InputIterator >
-        )
-#endif
-        ) &&
-          is_constructible_v
-          <
-                T,
-                typename iterator_traits< InputIterator >::reference
-          >,
-          void
->
-vector< T, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
+template< typename InputIter >
+enable_input_iter_func_if_constructible_t< InputIter, T >
+vector< T, Allocator >::assign ( InputIter _first_, InputIter _last_ )
 {
         clear();
         for( ; _first_ != _last_; ++_first_ )
@@ -1472,30 +1347,15 @@ vector< T, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
 }
 
 template< typename T, typename Allocator >
-template< typename ForwardIterator >
-enable_if_t
-<
-        (
-         is_at_least_forward_iterator_v    < ForwardIterator >
-#ifdef NPL_HAS_STL
-         ||
-         is_at_least_std_forward_iterator_v< ForwardIterator >
-#endif
-        ) &&
-         is_constructible_v
-         <
-                T,
-                typename iterator_traits< ForwardIterator >::reference
-         >,
-         void
->
-vector< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_ )
+template< typename ForwardIter >
+enable_forward_iter_func_if_constructible_t< ForwardIter, T >
+vector< T, Allocator >::assign ( ForwardIter _first_, ForwardIter _last_ )
 {
         size_type new_size = static_cast< size_type >( npl::distance( _first_, _last_ ) );
 
         if( new_size <= capacity() )
         {
-                ForwardIterator mid = _last_;
+                ForwardIter mid = _last_;
                 bool growing = false;
 
                 if( new_size > size() )
@@ -1525,79 +1385,6 @@ vector< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_
         _invalidate_all_iterators();
 
 }
-
-/*
-template< typename T, typename Allocator >
-template< typename InputIterator >
-enable_if_t
-<
-          is_at_least_std_input_iterator_v  < InputIterator > &&
-         !is_at_least_std_forward_iterator_v< InputIterator > &&
-          is_constructible_v
-          <
-                T,
-                typename std::iterator_traits< InputIterator >::reference
-          >,
-          void
->
-vector< T, Allocator >::assign ( InputIterator _first_, InputIterator _last_ )
-{
-        clear();
-        for( ; _first_ != _last_; ++_first_ )
-        {
-                _emplace_back( *_first_ );
-        }
-}
-
-template< typename T, typename Allocator >
-template< typename ForwardIterator >
-enable_if_t
-<
-         is_at_least_std_forward_iterator_v< ForwardIterator > &&
-         is_constructible_v
-         <
-                T,
-                typename std::iterator_traits< ForwardIterator >::reference
-         >,
-         void
->
-vector< T, Allocator >::assign ( ForwardIterator _first_, ForwardIterator _last_ )
-{
-        size_type new_size = static_cast< size_type >( npl::distance( _first_, _last_ ) );
-
-        if( new_size <= capacity() )
-        {
-                ForwardIterator mid = _last_;
-                bool growing = false;
-
-                if( new_size > size() )
-                {
-                        growing = true;
-                        mid = _first_;
-                        npl::advance( mid, size() );
-                }
-
-                pointer mid_ptr = std::copy( _first_, mid, this->begin_ );
-
-                if( growing )
-                {
-                        _construct_at_end( mid, _last_, new_size - size() );
-                }
-                else
-                {
-                        this->_destruct_at_end( mid_ptr );
-                }
-        }
-        else
-        {
-                _vdeallocate();
-                _vallocate( _recommend( new_size ) );
-                _construct_at_end( _first_, _last_, new_size );
-        }
-        _invalidate_all_iterators();
-
-}
-*/
 
 template< typename T, typename Allocator >
 void vector< T, Allocator >::assign ( size_type const _count_, const_reference _val_ )

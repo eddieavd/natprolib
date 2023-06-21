@@ -190,20 +190,28 @@ struct has_iterator_category_convertible_to< T, U, false > : false_type {} ;
 template< typename T >
 struct is_at_least_input_iterator : has_iterator_category_convertible_to< T, input_iterator_tag > {} ;
 template< typename T >
+using is_at_least_input_iterator_t = typename is_at_least_input_iterator< T >::type ;
+template< typename T >
 inline constexpr bool is_at_least_input_iterator_v = is_at_least_input_iterator< T >::value ;
 
 template< typename T >
 struct is_at_least_forward_iterator : has_iterator_category_convertible_to< T, forward_iterator_tag > {} ;
+template< typename T >
+using is_at_least_forward_iterator_t = typename is_at_least_forward_iterator< T >::type ;
 template< typename T >
 inline constexpr bool is_at_least_forward_iterator_v = is_at_least_forward_iterator< T >::value ;
 
 template< typename T >
 struct is_at_least_bidirectional_iterator : has_iterator_category_convertible_to< T, bidirectional_iterator_tag > {} ;
 template< typename T >
+using is_at_least_bidirectional_iterator_t = typename is_at_least_bidirectional_iterator< T >::type ;
+template< typename T >
 inline constexpr bool is_at_least_bidirectional_iterator_v = is_at_least_bidirectional_iterator< T >::value ;
 
 template< typename T >
 struct is_at_least_random_access_iterator : has_iterator_category_convertible_to< T, random_access_iterator_tag > {} ;
+template< typename T >
+using is_at_least_random_access_iterator_t = typename is_at_least_random_access_iterator< T >::type ;
 template< typename T >
 inline constexpr bool is_at_least_random_access_iterator_v = is_at_least_random_access_iterator< T >::value ;
 
@@ -211,11 +219,14 @@ template< typename T >
 struct is_exactly_random_access_iterator : conjunction_t< is_at_least_random_access_iterator< T >,
                                                             is_convertible< random_access_iterator_tag, typename iterator_traits< T >::iterator_category > > {} ;
 template< typename T >
+using is_exactly_random_access_iterator_t = typename is_exactly_random_access_iterator< T >::type ;
+template< typename T >
 inline constexpr bool is_exactly_random_access_iterator_v = is_exactly_random_access_iterator< T >::value ;
 
 template< typename T >
 struct is_2d_container_iterator : is_container< typename iterator_traits< T >::value_type > {} ;
-
+template< typename T >
+using is_2d_container_iterator_t = typename is_2d_container_iterator< T >::type ;
 template< typename T >
 inline constexpr bool is_2d_container_iterator_v = is_2d_container_iterator< T >::value ;
 
@@ -285,20 +296,28 @@ struct has_std_iterator_category_convertible_to< T, U, false > : false_type {} ;
 template< typename T >
 struct is_at_least_std_input_iterator : has_std_iterator_category_convertible_to< T, std::input_iterator_tag > {} ;
 template< typename T >
+using is_at_least_std_input_iterator_t = typename is_at_least_std_input_iterator< T >::type ;
+template< typename T >
 inline constexpr bool is_at_least_std_input_iterator_v = is_at_least_std_input_iterator< T >::value ;
 
 template< typename T >
 struct is_at_least_std_forward_iterator : has_std_iterator_category_convertible_to< T, std::forward_iterator_tag > {} ;
+template< typename T >
+using is_at_least_std_forward_iterator_t = typename is_at_least_std_forward_iterator< T >::type ;
 template< typename T >
 inline constexpr bool is_at_least_std_forward_iterator_v = is_at_least_std_forward_iterator< T >::value ;
 
 template< typename T >
 struct is_at_least_std_bidirectional_iterator : has_std_iterator_category_convertible_to< T, std::bidirectional_iterator_tag > {} ;
 template< typename T >
+using is_at_least_std_bidirectional_iterator_t = typename is_at_least_std_bidirectional_iterator< T >::type ;
+template< typename T >
 inline constexpr bool is_at_least_std_bidirectional_iterator_v = is_at_least_std_bidirectional_iterator< T >::value ;
 
 template< typename T >
 struct is_at_least_std_random_access_iterator : has_std_iterator_category_convertible_to< T, std::random_access_iterator_tag > {} ;
+template< typename T >
+using is_at_least_std_random_access_iterator_t = typename is_at_least_std_random_access_iterator< T >::type ;
 template< typename T >
 inline constexpr bool is_at_least_std_random_access_iterator_v = is_at_least_std_random_access_iterator< T >::value ;
 
@@ -335,6 +354,149 @@ constexpr void _advance ( RandIter & _iter_, typename iterator_traits< RandIter 
 }
 
 #endif
+
+
+template< typename Iter >
+struct is_at_most_input_iterator : conjunction_t
+                                   <
+                                                is_at_least_input_iterator    < Iter > ,
+                                        is_not< is_at_least_forward_iterator_t< Iter > >
+                                   > {} ;
+
+#ifdef NPL_HAS_STL
+
+template< typename Iter >
+struct is_at_most_std_input_iterator : conjunction_t
+                                       <
+                                                is_at_least_std_input_iterator    < Iter > ,
+                                        is_not< is_at_least_std_forward_iterator_t< Iter > >
+                                       > {} ;
+#endif
+
+template< typename Iter, typename ValueType,
+          typename T = void,
+          bool = conjunction_v
+                 <
+                        disjunction_t
+                        <
+                        conjunction_t
+                        <
+                                 is_at_least_input_iterator        < Iter >,
+                         is_not< is_at_least_forward_iterator_t    < Iter > >
+                        >
+#ifdef NPL_HAS_STL
+                        ,
+                        conjunction_t
+                        <
+                                 is_at_least_std_input_iterator    < Iter >
+                        ,is_not< is_at_least_std_forward_iterator_t< Iter > >
+                        >
+#endif
+                        >,
+                        is_constructible
+                        <
+                                ValueType,
+                                typename iterator_traits< Iter >::reference
+                        >
+                 > >
+struct enable_input_iter_func_if_constructible {} ;
+
+template< typename Iter, typename ValueType, typename T >
+struct enable_input_iter_func_if_constructible< Iter, ValueType, T, true >
+{
+        using type = T ;
+};
+
+template< typename Iter, typename ValueType, typename T = void >
+using enable_input_iter_func_if_constructible_t = typename enable_input_iter_func_if_constructible< Iter, ValueType, T >::type ;
+
+template< typename Iter, typename ValueType,
+          typename T = void,
+          bool = conjunction_v
+                 <
+                        disjunction_t
+                        <
+                        conjunction_t
+                        <
+                                 is_at_least_input_iterator        < Iter >,
+                         is_not< is_at_least_forward_iterator_t    < Iter > >
+                        >
+#ifdef NPL_HAS_STL
+                        ,
+                        conjunction_t
+                        <
+                                 is_at_least_std_input_iterator    < Iter >
+                        ,is_not< is_at_least_std_forward_iterator_t< Iter > >
+                        >
+#endif
+                        >
+                 > >
+struct enable_input_iter_func {} ;
+
+template< typename Iter, typename ValueType, typename T >
+struct enable_input_iter_func< Iter, ValueType, T, true >
+{
+        using type = T ;
+};
+
+template< typename Iter, typename ValueType, typename T = void >
+using enable_input_iter_func_t = typename enable_input_iter_func< Iter, ValueType, T >::type ;
+
+template< typename Iter, typename ValueType,
+          typename T = void,
+          bool = conjunction_v
+                 <
+                        disjunction_t
+                        <
+                         is_at_least_forward_iterator    < Iter >
+#ifdef NPL_HAS_STL
+                        ,is_at_least_std_forward_iterator< Iter >
+#endif
+                        >,
+                        is_constructible
+                        <
+                                ValueType,
+                                typename iterator_traits< Iter >::reference
+                        >
+                 > >
+struct enable_forward_iter_func_if_constructible {} ;
+
+template< typename Iter, typename ValueType, typename T >
+struct enable_forward_iter_func_if_constructible< Iter, ValueType, T, true >
+{
+        using type = T ;
+};
+
+template< typename Iter, typename ValueType, typename T = void >
+using enable_forward_iter_func_if_constructible_t = typename enable_forward_iter_func_if_constructible< Iter, ValueType, T >::type ;
+
+template< typename Iter, typename ValueType,
+          typename T = void,
+          bool = conjunction_v
+                 <
+                        disjunction_t
+                        <
+                         is_at_least_forward_iterator    < Iter >
+#ifdef NPL_HAS_STL
+                        ,is_at_least_std_forward_iterator< Iter >
+#endif
+                        >,
+                        is_constructible
+                        <
+                                ValueType,
+                                typename iterator_traits< Iter >::reference
+                        >
+                 > >
+struct enable_forward_iter_func {} ;
+
+template< typename Iter, typename ValueType, typename T >
+struct enable_forward_iter_func< Iter, ValueType, T, true >
+{
+        using type = T ;
+};
+
+template< typename Iter, typename ValueType, typename T = void >
+using enable_forward_iter_func_t = typename enable_forward_iter_func< Iter, ValueType, T >::type ;
 
 
 } // namespace npl
