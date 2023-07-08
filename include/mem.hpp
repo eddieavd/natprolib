@@ -60,11 +60,12 @@ inline constexpr void * voidify( T & _from_ )
 template< typename T, typename... Args, typename = decltype( ::new( declval< void * >() ) T( declval< Args >()... ) ) >
 constexpr T * construct_at ( T * _location_, Args&&... _args_ )
 {
-        /*
+#if NPL_STD_VER >= 20
+        return std::construct_at( _location_, NPL_FWD( _args_ )... );
+#else
         NPL_CONSTEXPR_ASSERT( _location_ != nullptr, "null pointer passed to construct_at" );
         return ::new ( voidify( *_location_ ) ) T( NPL_FWD( _args_ )... );
-        */
-        return std::construct_at( _location_, NPL_FWD( _args_ )... );
+#endif
 }
 
 template< typename Iter, typename... Args >

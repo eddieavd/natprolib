@@ -139,7 +139,7 @@ template< typename Comp, typename Iter, typename Sent >
 inline constexpr
 Iter _min_element ( Iter _first_, Sent _last_, Comp _comp_ )
 {
-        auto proj = std::identity();
+        auto proj = identity();
         return _min_element< Comp >( NPL_MOVE( _first_ ), NPL_MOVE( _last_ ), _comp_, proj );
 }
 

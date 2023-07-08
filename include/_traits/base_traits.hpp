@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <util.hpp>
+
 #if !__has_builtin(__is_final)                   || \
     !__has_builtin(__is_empty)                   || \
     !__has_builtin(__is_enum)                    || \
@@ -70,6 +72,16 @@ struct type_identity
 
 template< typename T >
 using type_identity_t = typename type_identity< T >::type ;
+
+struct identity
+{
+        template< typename T >
+        NPL_NODISCARD constexpr T && operator() ( T && t ) const noexcept
+        {
+                return NPL_FWD( t );
+        }
+        using is_transparent = void ;
+};
 
 template< typename T, bool >
 struct dependent_type : public T {} ;
@@ -1518,16 +1530,22 @@ inline constexpr bool is_convertible_v = is_convertible< From, To >::value ;
 //      is_nothrow_convertible
 //=====================================================================
 
-template< typename From, typename To >
-struct is_nothrow_convertible : conjunction< is_void< From >, is_void< To > > {} ;
+template< typename To >
+void_t< To() > convert_to ( To ) noexcept ;
+
+template< typename From, typename To, typename = void >
+struct is_nothrow_convertible_impl : false_type {} ;
 
 template< typename From, typename To >
-        requires requires
-        {
-                static_cast< To( * )() >( nullptr );
-                { declval< void( & )( To ) noexcept >()( declval< From >() ) } noexcept;
-        }
-struct is_nothrow_convertible< From, To > : true_type {} ;
+struct is_nothrow_convertible_impl< From, To, enable_if_t< noexcept( convert_to< To >( declval< From >() ) ) > > : true_type {} ;
+
+template< typename From, typename To >
+struct is_nothrow_convertible : conditional_t
+                                <
+                                        is_void_v< From >,
+                                        is_void< To >,
+                                        is_nothrow_convertible_impl< From, To >
+                                > {} ;
 
 template< typename From, typename To >
 inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible< From, To >::value ;
