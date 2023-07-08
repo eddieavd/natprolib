@@ -152,18 +152,22 @@ public:
                         enable_pvec_iter_func_if_constructible_t< PrefixIter, value_type > * = 0 ) ;
 
         template< typename InputIter >
-        prefix_vector ( InputIter _first_, enable_input_iter_func_if_constructible_t< InputIter, value_type, InputIter > _last_ ) requires( !is_prefix_vector_iterator_v< InputIter > ) ;
+        prefix_vector ( InputIter _first_, enable_input_iter_func_if_constructible_t< InputIter, value_type, InputIter > _last_ )
+                                requires( !is_prefix_vector_iterator_v< InputIter > ) ;
 
         template< typename InputIter >
         prefix_vector ( InputIter _first_, InputIter _last_, allocator_type const & _alloc_,
-                        enable_input_iter_func_if_constructible_t< InputIter, value_type > * = 0 ) requires( !is_prefix_vector_iterator_v< InputIter > ) ;
+                        enable_input_iter_func_if_constructible_t< InputIter, value_type > * = 0 )
+                                requires( !is_prefix_vector_iterator_v< InputIter > ) ;
 
         template< typename ForwardIter >
-        prefix_vector ( ForwardIter _first_, enable_forward_iter_func_if_constructible_t< ForwardIter, value_type, ForwardIter > _last_ ) requires( !is_prefix_vector_iterator_v< ForwardIter > ) ;
+        prefix_vector ( ForwardIter _first_, enable_forward_iter_func_if_constructible_t< ForwardIter, value_type, ForwardIter > _last_ )
+                                requires( !is_prefix_vector_iterator_v< ForwardIter > ) ;
 
         template< typename ForwardIter >
         prefix_vector ( ForwardIter _first_, ForwardIter _last_, allocator_type const & _alloc_,
-                        enable_forward_iter_func_if_constructible_t< ForwardIter, value_type > * = 0 ) requires( !is_prefix_vector_iterator_v< ForwardIter > ) ;
+                        enable_forward_iter_func_if_constructible_t< ForwardIter, value_type > * = 0 )
+                                requires( !is_prefix_vector_iterator_v< ForwardIter > ) ;
 
         ~prefix_vector ()
         {
@@ -894,7 +898,8 @@ prefix_vector< T, Allocator >::_construct_at_end ( PrefixIterator _first_, Prefi
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
 enable_forward_iter_func_t< ForwardIterator, T >
-prefix_vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ ) requires( !is_prefix_vector_iterator_v< ForwardIterator > )
+prefix_vector< T, Allocator >::_construct_at_end ( ForwardIterator _first_, ForwardIterator _last_, size_type const _count_ )
+        requires( !is_prefix_vector_iterator_v< ForwardIterator > )
 {
         _construct_transaction tx( *this, _count_ );
 
@@ -1063,7 +1068,8 @@ prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_, enable_inp
 template< typename T, typename Allocator >
 template< typename InputIterator >
 prefix_vector< T, Allocator >::prefix_vector ( InputIterator _first_, InputIterator _last_, allocator_type const & _alloc_,
-                                                enable_input_iter_func_if_constructible_t< InputIterator, T > * ) requires( !is_prefix_vector_iterator_v< InputIterator > )
+                                                enable_input_iter_func_if_constructible_t< InputIterator, T > * )
+        requires( !is_prefix_vector_iterator_v< InputIterator > )
                 : _base( _alloc_ )
 {
         for( ; _first_ != _last_; ++_first_ )
@@ -1094,7 +1100,8 @@ prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_, enable_f
 template< typename T, typename Allocator >
 template< typename ForwardIterator >
 prefix_vector< T, Allocator >::prefix_vector ( ForwardIterator _first_, ForwardIterator _last_, allocator_type const & _alloc_,
-                                                enable_forward_iter_func_if_constructible_t< ForwardIterator, T > * ) requires( !is_prefix_vector_iterator_v< ForwardIterator > )
+                                                enable_forward_iter_func_if_constructible_t< ForwardIterator, T > * )
+        requires( !is_prefix_vector_iterator_v< ForwardIterator > )
         : _base( _alloc_ )
 {
         size_type count = static_cast< size_type >( npl::distance( _first_, _last_ ) );
