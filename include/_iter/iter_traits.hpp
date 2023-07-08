@@ -364,15 +364,15 @@ template< typename Iter, typename ValueType,
                         <
                         conjunction_t
                         <
-                                 is_at_least_input_iterator        < Iter >,
+                                 is_at_least_input_iterator        < Iter > ,
                          is_not< is_at_least_forward_iterator_t    < Iter > >
                         >
 #ifdef NPL_HAS_STL
                         ,
                         conjunction_t
                         <
-                                 is_at_least_std_input_iterator    < Iter >
-                        ,is_not< is_at_least_std_forward_iterator_t< Iter > >
+                                 is_at_least_std_input_iterator    < Iter > ,
+                         is_not< is_at_least_std_forward_iterator_t< Iter > >
                         >
 #endif
                         >,
@@ -399,15 +399,15 @@ template< typename Iter, typename ValueType,
                  <
                         conjunction_t
                         <
-                                 is_at_least_input_iterator        < Iter >,
+                                 is_at_least_input_iterator        < Iter > ,
                          is_not< is_at_least_forward_iterator_t    < Iter > >
                         >
 #ifdef NPL_HAS_STL
                         ,
                         conjunction_t
                         <
-                                 is_at_least_std_input_iterator    < Iter >
-                        ,is_not< is_at_least_std_forward_iterator_t< Iter > >
+                                 is_at_least_std_input_iterator    < Iter > ,
+                         is_not< is_at_least_std_forward_iterator_t< Iter > >
                         >
 #endif
                  > >
@@ -428,9 +428,9 @@ template< typename Iter, typename ValueType,
                  <
                         disjunction_t
                         <
-                         is_at_least_forward_iterator    < Iter >
+                          is_at_least_forward_iterator    < Iter >
 #ifdef NPL_HAS_STL
-                        ,is_at_least_std_forward_iterator< Iter >
+                        , is_at_least_std_forward_iterator< Iter >
 #endif
                         >,
                         is_constructible
@@ -454,9 +454,9 @@ template< typename Iter, typename ValueType,
           typename T = void,
           bool = disjunction_v
                  <
-                         is_at_least_forward_iterator    < Iter >
+                          is_at_least_forward_iterator    < Iter >
 #ifdef NPL_HAS_STL
-                        ,is_at_least_std_forward_iterator< Iter >
+                        , is_at_least_std_forward_iterator< Iter >
 #endif
                   > >
 struct enable_forward_iter_func {} ;
