@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <util.hpp>
+
 #if !__has_builtin(__is_final)                   || \
     !__has_builtin(__is_empty)                   || \
     !__has_builtin(__is_enum)                    || \
@@ -74,10 +76,11 @@ using type_identity_t = typename type_identity< T >::type ;
 struct identity
 {
         template< typename T >
-        constexpr T && operator() ( T && t ) const noexcept
+        NPL_NODISCARD constexpr T && operator() ( T && t ) const noexcept
         {
                 return NPL_FWD( t );
         }
+        using is_transparent = void ;
 };
 
 template< typename T, bool >
