@@ -356,23 +356,6 @@ constexpr void _advance ( RandIter & _iter_, typename iterator_traits< RandIter 
 #endif
 
 
-template< typename Iter >
-struct is_at_most_input_iterator : conjunction_t
-                                   <
-                                                is_at_least_input_iterator    < Iter > ,
-                                        is_not< is_at_least_forward_iterator_t< Iter > >
-                                   > {} ;
-
-#ifdef NPL_HAS_STL
-
-template< typename Iter >
-struct is_at_most_std_input_iterator : conjunction_t
-                                       <
-                                                is_at_least_std_input_iterator    < Iter > ,
-                                        is_not< is_at_least_std_forward_iterator_t< Iter > >
-                                       > {} ;
-#endif
-
 template< typename Iter, typename ValueType,
           typename T = void,
           bool = conjunction_v
