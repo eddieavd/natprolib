@@ -1,6 +1,7 @@
 add_executable(
         gbench_nplib
-        gbench_nplib.cpp
+#       gbench_nplib.cpp
+        gbench_new_vec.cpp
 )
 
 find_package( benchmark REQUIRED )

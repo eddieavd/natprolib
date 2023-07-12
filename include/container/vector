@@ -13,6 +13,7 @@
 #include <_traits/base_traits.hpp>
 #include <_traits/npl_traits.hpp>
 #include <_alloc/alloc_traits.hpp>
+#include <_alloc/static_allocator.hpp>
 #include <_iter/iter_traits.hpp>
 #include <_iter/std_iter.hpp>
 #include <_iter/move_iterator.hpp>
@@ -212,8 +213,8 @@ public:
         using       reverse_iterator = reverse_iter<         iterator > ;
         using const_reverse_iterator = reverse_iter<   const_iterator > ;
 
-        static_assert( ( is_same_v< typename allocator_type::value_type, value_type > ),
-                        "allocator_type::value_type != vector::value_type" );
+//        static_assert( ( is_same_v< typename allocator_type::value_type, value_type > ),
+//                        "allocator_type::value_type != vector::value_type" );
 
         vector () noexcept( is_nothrow_default_constructible_v< allocator_type > ) {}
 

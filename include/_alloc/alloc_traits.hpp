@@ -9,9 +9,22 @@
 #include <util.hpp>
 #include <_traits/base_traits.hpp>
 
+#include <memory>
+
 
 namespace npl
 {
+
+
+namespace alloc
+{
+
+
+template< typename T = void >
+struct block_t ;
+
+
+} //namespace alloc
 
 
 template< typename Alloc >
@@ -20,8 +33,11 @@ struct allocator_traits ;
 template< typename T >
 class allocator ;
 
+template< typename T, size_t MemSize = 1024 * 1024 >
+class static_allocator ;
+
 template< typename T >
-using default_allocator_t = allocator< T > ;
+using default_allocator_t = static_allocator< T > ;
 
 
 #define NPL_ALLOCATOR_TRAITS_HAS(NAME, PROPERTY)                                                              \
@@ -96,16 +112,42 @@ struct _const_void_pointer< Ptr, Alloc, false >
 };
 
 //=====================================================================
+//      _difference_type
+//=====================================================================
+
+NPL_ALLOCATOR_TRAITS_HAS( _has_difference_type, difference_type );
+template< typename Alloc, typename DiffType, bool = _has_difference_type< Alloc >::value >
+struct _difference_type : std::make_unsigned< DiffType > {} ;
+template< typename Alloc, typename DiffType >
+struct _difference_type< Alloc, DiffType, true >
+{
+        using type = typename Alloc::difference_type ;
+};
+
+//=====================================================================
 //      _size_type
 //=====================================================================
 
 NPL_ALLOCATOR_TRAITS_HAS( _has_size_type, size_type );
-template< typename Alloc, typename DiffType, bool = _has_size_type< Alloc >::value >
-struct _size_type : std::make_unsigned< DiffType > {} ;
-template< typename Alloc, typename DiffType >
-struct _size_type< Alloc, DiffType, true >
+template< typename Alloc, typename SizeType, bool = _has_size_type< Alloc >::value >
+struct _size_type : std::make_unsigned< SizeType > {} ;
+template< typename Alloc, typename SizeType >
+struct _size_type< Alloc, SizeType, true >
 {
         using type = typename Alloc::size_type ;
+};
+
+//=====================================================================
+//      _block_type
+//=====================================================================
+
+NPL_ALLOCATOR_TRAITS_HAS( _has_block_type, block_type );
+template< typename Alloc, typename BlockType, bool = _has_block_type< Alloc >::value >
+struct _block_type : type_identity< BlockType > {} ;
+template< typename Alloc, typename BlockType >
+struct _block_type< Alloc, BlockType, true >
+{
+        using type = typename Alloc::block_type ;
 };
 
 //=====================================================================
@@ -277,8 +319,9 @@ struct allocator_traits
         using       void_pointer = typename       _void_pointer<             pointer, allocator_type >::type ;
         using const_void_pointer = typename _const_void_pointer<             pointer, allocator_type >::type ;
 
-        using difference_type = typename _alloc_traits_difference_type< allocator_type,         pointer >::type ;
-        using       size_type = typename                    _size_type< allocator_type, difference_type >::type ;
+        using difference_type = typename _alloc_traits_difference_type< allocator_type,                    pointer   >::type ;
+        using       size_type = typename                    _size_type< allocator_type,            difference_type   >::type ;
+        using      block_type = typename                   _block_type< allocator_type, alloc::block_t< value_type > >::type ;
 
         using is_always_equal                        = typename _is_always_equal                       < allocator_type >::type ;
         using propagate_on_container_swap            = typename _propagate_on_container_swap           < allocator_type >::type ;
@@ -293,7 +336,7 @@ struct allocator_traits
         NPL_NODISCARD inline constexpr static
         pointer allocate ( allocator_type & _a_, size_type _n_ )
         {
-                return _a_.allocate( _n_ );
+                return _a_.allocate( _n_ ).ptr_;
         }
 
         template< typename A = Alloc,
@@ -308,13 +351,19 @@ struct allocator_traits
         NPL_NODISCARD inline constexpr static
         pointer allocate ( allocator_type & _a_, size_type _n_, const_void_pointer )
         {
-                return _a_.allocate( _n_ );
+                return _a_.allocate( _n_ ).ptr_;
+        }
+
+        inline constexpr static
+        void deallocate ( allocator_type & _a_, block_type const & _b_ ) noexcept
+        {
+                _a_.deallocate( _b_ );
         }
 
         inline constexpr static
         void deallocate ( allocator_type & _a_, pointer _ptr_, size_type _n_ ) noexcept
         {
-                _a_.deallocate( _ptr_, _n_ );
+                _a_.deallocate( { _ptr_, _n_ } );
         }
 
         template< typename T, typename... Args,
@@ -440,13 +489,13 @@ inline constexpr bool is_cpp17_move_insertable_v = is_cpp17_move_insertable< All
 //      noexcept_move_assign_container
 //=====================================================================
 
-template< typename Alloc, typename Traits = std::allocator_traits< Alloc > >
+template< typename Alloc, typename Traits = allocator_traits< Alloc > >
 struct noexcept_move_assign_container : bool_constant
                                         <
                                                 Traits::propagate_on_container_move_assignment::value ||
                                                 Traits::is_always_equal::value
                                         > {} ;
-template< typename Alloc, typename Traits = std::allocator_traits< Alloc > >
+template< typename Alloc, typename Traits = allocator_traits< Alloc > >
 inline constexpr bool noexcept_move_assign_container_v = noexcept_move_assign_container< Alloc, Traits >::value ;
 
 

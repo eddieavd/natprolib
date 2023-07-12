@@ -115,8 +115,8 @@ public:
 
         constexpr static_vector () noexcept = default;
 
-        constexpr static_vector ( size_type const _count_                        ) noexcept( noexcept( value_type{       } ) );
-        constexpr static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) );
+        constexpr static_vector ( size_type _count_                        ) noexcept( noexcept( value_type{       } ) );
+        constexpr static_vector ( size_type _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) );
 
         constexpr static_vector ( static_vector const &  _other_ ) noexcept( is_nothrow_copy_constructible_v< value_type > );
         constexpr static_vector ( static_vector       && _other_ ) noexcept( is_nothrow_move_constructible_v< value_type > );
@@ -222,6 +222,12 @@ public:
         constexpr iterator insert ( const_iterator _position_, value_type       && _val_ ) noexcept( is_nothrow_move_assignable_v   < value_type > &&
                                                                                                      is_nothrow_move_constructible_v< value_type > );
 
+        constexpr void erase ( iterator _position_ ) noexcept( is_nothrow_destructible_v   < value_type > &&
+                                                                     is_nothrow_move_assignable_v< value_type > );
+
+        constexpr void erase ( value_type _value_ ) noexcept( is_nothrow_destructible_v   < value_type > &&
+                                                                     is_nothrow_move_assignable_v< value_type > );
+
         constexpr void assign ( size_type const _count_, value_type const & _val_ ) noexcept( noexcept( value_type( _val_ ) ) && noexcept( declval< value_type >() = _val_ ) );
 
         constexpr void resize ( size_type const _count_ ) noexcept( is_nothrow_default_constructible_v< value_type > );
@@ -240,12 +246,12 @@ public:
 
         template< typename... Args >
         constexpr reference emplace_back ( Args&&... _args_ ) noexcept( noexcept( value_type{ NPL_FWD( _args_ )... } ) );
-protected:
-        _base     data_;
-        size_type size_{ 0 };
 
         NPL_NODISCARD constexpr bool full () const noexcept
         { return size() == capacity(); }
+protected:
+        _base     data_;
+        size_type size_{ 0 };
 
 /*
         template< typename InputIterator, typename Assigner >
@@ -261,24 +267,24 @@ protected:
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 template< typename T, size_t N >
-constexpr static_vector< T, N >::static_vector ( size_type const _count_ ) noexcept( noexcept( value_type{} ) )
+constexpr static_vector< T, N >::static_vector ( size_type _count_ ) noexcept( noexcept( value_type{} ) )
         : size_( _count_ )
 {
         NPL_CONSTEXPR_ASSERT( size_ <= N, "static_vector::static_vector: count > capacity" );
 
-        for( auto it( begin() ); it != end(); ++it )
+        for( auto it( begin() ); it != end() && _count_ != 0; ++it, --_count_ )
         {
                 mem::construct_at< value_type >( it );
         }
 }
 
 template< typename T, size_t N >
-constexpr static_vector< T, N >::static_vector ( size_type const _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) )
+constexpr static_vector< T, N >::static_vector ( size_type _count_, const_reference _val_ ) noexcept( noexcept( value_type( _val_ ) ) )
         : size_( _count_ )
 {
         NPL_CONSTEXPR_ASSERT( size_ <= N, "static_vector::static_vector: count > capacity" );
 
-        for( auto it( begin() ); it != end(); ++it )
+        for( auto it( begin() ); it != end() && _count_ != 0; ++it, --_count_ )
         {
                 mem::construct_at( it, _val_ );
         }
@@ -426,6 +432,35 @@ static_vector< T, N >::insert ( const_iterator _position_, value_type && _val_ )
         ++size_;
 
         return mut_pos;
+}
+
+template< typename T, size_t N >
+constexpr void
+static_vector< T, N >::erase ( iterator _position_ ) noexcept( is_nothrow_destructible_v   < value_type > &&
+                                                                     is_nothrow_move_assignable_v< value_type >  )
+{
+        using npl::swap;
+
+        value_type & last = back();
+        swap( *_position_, last );
+        resize( size() - 1 );
+}
+
+template< typename T, size_t N >
+constexpr void
+static_vector< T, N >::erase ( value_type _value_ ) noexcept( is_nothrow_destructible_v   < value_type > &&
+                                                              is_nothrow_move_assignable_v< value_type >  )
+{
+        auto iter = begin();
+
+        for( size_type i = 0; i < size(); ++i, ++iter )
+        {
+                if( at( i ) == _value_ )
+                {
+                        erase( iter );
+                        return;
+                }
+        }
 }
 
 template< typename T, size_t N >

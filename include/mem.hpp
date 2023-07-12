@@ -81,7 +81,7 @@ template< typename T >
 inline
 constexpr void destruct_at ( T * _ptr_ )
 {
-        NPL_CONSTEXPR_ASSERT( _ptr_, "mem::destruct_at: nullptr passed to destruct_at" );
+        NPL_ASSERT( _ptr_, "mem::destruct_at: nullptr passed to destruct_at" );
 
         _ptr_->~T();
 }

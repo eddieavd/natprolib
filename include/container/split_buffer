@@ -12,6 +12,8 @@
 #include <util.hpp>
 #include <_traits/npl_traits.hpp>
 #include <_iter/move_iterator.hpp>
+#include <_alloc/_alloc.hpp>
+#include <_alloc/_stack_alloc.hpp>
 #include <mem.hpp>
 
 
@@ -32,18 +34,21 @@ public:
         using   _alloc_traits = allocator_traits< _alloc_rr >           ;
         using       reference = value_type       &                      ;
         using const_reference = value_type const &                      ;
+        using         pointer = value_type       *                      ;
+        using   const_pointer = value_type const *                      ;
         using       size_type = typename _alloc_traits::      size_type ;
         using difference_type = typename _alloc_traits::difference_type ;
-        using         pointer = typename _alloc_traits::        pointer ;
-        using   const_pointer = typename _alloc_traits::  const_pointer ;
         using        iterator =       pointer                           ;
         using  const_iterator = const_pointer                           ;
+
+        using block_type = typename _alloc_rr::block_type ;
 
         pointer        first_  ;
         pointer        begin_  ;
         pointer        end_    ;
         pointer        end_cap_;
         allocator_type alloc_  ;
+        block_type     mem_    ;
 
         using _alloc_ref       = add_lvalue_reference_t< allocator_type > ;
         using _alloc_const_ref = add_lvalue_reference_t< allocator_type > ;
@@ -214,7 +219,7 @@ split_buffer< T, Allocator >::_construct_at_end ( size_type const _count_ )
 
         for( ; tx.position_ != tx.end_; ++tx.position_ )
         {
-                _alloc_traits::construct( this->_alloc(), mem::to_address( tx.position_ ) );
+                mem::construct_at( mem::to_address( tx.position_ ) );
         }
 }
 
@@ -226,7 +231,7 @@ split_buffer< T, Allocator >::_construct_at_end ( size_type const _count_, const
 
         for( ; tx.position_ != tx.end_; ++tx.position_ )
         {
-                _alloc_traits::construct( this->_alloc(), mem::to_address( tx.position_ ), _val_ );
+                mem::construct_at( mem::to_address( tx.position_ ), _val_ );
         }
 }
 
@@ -253,12 +258,11 @@ split_buffer< T, Allocator >::_construct_at_end ( InputIterator _first_, InputIt
 
                         for( pointer p = begin_; p != end_; ++p, ++buf.end_ )
                         {
-                                _alloc_traits::construct( buf._alloc(),
-                                                mem::to_address( buf.end_ ), NPL_MOVE( *p ) );
+                                mem::construct_at( mem::to_address( buf.end_ ), NPL_MOVE( *p ) );
                         }
                         swap( buf );
                 }
-                _alloc_traits::construct( alloc, mem::to_address( this->end_ ), *_first_ );
+                mem::construct_at( mem::to_address( this->end_ ), *_first_ );
                 ++this->end_;
         }
 }
@@ -276,7 +280,7 @@ split_buffer< T, Allocator >::_construct_at_end ( ForwardIterator _first_, Forwa
 
         for( ; tx.position_ != tx.end_; ++tx.position_, ++_first_ )
         {
-                _alloc_traits::construct( this->_alloc(), mem::to_address( tx.position_ ), *_first_ );
+                mem::construct_at( mem::to_address( tx.position_ ), *_first_ );
         }
 }
 
@@ -287,7 +291,7 @@ split_buffer< T, Allocator >::_destruct_at_begin ( pointer _new_begin_, false_ty
 {
         while( begin_ != _new_begin_ )
         {
-                _alloc_traits::destroy( _alloc(), mem::to_address( begin_++ ) );
+                mem::destruct_at< T >( mem::to_address( begin_++ ) );
         }
 }
 
@@ -306,7 +310,7 @@ split_buffer< T, Allocator >::_destruct_at_end ( pointer _new_last_, false_type 
 {
         while( end_ != _new_last_ )
         {
-                _alloc_traits::destroy( _alloc(), mem::to_address( --end_ ) );
+                mem::destruct_at< T >( mem::to_address( --end_ ) );
         }
 }
 
@@ -322,7 +326,15 @@ template< typename T, typename Allocator >
 split_buffer< T, Allocator >::split_buffer ( size_type const _capacity_, size_type const _start_, _alloc_rr & _alloc_ )
         : end_cap_( nullptr ), alloc_( _alloc_ )
 {
-        first_ = _capacity_ != 0 ? _alloc_traits::allocate( _alloc(), _capacity_ ) : nullptr;
+        if( _capacity_ == 0 )
+        {
+                mem_ = { nullptr, 0 };
+        }
+        else
+        {
+                mem_ = alloc_.allocate( _capacity_ );
+        }
+        first_ = mem_.ptr_;
         begin_ = end_ = first_ + _start_;
         end_cap_ = first_ + _capacity_;
 }
@@ -352,7 +364,7 @@ split_buffer< T, Allocator >::~split_buffer ()
         clear();
         if( first_ )
         {
-                _alloc_traits::deallocate( _alloc(), first_, capacity() );
+                alloc_.deallocate( mem_ );
         }
 }
 
@@ -362,13 +374,15 @@ split_buffer< T, Allocator >::split_buffer ( split_buffer && _other_ )
         : first_   ( NPL_MOVE( _other_.first_   ) ),
           begin_   ( NPL_MOVE( _other_.begin_   ) ),
           end_     ( NPL_MOVE( _other_.end_     ) ),
+          mem_     ( NPL_MOVE( _other_.mem_     ) ),
           end_cap_ ( NPL_MOVE( _other_,end_cap_ ) ),
           alloc_   ( NPL_MOVE( _other_.alloc_   ) )
 {
-        _other_.first_   = nullptr;
-        _other_.begin_   = nullptr;
-        _other_.end_     = nullptr;
-        _other_.end_cap_ = nullptr;
+        _other_.first_   =   nullptr;
+        _other_.begin_   =   nullptr;
+        _other_.end_     =   nullptr;
+        _other_.end_cap_ =   nullptr;
+        _other_.mem_     = { nullptr, 0 };
 }
 
 template< typename T, typename Allocator >
@@ -380,18 +394,21 @@ split_buffer< T, Allocator >::split_buffer ( split_buffer && _other_, _alloc_rr 
                 first_   = _other_.first_  ;
                 begin_   = _other_.begin_  ;
                 end_     = _other_.end_    ;
+                mem_     = _other_.mem_    ;
                 end_cap_ = _other_.end_cap_;
 
-                _other_.first_   = nullptr;
-                _other_.begin_   = nullptr;
-                _other_.end_     = nullptr;
-                _other_.end_cap_ = nullptr;
+                _other_.first_   =   nullptr;
+                _other_.begin_   =   nullptr;
+                _other_.end_     =   nullptr;
+                _other_.end_cap_ =   nullptr;
+                _other_.mem_     = { nullptr, 0 };
         }
         else
         {
                 size_type cap = _other_.size();
 
-                first_ = _alloc_traits::allocate( _alloc(), cap );
+                mem_   = alloc_.allocate( cap );
+                first_ = mem_.ptr_;
                 begin_ = end_ = first_;
                 end_cap_ = first_ + cap;
 
@@ -413,10 +430,12 @@ split_buffer< T, Allocator >::operator= ( split_buffer && _other_ )
         first_   = _other_.first_  ;
         begin_   = _other_.begin_  ;
         end_     = _other_.end_    ;
+        mem_     = _other_.mem_    ;
         end_cap_ = _other_.end_cap_;
 
         _move_assign_alloc( _other_, bool_constant< _alloc_traits::propagate_on_container_move_assignment::value >() );
 
+        _other_.mem_ = { nullptr, 0 };
         _other_.first_ = _other_.begin_ = _other_.end_ = _other_.end_cap_ = nullptr;
         return *this;
 }
@@ -430,6 +449,7 @@ split_buffer< T, Allocator >::swap ( split_buffer & _other_ )
         npl::swap( first_  , _other_.first_   );
         npl::swap( begin_  , _other_.begin_   );
         npl::swap( end_    , _other_.end_     );
+        npl::swap( mem_    , _other_.mem_     );
         npl::swap( end_cap_, _other_.end_cap_ );
 
         mem::_swap_allocator( _alloc(), _other_.alloc() );
@@ -449,6 +469,7 @@ split_buffer< T, Allocator >::reserve ( size_type const _count_ )
                 npl::swap( first_  , tmp.first_   );
                 npl::swap( begin_  , tmp.begin_   );
                 npl::swap( end_    , tmp.end_     );
+                npl::swap( mem_    , tmp.mem_     );
                 npl::swap( end_cap_, tmp.end_cap_ );
         }
 }
@@ -468,6 +489,7 @@ split_buffer< T, Allocator >::shrink_to_fit () noexcept
                 npl::swap( first_  , tmp.first_   );
                 npl::swap( begin_  , tmp.begin_   );
                 npl::swap( end_    , tmp.end_     );
+                npl::swap( mem_    , tmp.mem_     );
                 npl::swap( end_cap_, tmp.end_cap_ );
         }
 }
@@ -498,10 +520,11 @@ split_buffer< T, Allocator >::push_front ( const_reference _val_ )
                         npl::swap( first_  , tmp.first_   );
                         npl::swap( begin_  , tmp.begin_   );
                         npl::swap( end_    , tmp.end_     );
+                        npl::swap( mem_    , tmp.mem_     );
                         npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
-        _alloc_traits::construct( _alloc(), mem::to_address( begin_ - 1 ), _val_ );
+        mem::construct_at( mem::to_address( begin_ - 1 ), _val_ );
         --begin_;
 }
 
@@ -531,10 +554,11 @@ split_buffer< T, Allocator >::push_front ( value_type && _val_ )
                         npl::swap( first_  , tmp.first_   );
                         npl::swap( begin_  , tmp.begin_   );
                         npl::swap( end_    , tmp.end_     );
+                        npl::swap( mem_    , tmp.mem_     );
                         npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
-        _alloc_traits::construct( _alloc(), mem::to_address( begin_ - 1 ), NPL_MOVE( _val_ ) );
+        mem::construct_at( mem::to_address( begin_ - 1 ), NPL_MOVE( _val_ ) );
         --begin_;
 }
 
@@ -565,10 +589,11 @@ split_buffer< T, Allocator >::push_back ( const_reference _val_ )
                         npl::swap( first_  , tmp.first_   );
                         npl::swap( begin_  , tmp.begin_   );
                         npl::swap( end_    , tmp.end_     );
+                        npl::swap( mem_    , tmp.mem_     );
                         npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
-        _alloc_traits::construct( _alloc(), mem::to_address( end_ ), _val_ );
+        mem::construct_at( mem::to_address( end_ ), _val_ );
         ++end_;
 }
 
@@ -599,10 +624,11 @@ split_buffer< T, Allocator >::push_back ( value_type && _val_ )
                         npl::swap( first_  , tmp.first_   );
                         npl::swap( begin_  , tmp.begin_   );
                         npl::swap( end_    , tmp.end_     );
+                        npl::swap( mem_    , tmp.mem_     );
                         npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
-        _alloc_traits::construct( _alloc(), mem::to_address( end_ ), NPL_MOVE( _val_ ) );
+        mem::construct_at( mem::to_address( end_ ), NPL_MOVE( _val_ ) );
         ++end_;
 }
 
@@ -633,10 +659,11 @@ split_buffer< T, Allocator >::emplace_back ( Args&&... _args_ )
                         npl::swap( first_  , tmp.first_   );
                         npl::swap( begin_  , tmp.begin_   );
                         npl::swap( end_    , tmp.end_     );
+                        npl::swap( mem_    , tmp.mem_     );
                         npl::swap( end_cap_, tmp.end_cap_ );
                 }
         }
-        _alloc_traits::construct( _alloc(), mem::to_address( end_ ), NPL_FWD( _args_ )... );
+        mem::construct_at( mem::to_address( end_ ), NPL_FWD( _args_ )... );
         ++end_;
 }
 
