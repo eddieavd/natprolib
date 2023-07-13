@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <iostream>
-
 #include <_alloc/_alloc.hpp>
 
 
@@ -26,8 +24,6 @@ namespace alloc
 template< size_t MemSize = 1024 * 1024 >
 class stack_allocator
 {
-        char   mem_[ MemSize ] ;
-        char * ptr_{ mem_    } ;
 public:
         using         value_type = void         ;
         using            pointer = void       * ;
@@ -60,7 +56,7 @@ public:
         }
         NPL_NODISCARD constexpr block_type allocate_all () noexcept
         {
-                if( ptr_ == mem_ + MemSize ) return { nullptr, 0 };
+                if( ptr_ >= mem_ + MemSize ) return { nullptr, 0 };
 
                 block_type block { ptr_, mem_ + MemSize - ptr_ };
                 ptr_ = mem_ + MemSize;
@@ -99,13 +95,15 @@ public:
                 }
         }
         constexpr void deallocate_all () noexcept { ptr_ = mem_; }
+private:
+        char   mem_[ MemSize ] ;
+        char * ptr_{ mem_    } ;
 };
 
 
 template< typename T, size_t MemSize = 1024 * 1024 / sizeof( T ) >
 class typed_stack_allocator
 {
-        stack_allocator< MemSize * sizeof( T ) > alloc_ ;
 public:
         static constexpr size_t value_type_size { sizeof( T ) } ;
 
@@ -169,6 +167,8 @@ public:
                 alloc_.deallocate( { _block_.ptr_, _block_.len_ * value_type_size } );
         }
         constexpr void deallocate_all () noexcept { alloc_.deallocate_all; }
+private:
+        stack_allocator< MemSize * sizeof( T ) > alloc_ ;
 };
 
 

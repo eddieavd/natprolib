@@ -38,7 +38,7 @@ struct block_t
 class mallocator
 {
 public:
-        using         value_type = void ;
+        using         value_type = void         ;
         using            pointer = void       * ;
         using      const_pointer = void const * ;
         using       void_pointer = void       * ;
@@ -124,12 +124,12 @@ public:
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return alloc_. free_mem(); }
         NPL_NODISCARD constexpr size_type  max_size () const noexcept { return alloc_. max_size(); }
 
-        NPL_NODISCARD constexpr bool owns ( block_type const & ) const noexcept
-        { return true; }
+        NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
+        { return alloc_.owns( _block_ ); }
 
         NPL_NODISCARD constexpr block_type allocate ( size_type const _count_ ) noexcept
         {
-                block_type allocation { static_cast< value_type * >( alloc_.allocate( _count_ * value_type_size ).ptr_ ),_count_ };
+                block_type allocation { static_cast< value_type * >( alloc_.allocate( _count_ * value_type_size ).ptr_ ), _count_ };
 
                 return allocation.ptr_ ? block_type{ allocation.ptr_, _count_ }
                                        : block_type{         nullptr,       0 };

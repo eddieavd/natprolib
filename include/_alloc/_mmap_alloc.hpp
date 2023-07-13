@@ -1,10 +1,14 @@
 //
 //
 //      natprolib
-//      _frag_alloc.hpp
+//      _mmap_alloc.hpp
 //
 
 #pragma once
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
 
 #include <_alloc/_alloc.hpp>
 
@@ -23,39 +27,52 @@ namespace alloc
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 
-template< size_t MemSize = 1024 * 1024 >
-class frag_allocator
+template< typename T = void >
+struct page_t
+{
+        size_t len_ {       0 } ;
+        T *    mem_ { nullptr } ;
+};
+
+
+class mmap_allocator
 {
 public:
-        using         value_type = void         ;
-        using            pointer = void       * ;
-        using      const_pointer = void const * ;
-        using       void_pointer = void       * ;
-        using const_void_pointer = void const * ;
+        using         value_type = void               ;
+        using            pointer = value_type       * ;
+        using      const_pointer = value_type const * ;
+        using       void_pointer = void             * ;
+        using const_void_pointer = void       const * ;
 
         using difference_type = npl::       ptrdiff_t ;
         using       size_type = npl::          size_t ;
         using      block_type = block_t< value_type > ;
+        using       page_type =  page_t< value_type > ;
 
-        constexpr frag_allocator () noexcept : free_list_( 1, { mem_, MemSize } ) {}
+        static constexpr size_type default_page_size { 1024 * 1024 } ;
 
-        constexpr frag_allocator ( frag_allocator const &  ) = delete ;
-        constexpr frag_allocator ( frag_allocator       && ) = delete ;
+        constexpr mmap_allocator (                            ) : page_( _allocate_page( default_page_size ) )
+                                                                , free_list_( 1, { page_.mem_, page_.len_ } ) {}
+        constexpr mmap_allocator ( size_type const _mem_size_ ) : page_( _allocate_page(        _mem_size_ ) )
+                                                                , free_list_( 1, { page_.mem_, page_.len_ } ) {}
 
-        constexpr frag_allocator & operator= ( frag_allocator const &  ) = delete ;
-        constexpr frag_allocator & operator= ( frag_allocator       && ) = delete ;
+        constexpr ~mmap_allocator () noexcept
+        {
+                if( page_.mem_ ) _deallocate_page( page_ );
+        }
 
-        constexpr ~frag_allocator () noexcept {}
+        NPL_NODISCARD constexpr size_type max_size () const noexcept
+        {
+                return std::numeric_limits< size_type >::max();
+        }
 
-        NPL_NODISCARD constexpr size_type total_mem () const noexcept { return          MemSize; }
-        NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return _calc_free_mem(); }
-
-        NPL_NODISCARD constexpr size_type max_size () const noexcept { return total_mem(); }
+        NPL_NODISCARD constexpr size_type total_mem () const noexcept { return max_size(); }
+        NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return max_size(); }
 
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         {
-                return  ( _block_.ptr_ >= mem_           ) &&
-                        ( _block_.ptr_ <  mem_ + MemSize )  ;
+                return  ( _block_.ptr_ >=                        page_.mem_                ) &&
+                        ( _block_.ptr_ <  static_cast< char * >( page_.mem_ ) + page_.len_ )  ;
         }
 
         NPL_NODISCARD constexpr block_type allocate ( size_type const _size_ ) noexcept
@@ -74,75 +91,36 @@ public:
                 best.len_ = _size_;
                 return best;
         }
-        NPL_NODISCARD constexpr block_type new_allocate ( size_type const _size_ ) noexcept
-        {
-                size_type best_pos = _find_best_block( _size_ );
-                block_type & best = free_list_.at( best_pos );
-                block_type allocation{ best.ptr_, _size_ };
-
-                if( best.len_ == _size_ )
-                {
-                        free_list_.erase( best );
-                }
-                else
-                {
-                        size_type diff = best.len_ - _size_;
-                        best.ptr_ = static_cast< char * >( best.ptr_ ) + diff;
-                        best.len_ -= diff;
-                }
-                return allocation;
-        }
         NPL_NODISCARD constexpr block_type allocate_all () noexcept
         {
-                NPL_CONSTEXPR_ASSERT( false, "alloc::frag_allocator::allocate_all: unsupported operation" );
+                NPL_CONSTEXPR_ASSERT( false, "alloc::mmap_allocator::allocate_all: unimplemented" );
                 return { nullptr, 0 };
         }
 
-        NPL_NODISCARD constexpr block_type reallocate ( block_type const & _block_, size_type _new_size_ ) noexcept
+        NPL_NODISCARD constexpr block_type reallocate ( block_type const & _block_, size_type const _new_size_ ) noexcept
         {
-                size_type extend_pos = _find_extension( _block_, _new_size_ );
-
-                if( extend_pos < free_list_.size() )
-                {
-                        block_type & extension = free_list_.at( extend_pos );
-                        block_type reallocation { _block_.ptr_, _new_size_ };
-
-                        if( extension.len_ + _block_.len_ == _new_size_ )
-                        {
-                                free_list_.erase( extension );
-                        }
-                        else
-                        {
-                                size_type diff = _block_.len_ + extension.len_ - _new_size_;
-                                extension.ptr_ = static_cast< char * >( extension.ptr_ ) + diff;
-                                extension.len_ -= diff;
-                        }
-                        return reallocation;
-                }
-                else
-                {
-                        block_type reallocation = allocate( _new_size_ );
-                        memcpy( reallocation.ptr_, _block_.ptr_, _block_.len_ );
-                        free_list_.push_back( _block_ );
-                        _merge_surrounding( free_list_.size() - 1 );
-                        return reallocation;
-                }
+                ( void )    _block_ ;
+                ( void ) _new_size_ ;
+                return      _block_ ;
         }
 
-        NPL_NODISCARD constexpr block_type aligned_allocate ( size_type const, unsigned ) noexcept
+        NPL_NODISCARD constexpr block_type aligned_allocate ( size_type const _size_, unsigned const _align_ ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( false, "alloc::frag_allocator::aligned_allocate: unimplemented" );
+                ( void )  _size_ ;
+                ( void ) _align_ ;
                 return { nullptr, 0 };
         }
-        NPL_NODISCARD constexpr block_type aligned_reallocate ( block_type const &, size_type const, unsigned ) noexcept
+        NPL_NODISCARD constexpr block_type aligned_reallocate ( block_type const & _block_, size_type const _new_size_, unsigned const _align_ ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( false, "alloc::frag_allocator::aligned_reallocate: unimplemented" );
+                ( void )    _block_ ;
+                ( void ) _new_size_ ;
+                ( void )    _align_ ;
                 return { nullptr, 0 };
         }
 
         constexpr void deallocate ( block_type const & _block_ ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::frag_allocator::deallocate: allocator does not own block" );
+                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::mmap_allocator::deallocate: allocator does not own block" );
 
                 free_list_.push_back( _block_ );
 
@@ -151,23 +129,36 @@ public:
         constexpr void deallocate_all () noexcept
         {
                 free_list_.clear();
-                free_list_.push_back( block_type{ mem_, MemSize } );
+                free_list_.push_back( block_type{ page_.mem_, page_.len_ } );
         }
 private:
-        char mem_[ MemSize ] ;
+        page_type page_ ;
 
         static_vector< block_type, 1024 > free_list_ ;
 
-        NPL_NODISCARD constexpr size_type _calc_free_mem () const noexcept
+        NPL_NODISCARD constexpr page_type _allocate_page ( size_type const _page_size_ )
         {
-                return 0;
+                NPL_CONSTEXPR_ASSERT( _page_size_ < max_size(), "alloc::mmap_allocator::_allocate_page: not enough memory" );
+
+                void_pointer ptr = ::mmap( 0, _page_size_, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0 );
+
+                NPL_CONSTEXPR_ASSERT( ptr != MAP_FAILED, "alloc::mmap_allocator::_allocate_page: failed allocating page" );
+
+                return page_type{ _page_size_, ptr };
         }
+        constexpr void _deallocate_page ( page_type const & _page_ ) noexcept
+        {
+                NPL_CONSTEXPR_ASSERT( _page_.mem_ != nullptr, "alloc::mmap_allocator::_deallocate_page: tried deallocating nullptr" );
+
+                NPL_CONSTEXPR_ASSERT( ( ::munmap( _page_.mem_, _page_.len_ ) == 0 ),
+                                        "alloc::mmap_allocator::_deallocate_page: failed deallocating page" );
+        }
+
         NPL_NODISCARD constexpr size_type _find_extension ( block_type const & _block_, size_type const _new_size_ ) const noexcept
         {
                 ( void )    _block_ ;
                 ( void ) _new_size_ ;
-
-                return free_list_.size();
+                return 0 ;
         }
         NPL_NODISCARD constexpr size_type _find_best_block ( size_type const _size_ ) const noexcept
         {
@@ -189,19 +180,19 @@ private:
         NPL_NODISCARD constexpr block_type _merge_blocks ( block_type const & _lhs_, block_type const & _rhs_ ) const noexcept
         {
                 NPL_CONSTEXPR_ASSERT( static_cast< char * >( _lhs_.ptr_ ) + _lhs_.len_ == _rhs_.ptr_,
-                                "alloc::frag_allocator::_merge_blocks: internal error" );
+                                        "alloc::mmap_allocator::_merge_blocks: internal error" );
 
-                return block_type{ _lhs_.ptr_, _lhs_.len_ + _rhs_.len_ } ;
+                return block_type{ _lhs_.ptr_, _lhs_.len_ + _rhs_.len_ };
         }
         constexpr void _merge_surrounding ( size_type _block_pos_ ) noexcept
         {
-                block_type block = free_list_.at( _block_pos_ );
+                block_type block { free_list_.at( _block_pos_ ) };
 
                 for( size_type i = 0; i < free_list_.size(); ++i )
                 {
-                        block_type other = free_list_.at( i );
+                        block_type other { free_list_.at( i ) };
 
-                        if( static_cast< char * >( other.ptr_ ) + other.len_ == block.ptr_ )
+                        if( static_cast< char * >( other.ptr_ ) +other.len_ == block.ptr_ )
                         {
                                 block_type merged = _merge_blocks( other, block );
 
@@ -227,9 +218,8 @@ private:
         }
 };
 
-
-template< typename T, size_t MemSize = 1024 * 1024 / sizeof( T ) >
-class typed_frag_allocator
+template< typename T >
+class typed_mmap_allocator
 {
 public:
         static constexpr size_t value_type_size { sizeof( T ) } ;
@@ -244,14 +234,18 @@ public:
         using       size_type = npl::          size_t ;
         using      block_type = block_t< value_type > ;
 
+        using base_alloc_type = mmap_allocator ;
+
+        constexpr typed_mmap_allocator () : alloc_( base_alloc_type::default_page_size ) {}
+
+        constexpr typed_mmap_allocator ( size_type const _page_size_ ) : alloc_( _page_size_ ) {}
+
         NPL_NODISCARD constexpr size_type total_mem () const noexcept { return alloc_.total_mem(); }
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return alloc_. free_mem(); }
         NPL_NODISCARD constexpr size_type  max_size () const noexcept { return alloc_. max_size(); }
 
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
-        {
-                return alloc_.owns( { _block_.ptr_, _block_.len_ * value_type_size } );
-        }
+        { return alloc_.owns( _block_ ); }
 
         NPL_NODISCARD constexpr block_type allocate ( size_type const _count_ ) noexcept
         {
@@ -261,7 +255,7 @@ public:
         }
         NPL_NODISCARD constexpr block_type allocate_all () noexcept
         {
-                NPL_CONSTEXPR_ASSERT( false, "alloc::typed_frag_allocator::allocate_all: unsupported operation" );
+                NPL_CONSTEXPR_ASSERT( false, "alloc::typed_mmap_allocator::allocate_all: unimplemented" );
                 return { nullptr, 0 };
         }
 
@@ -275,12 +269,12 @@ public:
 
         NPL_NODISCARD constexpr block_type aligned_allocate ( size_type, unsigned ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( false, "alloc::typed_frag_allocator::aligned_allocate: unimplemented" );
+                NPL_CONSTEXPR_ASSERT( false, "alloc::typed_mmap_allocator::aligned_allocate: unimplemented" );
                 return { nullptr, 0 };
         }
         NPL_NODISCARD constexpr block_type aligned_reallocate ( block_type const &, size_type, unsigned ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( false, "alloc::typed_frag_allocator::aligned_reallocate: unimplemented" );
+                NPL_CONSTEXPR_ASSERT( false, "alloc::typed_mmap_allocator::aligned_reallocate: unimplemented" );
                 return { nullptr, 0 };
         }
 
@@ -290,7 +284,7 @@ public:
         }
         constexpr void deallocate_all () noexcept { alloc_.deallocate_all(); }
 private:
-        frag_allocator< MemSize * sizeof( T ) > alloc_ ;
+        mmap_allocator alloc_ ;
 };
 
 

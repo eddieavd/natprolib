@@ -33,8 +33,11 @@ struct allocator_traits ;
 template< typename T >
 class allocator ;
 
-template< typename T, size_t MemSize = 1024 * 1024 >
+template< typename T, size_t MemSize = 1024 * 1024 / sizeof( T ) >
 class static_allocator ;
+
+template< typename T >
+class dynamic_allocator ;
 
 template< typename T >
 using default_allocator_t = static_allocator< T > ;
@@ -288,6 +291,33 @@ struct _has_destroy< Alloc, Ptr, decltype(
                 ) > : true_type {} ;
 
 //=====================================================================
+//      _has_owns
+//=====================================================================
+
+template< typename Alloc, typename = void >
+struct _has_owns : false_type {} ;
+template< typename Alloc >
+struct _has_owns< Alloc, decltype( ( void ) declval< Alloc & >().owns( declval< Alloc::block_type >() ) ) > : true_type {} ;
+
+//=====================================================================
+//      _has_total_mem
+//=====================================================================
+
+template< typename Alloc, typename = void >
+struct _has_total_mem : false_type {} ;
+template< typename Alloc >
+struct _has_total_mem< Alloc, decltype( ( void ) declval< Alloc & >().total_mem() ) > : true_type {} ;
+
+//=====================================================================
+//      _has_free_mem
+//=====================================================================
+
+template< typename Alloc, typename = void >
+struct _has_free_mem : false_type {} ;
+template< typename Alloc >
+struct _has_free_mem< Alloc, decltype( ( void ) declval< Alloc & >().free_mem() ) > : true_type {} ;
+
+//=====================================================================
 //      _has_max_size
 //=====================================================================
 
@@ -312,8 +342,8 @@ struct _has_select_on_container_copy_construction< Alloc, decltype(
 template< typename Alloc >
 struct allocator_traits
 {
-        using     allocator_type = Alloc ;
-        using         value_type = typename allocator_type::value_type ;
+        using     allocator_type = Alloc                                                                     ;
+        using         value_type = typename allocator_type::value_type                                       ;
         using            pointer = typename            _pointer< value_type,          allocator_type >::type ;
         using      const_pointer = typename      _const_pointer< value_type, pointer, allocator_type >::type ;
         using       void_pointer = typename       _void_pointer<             pointer, allocator_type >::type ;
@@ -328,30 +358,32 @@ struct allocator_traits
         using propagate_on_container_copy_assignment = typename _propagate_on_container_copy_assignment< allocator_type >::type ;
         using propagate_on_container_move_assignment = typename _propagate_on_container_move_assignment< allocator_type >::type ;
 
+        static constexpr size_type value_type_size { sizeof( value_type ) } ;
+
         template< typename T >
         using rebind_alloc = _allocator_traits_rebind_t< allocator_type, T > ;
         template< typename T >
         using rebind_traits = allocator_traits< rebind_alloc< T > > ;
 
         NPL_NODISCARD inline constexpr static
-        pointer allocate ( allocator_type & _a_, size_type _n_ )
+        block_type allocate ( allocator_type & _a_, size_type _n_ )
         {
-                return _a_.allocate( _n_ ).ptr_;
+                return _a_.allocate( _n_ );
         }
 
         template< typename A = Alloc,
                   typename = enable_if_t< _has_allocate_hint< A, size_type, const_void_pointer >::value > >
         NPL_NODISCARD inline constexpr static
-        pointer allocate ( allocator_type & _a_, size_type _n_, const_void_pointer _hint_ )
+        block_type allocate ( allocator_type & _a_, size_type _n_, const_void_pointer _hint_ )
         {
                 return _a_.allocate( _n_, _hint_ );
         }
         template< typename A = Alloc, typename = void,
                   typename = enable_if_t< !_has_allocate_hint< A, size_type, const_void_pointer >::value > >
         NPL_NODISCARD inline constexpr static
-        pointer allocate ( allocator_type & _a_, size_type _n_, const_void_pointer )
+        block_type allocate ( allocator_type & _a_, size_type _n_, const_void_pointer )
         {
-                return _a_.allocate( _n_ ).ptr_;
+                return _a_.allocate( _n_ );
         }
 
         inline constexpr static
@@ -394,6 +426,51 @@ struct allocator_traits
         void destroy ( allocator_type &, T * _ptr_ )
         {
                 _ptr_->~T();
+        }
+
+        template< typename A = Alloc,
+                  typename = enable_if_t< _has_owns< A const >::value > >
+        inline constexpr static
+        bool owns ( allocator_type const & _a_, block_type const & _b_ )
+        {
+                return _a_.owns( _b_ );
+        }
+        template< typename A = Alloc, typename = void,
+                  typename = enable_if_t< !_has_owns< A const >::value > >
+        inline constexpr static
+        bool owns ( allocator_type const &, block_type const & )
+        {
+                return true;
+        }
+
+        template< typename A = Alloc,
+                  typename = enable_if_t< _has_total_mem< A const >::value > >
+        inline constexpr static
+        size_type total_mem ( allocator_type const & _a_ ) noexcept
+        {
+                return _a_.total_mem();
+        }
+        template< typename A = Alloc, typename = void,
+                  typename = enable_if_t< !_has_total_mem< A const >::value > >
+        inline constexpr static
+        size_type total_mem ( allocator_type const & ) noexcept
+        {
+                return std::numeric_limits< size_type >::max() / sizeof( value_type );
+        }
+
+        template< typename A = Alloc,
+                  typename = enable_if_t< _has_free_mem< A const >::value > >
+        inline constexpr static
+        size_type free_mem ( allocator_type const & _a_ ) noexcept
+        {
+                return _a_.free_mem();
+        }
+        template< typename A = Alloc, typename = void,
+                  typename = enable_if_t< !_has_free_mem< A const >::value > >
+        inline constexpr static
+        size_type free_mem ( allocator_type const & ) noexcept
+        {
+                return std::numeric_limits< size_type >::max() / sizeof( value_type );
         }
 
         template< typename A = Alloc,

@@ -14,6 +14,7 @@
 #include <_traits/npl_traits.hpp>
 #include <_alloc/alloc_traits.hpp>
 #include <_alloc/static_allocator.hpp>
+#include <_alloc/dynamic_allocator.hpp>
 #include <_iter/iter_traits.hpp>
 #include <_iter/std_iter.hpp>
 #include <_iter/move_iterator.hpp>
@@ -121,6 +122,8 @@ protected:
 private:
         void _copy_assign_alloc ( _vector_base const & _other_, true_type )
         {
+                _alloc() = decltype( _other_._alloc() )();
+                /*
                 if( _alloc() != _other_._alloc() )
                 {
                         clear();
@@ -128,6 +131,7 @@ private:
                         begin_ = end_ = end_cap_ = nullptr;
                 }
                 _alloc() = _other_._alloc();
+                */
         }
         void _copy_assign_alloc ( _vector_base const &, false_type ) {}
 

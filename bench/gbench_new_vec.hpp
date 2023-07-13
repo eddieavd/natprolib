@@ -22,7 +22,7 @@ static void bm_vector_push_back ( benchmark::State & state )
 
         for( auto _ : state )
         {
-                for( int i = 0; i < 100; ++i )
+                for( int i = 0; i < 1000; ++i )
                 {
                         vec.push_back( 1 );
                 }
@@ -43,7 +43,7 @@ static void bm_new_vector_push_back ( benchmark::State & state )
 
         for( auto _ : state )
         {
-                for( int i = 0; i < 100; ++i )
+                for( int i = 0; i < 1000; ++i )
                 {
                         vec.push_back( 1 );
                 }

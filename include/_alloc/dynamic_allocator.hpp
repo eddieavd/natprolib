@@ -1,25 +1,24 @@
 //
 //
 //      natprolib
-//      static_allocator.hpp
+//      dynamic_allocator.hpp
 //
 
 #pragma once
 
 #include <_alloc/_alloc.hpp>
-#include <_alloc/_stack_alloc.hpp>
-#include <_alloc/_frag_alloc.hpp>
+#include <_alloc/_mmap_alloc.hpp>
 
 
 namespace npl
 {
 
 
-template< typename T, size_t MemSize >
-class static_allocator
+template< typename T >
+class dynamic_allocator
 {
 public:
-        using _base_alloc_type = alloc::typed_frag_allocator< T >     ;
+        using _base_alloc_type = alloc::typed_mmap_allocator< T >     ;
         using     alloc_traits = allocator_traits< _base_alloc_type > ;
 
         using      value_type = typename alloc_traits::     value_type ;
