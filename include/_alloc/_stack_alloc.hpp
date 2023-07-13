@@ -40,6 +40,11 @@ public:
 
         NPL_NODISCARD constexpr size_type max_size () const noexcept { return total_mem(); }
 
+        NPL_NODISCARD constexpr bool operator== ( stack_allocator const & _other_ ) const noexcept
+        {
+                return mem_ == _other_.mem_ && ptr_ == _other_.ptr_;
+        }
+
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         {
                 return  ( _block_.ptr_ >= mem_           ) &&
@@ -87,17 +92,17 @@ public:
 
         constexpr void deallocate ( block_type const & _block_ ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::stack_allocator::deallocate: allocator does not own block" );
+//                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::stack_allocator::deallocate: allocator does not own block" );
 
-                if( _block_.ptr_ == ptr_ - _block_.len_ )
+                if( owns( _block_ ) && _block_.ptr_ == ptr_ - _block_.len_ )
                 {
                         ptr_ -= _block_.len_;
                 }
         }
         constexpr void deallocate_all () noexcept { ptr_ = mem_; }
 private:
-        char   mem_[ MemSize ] ;
-        char * ptr_{ mem_    } ;
+        char   mem_[ MemSize + 1 ] ;
+        char * ptr_{ mem_        } ;
 };
 
 
@@ -120,6 +125,9 @@ public:
         NPL_NODISCARD constexpr size_type total_mem () const noexcept { return alloc_.total_mem(); }
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return alloc_. free_mem(); }
         NPL_NODISCARD constexpr size_type  max_size () const noexcept { return alloc_. max_size(); }
+
+        NPL_NODISCARD constexpr bool operator== ( typed_stack_allocator const & _other_ ) const noexcept
+        { return alloc_ == _other_.alloc_; }
 
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         {

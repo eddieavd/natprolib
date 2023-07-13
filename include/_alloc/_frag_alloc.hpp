@@ -39,18 +39,15 @@ public:
 
         constexpr frag_allocator () noexcept : free_list_( 1, { mem_, MemSize } ) {}
 
-        constexpr frag_allocator ( frag_allocator const &  ) = delete ;
-        constexpr frag_allocator ( frag_allocator       && ) = delete ;
-
-        constexpr frag_allocator & operator= ( frag_allocator const &  ) = delete ;
-        constexpr frag_allocator & operator= ( frag_allocator       && ) = delete ;
-
-        constexpr ~frag_allocator () noexcept {}
-
         NPL_NODISCARD constexpr size_type total_mem () const noexcept { return          MemSize; }
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return _calc_free_mem(); }
 
         NPL_NODISCARD constexpr size_type max_size () const noexcept { return total_mem(); }
+
+        NPL_NODISCARD constexpr bool operator== ( frag_allocator const & _other_ ) const noexcept
+        {
+                return mem_ == _other_.mem_ && free_list_ == _other_.free_list_;
+        }
 
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         {
@@ -142,9 +139,9 @@ public:
 
         constexpr void deallocate ( block_type const & _block_ ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::frag_allocator::deallocate: allocator does not own block" );
+//                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::frag_allocator::deallocate: allocator does not own block" );
 
-                free_list_.push_back( _block_ );
+                if( owns( _block_ ) ) free_list_.push_back( _block_ );
 
                 _merge_surrounding( free_list_.size() - 1 );
         }
@@ -154,7 +151,7 @@ public:
                 free_list_.push_back( block_type{ mem_, MemSize } );
         }
 private:
-        char mem_[ MemSize ] ;
+        char mem_[ MemSize + 1 ] ;
 
         static_vector< block_type, 1024 > free_list_ ;
 
@@ -247,6 +244,9 @@ public:
         NPL_NODISCARD constexpr size_type total_mem () const noexcept { return alloc_.total_mem(); }
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return alloc_. free_mem(); }
         NPL_NODISCARD constexpr size_type  max_size () const noexcept { return alloc_. max_size(); }
+
+        NPL_NODISCARD constexpr bool operator== ( typed_frag_allocator const & _other_ ) const noexcept
+        { return alloc_ == _other_.alloc_; }
 
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         {

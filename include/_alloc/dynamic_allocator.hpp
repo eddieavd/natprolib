@@ -35,6 +35,9 @@ public:
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return alloc_traits:: free_mem( alloc_ ); }
         NPL_NODISCARD constexpr size_type  max_size () const noexcept { return alloc_traits:: max_size( alloc_ ); }
 
+        NPL_NODISCARD constexpr bool operator== ( dynamic_allocator const & _other_ ) const noexcept
+        { return alloc_ == _other_.alloc_; }
+
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         { return alloc_traits::owns( alloc_, _block_ ); }
 

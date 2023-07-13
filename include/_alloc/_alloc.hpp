@@ -9,8 +9,6 @@
 #include <util.hpp>
 #include <_traits/base_traits.hpp>
 
-#include <_alloc/alloc_traits.hpp>
-
 
 namespace npl
 {
@@ -52,6 +50,8 @@ public:
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return 4 * 1024 * 1024; }
 
         NPL_NODISCARD constexpr size_type max_size () const noexcept { return total_mem(); }
+
+        NPL_NODISCARD constexpr bool operator== ( mallocator const & ) const noexcept { return true; }
 
         NPL_NODISCARD constexpr bool owns ( block_type const & ) const noexcept
         { return true; }
@@ -124,6 +124,8 @@ public:
         NPL_NODISCARD constexpr size_type  free_mem () const noexcept { return alloc_. free_mem(); }
         NPL_NODISCARD constexpr size_type  max_size () const noexcept { return alloc_. max_size(); }
 
+        NPL_NODISCARD constexpr bool operator== ( typed_mallocator const & ) const noexcept { return true; }
+
         NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
         { return alloc_.owns( _block_ ); }
 
@@ -173,123 +175,6 @@ public:
 
 
 #pragma GCC diagnostic pop
-
-
-template< typename Primary, typename Fallback >
-class fallback_allocator
-        : private Primary
-        , private Fallback
-{
-        using _primary  = Primary  ;
-        using _fallback = Fallback ;
-
-        static_assert( is_same_v< typename allocator_traits< _primary > ::        value_type     ,
-                                  typename allocator_traits< _fallback> ::        value_type > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::           pointer     ,
-                                  typename allocator_traits< _fallback> ::           pointer > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::     const_pointer     ,
-                                  typename allocator_traits< _fallback> ::     const_pointer > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::      void_pointer     ,
-                                  typename allocator_traits< _fallback> ::      void_pointer > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::const_void_pointer     ,
-                                  typename allocator_traits< _fallback> ::const_void_pointer > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::   difference_type     ,
-                                  typename allocator_traits< _fallback> ::   difference_type > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::         size_type     ,
-                                  typename allocator_traits< _fallback> ::         size_type > ) ;
-        static_assert( is_same_v< typename allocator_traits< _primary > ::        block_type     ,
-                                  typename allocator_traits< _fallback> ::        block_type > ) ;
-public:
-        static constexpr size_t value_type_size { Primary::value_type_size } ;
-
-        using         value_type = typename allocator_traits< _primary >::        value_type ;
-        using            pointer = typename allocator_traits< _primary >::           pointer ;
-        using      const_pointer = typename allocator_traits< _primary >::     const_pointer ;
-        using       void_pointer = typename allocator_traits< _primary >::      void_pointer ;
-        using const_void_pointer = typename allocator_traits< _primary >::const_void_pointer ;
-        using    difference_type = typename allocator_traits< _primary >::   difference_type ;
-        using          size_type = typename allocator_traits< _primary >::         size_type ;
-        using         block_type = typename allocator_traits< _primary >::        block_type ;
-
-        using is_always_equal                        = conjunction_t< typename allocator_traits< _primary  >::is_always_equal                          ,
-                                                                      typename allocator_traits< _fallback >::is_always_equal                        > ;
-        using propagate_on_container_swap            = conjunction_t< typename allocator_traits< _primary  >::propagate_on_container_swap              ,
-                                                                      typename allocator_traits< _fallback >::propagate_on_container_swap            > ;
-        using propagate_on_container_copy_assignment = conjunction_t< typename allocator_traits< _primary  >::propagate_on_container_copy_assignment   ,
-                                                                      typename allocator_traits< _fallback >::propagate_on_container_copy_assignment > ;
-        using propagate_on_container_move_assignment = conjunction_t< typename allocator_traits< _primary  >::propagate_on_container_move_assignment   ,
-                                                                      typename allocator_traits< _fallback >::propagate_on_container_move_assignment > ;
-
-        NPL_NODISCARD constexpr size_type total_mem () const noexcept
-        {
-                return _primary::total_mem() + _fallback::total_mem() ;
-        }
-        NPL_NODISCARD constexpr size_type free_mem () const noexcept
-        {
-                return _primary::free_mem() + _fallback::free_mem() ;
-        }
-        NPL_NODISCARD constexpr size_type max_size () const noexcept
-        {
-                return _primary::max_size() + _fallback::max_size() ;
-        }
-
-        NPL_NODISCARD constexpr bool owns ( block_type const & _block_ ) const noexcept
-        {
-                return     _primary ::owns( _block_ )
-                        || _fallback::owns( _block_ ) ;
-        }
-
-        NPL_NODISCARD constexpr block_type allocate ( size_type _size_ ) noexcept
-        {
-                block_type block = _primary ::allocate( _size_ );
-                if( !block.ptr_ )
-                           block = _fallback::allocate( _size_ );
-                return block;
-        }
-        NPL_NODISCARD constexpr block_type allocate_all () noexcept
-        {
-                block_type block = _primary ::allocate_all();
-                if( !block.ptr_ )
-                           block = _fallback::allocate_all();
-                return block;
-        }
-
-        NPL_NODISCARD constexpr block_type reallocate ( block_type const & _block_, size_type _new_size_ ) noexcept
-        {
-                if( _primary::owns( _block_ ) )
-                        return _primary ::reallocate( _block_, _new_size_ );
-                else
-                        return _fallback::reallocate( _block_, _new_size_ );
-        }
-
-        NPL_NODISCARD constexpr block_type aligned_allocate ( size_type _size_, unsigned _align_ ) noexcept
-        {
-                block_type block = _primary ::aligned_allocate( _size_, _align_ );
-                if( !block.ptr_ )
-                           block = _fallback::aligned_allocate( _size_, _align_ );
-                return block;
-        }
-        NPL_NODISCARD constexpr block_type aligned_reallocate ( block_type const & _block_, size_type _new_size_, unsigned _align_ ) noexcept
-        {
-                if( _primary::owns( _block_ ) )
-                        return _primary ::aligned_reallocate( _block_, _new_size_, _align_ );
-                else
-                        return _fallback::aligned_reallocate( _block_, _new_size_, _align_ );
-        }
-
-        constexpr void deallocate ( block_type const & _block_ ) noexcept
-        {
-                if( _primary::owns( _block_ ) )
-                        _primary ::deallocate( _block_ );
-                else
-                        _fallback::deallocate( _block_ );
-        }
-        constexpr void deallocate_all () noexcept
-        {
-                _primary ::deallocate_all();
-                _fallback::deallocate_all();
-        }
-};
 
 
 } // namespace alloc

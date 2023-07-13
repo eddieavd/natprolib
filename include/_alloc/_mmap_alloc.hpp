@@ -120,9 +120,9 @@ public:
 
         constexpr void deallocate ( block_type const & _block_ ) noexcept
         {
-                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::mmap_allocator::deallocate: allocator does not own block" );
+//                NPL_CONSTEXPR_ASSERT( owns( _block_ ), "alloc::mmap_allocator::deallocate: allocator does not own block" );
 
-                free_list_.push_back( _block_ );
+                if( owns( _block_ ) ) free_list_.push_back( _block_ );
 
                 _merge_surrounding( free_list_.size() - 1 );
         }

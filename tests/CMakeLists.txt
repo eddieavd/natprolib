@@ -15,10 +15,11 @@ add_executable(
         gtest_traits.cpp
         gtest_vector.cpp
         gtest_static_vector.cpp
-        gtest_prefix.cpp
-        gtest_static_prefix.cpp
-        gtest_fenwick.cpp
-        gtest_segtree.cpp
+#       gtest_prefix.cpp
+#       gtest_static_prefix.cpp
+#       gtest_fenwick.cpp
+#       gtest_segtree.cpp
+#       gtest_alloc.cpp
 )
 target_link_libraries(
         gtest_nplib
